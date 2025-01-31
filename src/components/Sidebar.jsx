@@ -4,6 +4,7 @@ import {
   IoHomeOutline,
   IoDocumentTextOutline,
   IoAppsOutline,
+  IoCropOutline,
 } from "react-icons/io5";
 
 const Sidebar = () => {
@@ -58,15 +59,24 @@ const Sidebar = () => {
 
             <li className="relative px-6 py-3">
               <Link
-                to="/forms"
+                to="/apporval"
                 className="flex items-center text-sm font-semibold text-gray-800 light:text-gray-100 hover:text-gray-600"
               >
                 <IoDocumentTextOutline className="w-5 h-5" />
-                <span className="ml-4">Forms</span>
+                <span className="ml-4">Approvals</span>
               </Link>
             </li>
 
-            {/* Dropdown Menu */}
+            <li className="relative px-6 py-3">
+              <Link
+                to="/rfi"
+                className="flex items-center text-sm font-semibold text-gray-800 light:text-gray-100 hover:text-gray-600"
+              >
+                <IoCropOutline className="w-5 h-5" />
+                <span className="ml-4">RFI</span>
+              </Link>
+            </li>
+
             <li className="relative px-6 py-3">
               <button
                 className="flex items-center justify-between w-full text-sm font-semibold text-gray-800 light:text-gray-100 hover:text-gray-600"
@@ -74,7 +84,7 @@ const Sidebar = () => {
               >
                 <span className="flex items-center">
                   <IoAppsOutline className="w-5 h-5" />
-                  <span className="ml-4">Pages</span>
+                  <span className="ml-4">Files</span>
                 </span>
                 <svg
                   className={`w-4 h-4 transform ${
@@ -91,7 +101,6 @@ const Sidebar = () => {
                 </svg>
               </button>
 
-              {/* Submenu */}
               {isPagesMenuOpen && (
                 <ul className="mt-2 space-y-2 text-sm text-gray-500 light:text-gray-400">
                   <li>
@@ -99,7 +108,7 @@ const Sidebar = () => {
                       to="/login"
                       className="block px-4 py-2 hover:text-gray-700"
                     >
-                      Login
+                      Received
                     </Link>
                   </li>
                   <li>
@@ -107,15 +116,7 @@ const Sidebar = () => {
                       to="/register"
                       className="block px-4 py-2 hover:text-gray-700"
                     >
-                      Register
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/forgot-password"
-                      className="block px-4 py-2 hover:text-gray-700"
-                    >
-                      Forgot Password
+                      Sent
                     </Link>
                   </li>
                 </ul>

@@ -2,6 +2,9 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
+import Approval from "./pages/Approval";
+import Rfi from "./pages/Rfi";
+import ImageView from "./pages/ImageView";
 const App = () => {
   return (
     <Router>
@@ -11,8 +14,9 @@ const App = () => {
         <div className="flex-1 p-6">
           <Routes>
             <Route path="/" Component={Dashboard} />
-            <Route path="/forms" element={<h1>Forms</h1>} />
-            {/* Add other routes */}
+            <Route path="/apporval" Component={Approval} />
+            <Route path="/rfi" Component={Rfi} />
+            <Route path="/image-view" component={ImageView} />
           </Routes>
         </div>
       </div>

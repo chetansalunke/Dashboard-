@@ -61,7 +61,7 @@ const Header = ({ toggleSidebar }) => {
 
         <ul className="flex items-center flex-shrink-0 space-x-6">
           {/* Theme toggler */}
-          <li className="flex">
+          {/* <li className="flex">
             <button
               className="rounded-md focus:outline-none focus:shadow-outline-purple"
               onClick={toggleTheme}
@@ -91,7 +91,7 @@ const Header = ({ toggleSidebar }) => {
                 </svg>
               )}
             </button>
-          </li>
+          </li> */}
 
           {/* Notifications menu */}
           <li className="relative">
