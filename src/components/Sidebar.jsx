@@ -106,7 +106,7 @@ const Sidebar = () => {
                 <ul className="mt-2 space-y-2 text-sm text-gray-500 light:text-gray-400">
                   <li>
                     <Link
-                      to="/login"
+                      to="/received"
                       className="block px-4 py-2 hover:text-gray-700"
                     >
                       Received
@@ -114,7 +114,7 @@ const Sidebar = () => {
                   </li>
                   <li>
                     <Link
-                      to="/register"
+                      to="/sent"
                       className="block px-4 py-2 hover:text-gray-700"
                     >
                       Sent
