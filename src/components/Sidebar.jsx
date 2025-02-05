@@ -34,7 +34,8 @@ const Sidebar = () => {
               to="/"
               className="text-lg font-bold text-gray-800 light:text-gray-200"
             >
-              Windmill
+            <h1 className="text-2xl font-bold text-green-600">Gig<span className="text-black">factory</span></h1>
+              {/* Windmill */}
             </Link>
             {/* Close Button for Mobile */}
             <button
@@ -105,7 +106,7 @@ const Sidebar = () => {
                 <ul className="mt-2 space-y-2 text-sm text-gray-500 light:text-gray-400">
                   <li>
                     <Link
-                      to="/login"
+                      to="/received"
                       className="block px-4 py-2 hover:text-gray-700"
                     >
                       Received
@@ -113,7 +114,7 @@ const Sidebar = () => {
                   </li>
                   <li>
                     <Link
-                      to="/register"
+                      to="/sent"
                       className="block px-4 py-2 hover:text-gray-700"
                     >
                       Sent
