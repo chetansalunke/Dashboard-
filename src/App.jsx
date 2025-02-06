@@ -4,7 +4,7 @@ import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Approval from "./pages/Approval";
 import Rfi from "./pages/Rfi";
-import ImageView from "./pages/ImageView";
+
 import Received from "./pages/Received";
 import Sent from "./pages/Sent";
 
@@ -19,9 +19,8 @@ const App = () => {
             <Route path="/" Component={Dashboard} />
             <Route path="/apporval" Component={Approval} />
             <Route path="/rfi" Component={Rfi} />
-            <Route path="/image-view" component={ImageView} />
             <Route path="/received" Component={Received} />
-            <Route path="/sent" Component={Sent}/>
+            <Route path="/sent" Component={Sent} />
           </Routes>
         </div>
       </div>
