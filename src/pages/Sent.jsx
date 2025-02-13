@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Header from "../components/Header";
 import { FaCloudUploadAlt, FaPaperPlane } from "react-icons/fa";
 import { FiFilter, FiDownload } from "react-icons/fi";
@@ -30,12 +30,22 @@ export default function Sent() {
     },
   ]);
 
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleUploadClick = () => {
     setShowUpload(!showUpload);
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleClick = () => {
+    fileInputRef.current.click();
   };
 
   return (
@@ -51,14 +61,20 @@ export default function Sent() {
                     Enclave IT Park
                   </h2>
                   <input
-                    type="text"
-                    placeholder="Search for projects..."
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-6 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm"
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={handleFileChange}
                   />
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-10 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-10 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+                    onClick={handleClick}
+                  >
                     <FaCloudUploadAlt className="text-purple-500 text-6xl animate-pulse" />
                     <p className="mt-3 text-gray-600 text-lg font-medium">
-                      Drag & Drop Files or Click to Upload
+                      {selectedFile
+                        ? selectedFile.name
+                        : "Drag & Drop Files or Click to Upload"}
                     </p>
                   </div>
                   <div className="mt-6">
@@ -103,12 +119,7 @@ export default function Sent() {
                       ].map((category, index) => (
                         <span
                           key={index}
-                          onClick={() => setSelectedCategory(category)}
-                          className={`px-4 py-2 rounded-lg cursor-pointer text-gray-700 font-medium transition ${
-                            selectedCategory === category
-                              ? "bg-gray-300 font-semibold"
-                              : "bg-gray-200 hover:bg-gray-400"
-                          }`}
+                          className="px-4 py-2 rounded-lg cursor-pointer text-gray-700 font-medium transition bg-gray-200 hover:bg-gray-400"
                         >
                           {category}
                         </span>
