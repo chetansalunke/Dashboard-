@@ -74,7 +74,7 @@ export default function Received() {
       status: "Pending",
       sentBy: "Jane Smith",
       previousVersions: "R1, R0",
-    }
+    },
   ]);
 
   return (
@@ -86,43 +86,93 @@ export default function Received() {
             <div className="bg-white shadow-md p-6 rounded-lg">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Enclave IT Park</h2>
-                <input type="text" placeholder="Search drawings" className="border p-2 w-64 rounded" />
+                <input
+                  type="text"
+                  placeholder="Search drawings"
+                  className="border p-2 w-64 rounded"
+                />
               </div>
               <div className="flex justify-between mb-4">
                 <div className="flex space-x-2">
-                  {["All", "Architecture", "Interior", "Structural", "MEP", "Others"].map((category, index) => (
-                    <span key={index} className="px-4 py-2 rounded-lg cursor-pointer text-gray-700 font-medium transition bg-gray-200 hover:bg-gray-400">{category}</span>
+                  {[
+                    "All",
+                    "Architecture",
+                    "Interior",
+                    "Structural",
+                    "MEP",
+                    "Others",
+                  ].map((category, index) => (
+                    <span
+                      key={index}
+                      className="px-4 py-2 rounded-lg cursor-pointer text-gray-700 font-medium transition bg-gray-200 hover:bg-gray-400"
+                    >
+                      {category}
+                    </span>
                   ))}
                 </div>
                 <div className="flex space-x-4">
-                  <button className="flex items-center px-3 py-2 bg-gray-200 rounded-lg shadow-md hover:bg-gray-300"><MdSort className="mr-2" /> Sort</button>
-                  <button className="flex items-center px-3 py-2 bg-gray-200 rounded-lg shadow-md hover:bg-gray-300"><FiFilter className="mr-2" /> Filter</button>
+                  <button className="flex items-center px-3 py-2 bg-gray-200 rounded-lg shadow-md hover:bg-gray-300">
+                    <MdSort className="mr-2" /> Sort
+                  </button>
+                  <button className="flex items-center px-3 py-2 bg-gray-200 rounded-lg shadow-md hover:bg-gray-300">
+                    <FiFilter className="mr-2" /> Filter
+                  </button>
                 </div>
               </div>
-              <table className="w-full whitespace-nowrap overflow-x-auto mt-6 border border-gray-200 rounded-lg">
+              <table className="w-full whitespace-no-wrap">
                 <thead>
-                  <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
-                    <th className="px-4 py-3">Preview</th>
+                  <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b light:border-gray-700 bg-gray-50 light:text-gray-400 light:bg-gray-800">
+                    <th className="px-4 py-3">Project Name</th>
                     <th className="px-4 py-3">Name</th>
-                    <th className="px-4 py-3">Latest Version</th>
-                    <th className="px-4 py-3">Discipline</th>
-                    <th className="px-4 py-3">Last Updated</th>
+                    <th className="px-4 py-3">Submission Date</th>
+                    <th className="px-4 py-3">Sent by</th>
+                    <th className="px-4 py-3">Priority</th>
                     <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Sent By</th>
-                    <th className="px-4 py-3">Previous Versions</th>
+                    <th className="px-4 py-3">Document</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y">
                   {files.map((file, index) => (
-                    <tr key={index} className="text-gray-700 hover:bg-gray-50">
-                      <td className="px-4 py-3"><img className="w-12 h-12 object-cover rounded" src={file.image} alt={file.name} /></td>
+                    <tr
+                      key={index}
+                      className="text-gray-700 light:text-gray-400"
+                    >
+                      <td className="px-4 py-3 flex-1 w-32">
+                        <div className="flex items-center text-sm">
+                          <img
+                            className="object-cover w-8 h-8 mr-3 rounded-full"
+                            src={file.image}
+                            alt="Project"
+                            loading="lazy"
+                          />
+                          <p className="font-semibold">{file.projectName}</p>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-sm">{file.name}</td>
-                      <td className="px-4 py-3 text-sm">{file.version}</td>
-                      <td className="px-4 py-3 text-sm">{file.discipline}</td>
-                      <td className="px-4 py-3 text-sm">{file.updated}</td>
-                      <td className={`px-4 py-3 text-xs ${file.status === "On Hold" ? "text-red-500" : file.status === "Under Review" ? "text-yellow-500" : file.status === "Pending" ? "text-orange-500" : "text-green-500"}`}>{file.status}</td>
+                      <td className="px-4 py-3 text-sm">
+                        {file.submissionDate}
+                      </td>
                       <td className="px-4 py-3 text-sm">{file.sentBy}</td>
-                      <td className="px-4 py-3 text-blue-500 cursor-pointer">{file.previousVersions}</td>
+                      <td className="px-4 py-3 text-sm">{file.priority}</td>
+                      <td className="px-4 py-3 text-xs">
+                        <span
+                          className={`px-2 py-1 font-semibold leading-tight rounded-full ${
+                            file.status === "Approved"
+                              ? "text-green-700 bg-green-100"
+                              : "text-orange-700 bg-orange-100"
+                          }`}
+                        >
+                          {file.status}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleDownloadClick(file.downloadUrl)}
+                          className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                        >
+                          Download
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -134,3 +184,5 @@ export default function Received() {
     </div>
   );
 }
+
+

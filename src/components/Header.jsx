@@ -1,14 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const Header = ({ toggleSidebar }) => {
   const [islightMode, setIslightMode] = useState(false);
   const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
+  const profileMenuRef = useRef(null);
+
   const toggleTheme = () => setIslightMode(!islightMode);
   const toggleNotificationsMenu = () =>
     setIsNotificationsMenuOpen(!isNotificationsMenuOpen);
   const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);
+
+  const handleLogout = () => {
+    alert("Logout clicked");
+  };
+
+  // Close profile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="z-10 py-4 bg-white shadow-md light:bg-gray-800">
@@ -123,7 +145,7 @@ const Header = ({ toggleSidebar }) => {
           </li>
 
           {/* Profile menu */}
-          <li className="relative">
+          <li className="relative" ref={profileMenuRef}>
             <button
               className="align-middle rounded-full focus:shadow-outline-purple focus:outline-none"
               onClick={toggleProfileMenu}
@@ -133,17 +155,37 @@ const Header = ({ toggleSidebar }) => {
               <img
                 className="object-cover w-8 h-8 rounded-full"
                 src="https://images.unsplash.com/photo-1502378735452-bc7d86632805?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&s=aa3a807e1bbdfd4364d1f449eaa96d82"
-                alt=""
+                alt="Profile"
                 aria-hidden="true"
               />
             </button>
 
             {isProfileMenuOpen && (
-              <ul
-                className="absolute right-0 w-56 p-2 mt-2 space-y-2 text-gray-600 bg-white border border-gray-100 rounded-md shadow-md light:border-gray-700 light:text-gray-300 light:bg-gray-700"
-                onBlur={() => setIsProfileMenuOpen(false)}
-              >
-                {/* Profile menu items */}
+              <ul className="absolute right-0 w-56 p-2 mt-2 space-y-2 text-gray-600 bg-white border border-gray-100 rounded-md shadow-md dark:border-gray-700 dark:text-gray-300 dark:bg-gray-700">
+                <li>
+                  <a
+                    href="/profile"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md"
+                  >
+                    Profile
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/settings"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md"
+                  >
+                    Settings
+                  </a>
+                </li>
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md"
+                  >
+                    Logout
+                  </button>
+                </li>
               </ul>
             )}
           </li>
