@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 
 export default function Users() {
@@ -9,13 +9,15 @@ export default function Users() {
     role: "Select",
     phone: "",
     profilePicture: null,
-    status: true,
-    projectName: "",
-    description: "",
-    duration: "",
-    projectSize: "",
-    assignedTo: "",
   });
+
+  const [users, setUsers] = useState([]);
+
+  // Load stored users when the component mounts
+  useEffect(() => {
+    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+    setUsers(storedUsers);
+  }, []);
 
   const handleDownloadClick = (url) => {
     window.open(url, "_blank");
@@ -30,9 +32,41 @@ export default function Users() {
     });
   };
 
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
+
+    // Store image as a base64 string
+    let imageUrl = "";
+    if (formData.profilePicture) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        imageUrl = reader.result;
+        saveUser(imageUrl);
+      };
+      reader.readAsDataURL(formData.profilePicture);
+    } else {
+      saveUser(imageUrl);
+    }
+  };
+
+  // Save user to local storage
+  const saveUser = (imageUrl) => {
+    const newUser = { ...formData, profilePicture: imageUrl };
+    const updatedUsers = [...users, newUser];
+
+    setUsers(updatedUsers);
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+
+    // Clear form
+    setFormData({
+      fullName: "",
+      email: "",
+      role: "Select",
+      phone: "",
+      profilePicture: null,
+    });
+    setIsFormOpen(false);
   };
 
   return (
@@ -155,40 +189,35 @@ export default function Users() {
               <table className="w-full whitespace-no-wrap">
                 <thead>
                   <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
-                    <th className="px-4 py-3">Project Name</th>
-                    <th className="px-4 py-3">Name</th>
-                    <th className="px-4 py-3">Submission Date</th>
-                    <th className="px-4 py-3">Sent by</th>
-                    <th className="px-4 py-3">Priority</th>
-                    <th className="px-4 py-3">Action</th>
-                    <th className="px-4 py-3">Document</th>
-                    <th className="px-4 py-3">Pending Form</th>
+                    <th className="px-4 py-3">Profile Picture</th>
+                    <th className="px-4 py-3">Full Name</th>
+                    <th className="px-4 py-3">Email</th>
+                    <th className="px-4 py-3">Role</th>
+                    <th className="px-4 py-3">Phone</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y">
-                  <tr className="text-gray-700">
-                    <td className="px-4 py-3 text-sm">Enclave IT Park</td>
-                    <td className="px-4 py-3 text-sm">Door Design</td>
-                    <td className="px-4 py-3 text-sm">21-02-2023</td>
-                    <td className="px-4 py-3 text-sm">Siddharth Nahta</td>
-                    <td className="px-4 py-3 text-sm">Low</td>
-                    <td className="px-4 py-3 text-xs">
-                      <span className="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full">
-                        Approved
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() =>
-                          handleDownloadClick("https://example.com/document")
-                        }
-                        className="px-3 py-1 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
-                      >
-                        Download
-                      </button>
-                    </td>
-                    <td className="px-4 py-3 text-sm">19 Days</td>
-                  </tr>
+                  {users.map((user, index) => (
+                    <tr key={index} className="text-gray-700">
+                      <td className="px-4 py-3 text-sm">
+                        {user.profilePicture ? (
+                          <img
+                            src={user.profilePicture}
+                            alt="Profile"
+                            className="h-10 w-10 rounded-full"
+                          />
+                        ) : (
+                          "No Image"
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm">{user.fullName}</td>
+                      <td className="px-4 py-3 text-sm">{user.email}</td>
+                      <td className="px-4 py-3 text-sm">{user.role}</td>
+                      <td className="px-4 py-3 text-sm">
+                        {user.phone || "N/A"}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
