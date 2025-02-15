@@ -1,30 +1,69 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
-import Dashboard from "./pages/Dashboard";
-import Approval from "./pages/Approval";
-import Rfi from "./pages/Rfi";
-
-import Received from "./pages/Received";
-import Sent from "./pages/Sent";
+import SignIn from "./pages/SignIn";
+import Dashboard from "./pages/Dashboard"; // Common Dashboard for Client/Designer/Expert
+import { AuthProvider } from "./context/AuthContext";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import Layout from "./components/Layout";
+import Projects from "./pages/admin/Projects";
+import Users from "./pages/admin/Users";
 
 const App = () => {
   return (
-    <Router>
-      <div className="flex">
-        <Sidebar />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Sign In Route */}
+          <Route path="/" element={<SignIn />} />
 
-        <div className="flex-1 p-6">
-          <Routes>
-            <Route path="/" Component={Dashboard} />
-            <Route path="/apporval" Component={Approval} />
-            <Route path="/rfi" Component={Rfi} />
-            <Route path="/received" Component={Received} />
-            <Route path="/sent" Component={Sent} />
-          </Routes>
-        </div>
-      </div>
-    </Router>
+          {/* Admin Dashboard with Nested Routes */}
+          <Route
+            path="/admin-dashboard"
+            element={
+              <Layout>
+                <AdminDashboard />
+              </Layout>
+            }
+          >
+            {/* Nested Routes */}
+            <Route path="" element={<AdminDashboard />} />
+            <Route path="projects" element={<Projects />} />
+            <Route path="users" element={<Users />} />
+            <Route path="create-users" element={<Users />} />
+            <Route path="create-project" element={<Users />} />
+          </Route>
+
+          {/* Client Dashboard Route */}
+          <Route
+            path="/client-dashboard"
+            element={
+              <Layout>
+                <Dashboard />
+              </Layout>
+            }
+          />
+
+          {/* Designer Dashboard Route */}
+          <Route
+            path="/designer-dashboard"
+            element={
+              <Layout>
+                <Dashboard />
+              </Layout>
+            }
+          />
+
+          {/* Expert Dashboard Route */}
+          <Route
+            path="/expert-dashboard"
+            element={
+              <Layout>
+                <Dashboard />
+              </Layout>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 

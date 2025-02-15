@@ -34,7 +34,9 @@ const Sidebar = () => {
               to="/"
               className="text-lg font-bold text-gray-800 light:text-gray-200"
             >
-            <h1 className="text-2xl font-bold text-green-600">Gig<span className="text-black">factory</span></h1>
+              <h1 className="text-2xl font-bold text-green-600">
+                Gig<span className="text-black">factory</span>
+              </h1>
               {/* Windmill */}
             </Link>
             {/* Close Button for Mobile */}
