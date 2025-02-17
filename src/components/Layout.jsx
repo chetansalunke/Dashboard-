@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
-import AdminSidebar from "./admin/AdminSidebar";
 import { AuthContext } from "../context/AuthContext"; // Ensure correct import
 import { Outlet } from "react-router-dom"; // Import Outlet for nested routes
+import Sidebar from "./Sidebar";
 
 const Layout = ({ children }) => {
   const { user } = useContext(AuthContext); // Get user from Context API
@@ -10,7 +10,7 @@ const Layout = ({ children }) => {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-md">
-        <AdminSidebar role={user?.role} /> {/* Pass role dynamically */}
+        <Sidebar role={user?.role} /> {/* Pass role dynamically */}
       </div>
 
       {/* Main Content */}
