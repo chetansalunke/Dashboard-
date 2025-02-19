@@ -19,10 +19,6 @@ export default function Users() {
     setUsers(storedUsers);
   }, []);
 
-  const handleDownloadClick = (url) => {
-    window.open(url, "_blank");
-  };
-
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     setFormData({
@@ -32,13 +28,31 @@ export default function Users() {
     });
   };
 
-  // Handle form submission
+
+  const handleEdit = (index) => {
+    const userToEdit = users[index];
+    setFormData(userToEdit);
+    setIsFormOpen(true);
+  
+    // Remove the selected user from the list so that updating works correctly
+    const updatedUsers = users.filter((_, i) => i !== index);
+    setUsers(updatedUsers);
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+  };
+
+
+  const handleDelete = (index) => {
+    const updatedUsers = users.filter((_, i) => i !== index);
+    setUsers(updatedUsers);
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Store image as a base64 string
-    let imageUrl = "";
-    if (formData.profilePicture) {
+  
+    let imageUrl = formData.profilePicture;
+    
+    if (formData.profilePicture && typeof formData.profilePicture !== "string") {
       const reader = new FileReader();
       reader.onloadend = () => {
         imageUrl = reader.result;
@@ -49,6 +63,7 @@ export default function Users() {
       saveUser(imageUrl);
     }
   };
+  
 
   // Save user to local storage
   const saveUser = (imageUrl) => {
@@ -74,7 +89,21 @@ export default function Users() {
       <Header />
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
-          <div className="flex justify-end">
+          <h1 className="text-xl font-semibold tracking-wide text-left text-gray-500 uppercase">
+            Welcome, Manage & Track Your Users.......
+          </h1>
+          <br />
+          <div
+            className={`flex ${isFormOpen ? "justify-between" : "justify-end"}`}
+          >
+            {isFormOpen && (
+              <button
+                onClick={() => setIsFormOpen(!isFormOpen)}
+                class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-md active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+              >
+                Back
+              </button>
+            )}
             <button
               onClick={() => setIsFormOpen(!isFormOpen)}
               className="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
@@ -183,45 +212,51 @@ export default function Users() {
               </div>
             </form>
           )}
-
-          <div className="w-full overflow-hidden rounded-lg shadow-xs">
-            <div className="w-full overflow-x-auto">
-              <table className="w-full whitespace-no-wrap">
-                <thead>
-                  <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
-                    <th className="px-4 py-3">Profile Picture</th>
-                    <th className="px-4 py-3">Full Name</th>
-                    <th className="px-4 py-3">Email</th>
-                    <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Phone</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y">
-                  {users.map((user, index) => (
-                    <tr key={index} className="text-gray-700">
-                      <td className="px-4 py-3 text-sm">
-                        {user.profilePicture ? (
-                          <img
-                            src={user.profilePicture}
-                            alt="Profile"
-                            className="h-10 w-10 rounded-full"
-                          />
-                        ) : (
-                          "No Image"
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-sm">{user.fullName}</td>
-                      <td className="px-4 py-3 text-sm">{user.email}</td>
-                      <td className="px-4 py-3 text-sm">{user.role}</td>
-                      <td className="px-4 py-3 text-sm">
-                        {user.phone || "N/A"}
-                      </td>
+          {!isFormOpen && (
+            <div className="w-full overflow-hidden rounded-lg shadow-xs">
+              <div className="w-full overflow-x-auto">
+                <table className="w-full whitespace-no-wrap">
+                  <thead>
+                    <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
+                      <th className="px-4 py-3">Profile Picture</th>
+                      <th className="px-4 py-3">Full Name</th>
+                      <th className="px-4 py-3">Email</th>
+                      <th className="px-4 py-3">Role</th>
+                      <th className="px-4 py-3">Phone</th>
+                      <th className="px-4 py-3">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y">
+                    {users.map((user, index) => (
+                      <tr key={index} className="text-gray-700">
+                        <td className="px-4 py-3 text-sm">
+                          {user.profilePicture ? (
+                            <img
+                              src={user.profilePicture}
+                              alt="Profile"
+                              className="h-10 w-10 rounded-full"
+                            />
+                          ) : (
+                            "No Image"
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-sm">{user.fullName}</td>
+                        <td className="px-4 py-3 text-sm">{user.email}</td>
+                        <td className="px-4 py-3 text-sm">{user.role}</td>
+                        <td className="px-4 py-3 text-sm">
+                          {user.phone || "N/A"}
+                        </td>
+                        <td className="p-3 flex space-x-2">
+                      <button onClick={() => handleEdit(index)} className="px-3 py-1 text-xs font-medium text-white bg-purple-500 rounded-md hover:bg-purple-600">Edit</button>
+                      <button onClick={() => handleDelete(index)} className="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600">Delete</button>
+                    </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </div>
