@@ -1,15 +1,20 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 
-export default function AdminDashboard() {
+export default function DesignerHome() {
+  const [username, setUsername] = useState("");
+
   useEffect(() => {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (user?.token) {
-        console.log("Stored Token:", user.token);
-      } else {
-        console.log("No token found");
-      }
-    }, []);
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.token) {
+      console.log("Stored Token:", user.token);
+    } else {
+      console.log("No token found");
+    }
+    console.log(user.username);
+    setUsername(user.username);
+  }, []);
+
   return (
     <div className="bg-gray-100 flex h-screen">
       {/* Main Content */}
@@ -19,7 +24,7 @@ export default function AdminDashboard() {
           <div className="container px-6 mx-auto grid">
             <div className="flex justify-between">
               <h5 className="my-6 text-2l font-semibold text-gray-700 light:text-gray-200">
-                Total Project Running 4
+                Welcome {username ? `, ${username}` : ""}
               </h5>
             </div>
 
@@ -37,7 +42,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <p className="mb-2 text-sm font-medium text-gray-600 light:text-gray-400">
-                    Submitted drawings waiting for approval
+                    Submitted Project
                   </p>
                   <p className="text-lg font-semibold text-gray-700 light:text-gray-200">
                     376
@@ -61,7 +66,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <p className="mb-2 text-sm font-medium text-gray-600 light:text-gray-400">
-                    Pending RFI
+                    Pending Project
                   </p>
                   <p className="text-lg font-semibold text-gray-700 light:text-gray-200">
                     35
@@ -76,33 +81,26 @@ export default function AdminDashboard() {
                 <table className="w-full whitespace-no-wrap">
                   <thead>
                     <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b light:border-gray-700 bg-gray-50 light:text-gray-400 light:bg-gray-800">
+                      <th className="px-4 py-3">Task Name</th>
                       <th className="px-4 py-3">Project Name</th>
-                      <th className="px-4 py-3">Timeline</th>
-                      <th className="px-4 py-3">Progress</th>
+                      <th className="px-4 py-3">Assigned By</th>
+                      <th className="px-4 py-3">Action</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y light:divide-gray-700 light:bg-gray-800">
                     <tr className="text-gray-700 light:text-gray-400">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center text-sm">
-                          <div className="relative hidden w-8 h-8 mr-3 rounded-full md:block">
-                            <img
-                              className="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/flagged/photo-1570612861542-284f4c12e75f?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
-                              alt=""
-                              loading="lazy"
-                            />
-                          </div>
-                          <div>
-                            <p className="font-semibold">Enclave IT Park</p>
-                          </div>
-                        </div>
+                      <td className="px-4 py-3 text-sm">Login Functionality</td>
+                      <td className="px-4 py-3 text-sm">
+                        Inventory Management System
                       </td>
-                      <td className="px-4 py-3 text-sm">2 years</td>
-                      <td className="px-4 py-3 text-xs">
-                        <span className="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full light:bg-green-700 light:text-green-100">
-                          Approved
-                        </span>
+                      <td className="px-4 py-3 text-sm">John</td>
+                      <td>
+                        <button
+                          onClick={() => handleView()}
+                          className="px-3 py-1 text-sm font-medium text-white bg-purple-500 rounded-md hover:bg-purple-600"
+                        >
+                          View
+                        </button>
                       </td>
                     </tr>
                   </tbody>
