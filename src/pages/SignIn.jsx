@@ -1,50 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 const SignIn = () => {
-  const { user, signIn } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Fetch user data from localStorage on initial load
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      signIn(parsedUser.email, parsedUser.password, parsedUser.role); // Update context
-    }
-  }, []);
-
-  useEffect(() => {
-    if (user && user.role) {
-      localStorage.setItem("user", JSON.stringify(user));
-
-      // Delay navigation to ensure state is updated
-      setTimeout(() => {
-        switch (user.role) {
-          case "admin":
-            navigate("/admin-dashboard");
-            break;
-          case "client":
-            navigate("/client-dashboard");
-            break;
-          case "designer":
-            navigate("/designer-dashboard");
-            break;
-          case "expert":
-            navigate("/expert-dashboard");
-            break;
-          default:
-            navigate("/login");
-        }
-      }, 0);
-    }
-  }, [user, navigate]);
+  const { signIn, error } = useContext(AuthContext);
 
   const [userData, setUserData] = useState({
     email: "",
     password: "",
-    role: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -53,7 +17,7 @@ const SignIn = () => {
     const { name, value } = e.target;
     setUserData((prevState) => ({
       ...prevState,
-      [name]: value || "", // Ensure it's never undefined
+      [name]: value || "",
     }));
   };
 
@@ -74,60 +38,15 @@ const SignIn = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: userData.email,
-          password: userData.password,
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Login Response:", data); // Debugging
-
-      if (response.ok && data.user && data.user.role) {
-        setUserData((prev) => ({
-          ...prev,
-          email: userData.email || userData.email,
-          username: data.user.username || prev.username,
-          role: data.user.role || prev.role,
-          token: data.accessToken || prev.accessToken,
-        }));
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            email: userData.email || "",
-            username: data.user.username || "",
-            role: data.user.role || "",
-            token: data.accessToken || "",
-          })
-        );
-
-        const storedUser = JSON.parse(localStorage.getItem("user"));
-        if (storedUser && storedUser.token) {
-          console.log("User Token:", storedUser.token);
-          console.log("User role:", storedUser.role);
-          console.log("Username: ",storedUser.username);
-        }
-
-        navigate(`/${data.user.role}-dashboard`);
-      } else {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          apiError: "Invalid login credentials",
-        }));
-      }
-    } catch (error) {
-      console.error("Login Error:", error);
+      await signIn(userData.email, userData.password);
+      navigate("/admin-dashboard"); // Redirect after successful login
+    } catch (err) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        apiError: "Something went wrong. Please try again.",
+        apiError: "Invalid credentials. Please try again.",
       }));
     }
   };
@@ -150,13 +69,13 @@ const SignIn = () => {
                 Login
               </h1>
 
-              {/* Email input */}
+              {/* Email Input */}
               <label className="block text-sm">
                 <span className="text-gray-700">Email</span>
                 <input
                   type="email"
                   name="email"
-                  value={userData.email || ""} // Ensures it’s never undefined
+                  value={userData.email}
                   onChange={handleInputChange}
                   className="block w-full mt-1 text-sm form-input"
                   placeholder="Enter Your Email"
@@ -166,13 +85,13 @@ const SignIn = () => {
                 )}
               </label>
 
-              {/* Password input */}
+              {/* Password Input */}
               <label className="block mt-4 text-sm">
                 <span className="text-gray-700">Password</span>
                 <input
                   type="password"
                   name="password"
-                  value={userData.password || ""} // Ensures it’s never undefined
+                  value={userData.password}
                   onChange={handleInputChange}
                   className="block w-full mt-1 text-sm form-input"
                   placeholder="***************"
@@ -182,10 +101,11 @@ const SignIn = () => {
                 )}
               </label>
 
-              {/* API Error message */}
+              {/* API Error Message */}
               {errors.apiError && (
                 <p className="text-red-500 text-xs mt-2">{errors.apiError}</p>
               )}
+              {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
 
               {/* Submit Button */}
               <button

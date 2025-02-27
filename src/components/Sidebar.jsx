@@ -23,7 +23,7 @@ const Sidebar = ({ role }) => {
       {
         name: "Dashboard",
         icon: <IoHomeOutline className="w-5 h-5" />,
-        path: "/",
+        path: "/admin-dashboard",
       },
       {
         name: "Projects",
@@ -53,8 +53,14 @@ const Sidebar = ({ role }) => {
           {
             name: "Communication",
             subItems: [
-              { name: "RFI", path: "/designer-dashboard/projects/communication/rfi" },
-              { name: "Submission", path: "/designer-dashboard/projects/communication/submission" },
+              {
+                name: "RFI",
+                path: "/designer-dashboard/projects/communication/rfi",
+              },
+              {
+                name: "Submission",
+                path: "/designer-dashboard/projects/communication/submission",
+              },
             ],
           },
           {
@@ -63,7 +69,6 @@ const Sidebar = ({ role }) => {
           },
         ],
       },
-      
     ],
 
     developer: [
@@ -137,16 +142,23 @@ const Sidebar = ({ role }) => {
                               {/* Sub-submenu */}
                               {openMenus[subItem.name] && (
                                 <ul className="ml-4 mt-2 space-y-1">
-                                  {subItem.subItems.map((nestedItem, nestedIndex) => (
-                                    <li key={nestedIndex} className="px-4 py-1">
-                                      <button
-                                        onClick={() => navigate(nestedItem.path)}
-                                        className="flex items-center justify-between w-full text-sm font-semibold text-gray-800 hover:text-gray-600 transition-all duration-150 focus:outline-none"
+                                  {subItem.subItems.map(
+                                    (nestedItem, nestedIndex) => (
+                                      <li
+                                        key={nestedIndex}
+                                        className="px-4 py-1"
                                       >
-                                        {nestedItem.name}
-                                      </button>
-                                    </li>
-                                  ))}
+                                        <button
+                                          onClick={() =>
+                                            navigate(nestedItem.path)
+                                          }
+                                          className="flex items-center justify-between w-full text-sm font-semibold text-gray-800 hover:text-gray-600 transition-all duration-150 focus:outline-none"
+                                        >
+                                          {nestedItem.name}
+                                        </button>
+                                      </li>
+                                    )
+                                  )}
                                 </ul>
                               )}
                             </>

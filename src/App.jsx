@@ -1,72 +1,121 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import SignIn from "./pages/SignIn";
-import Dashboard from "./pages/Dashboard"; // Common Dashboard for Client/Designer/Expert
-import { AuthProvider } from "./context/AuthContext";
+import SignUp from "./pages/SignUp";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import Layout from "./components/Layout";
 import Projects from "./pages/admin/Projects";
 import Users from "./pages/admin/Users";
 import DesignerHome from "./pages/designer/DesignerHome";
-import SignUp from "./pages/SignUp";
+import Layout from "./components/Layout";
+import { AuthProvider } from "./context/AuthContext";
+
+const getStoredUser = () => {
+  const user = localStorage.getItem("user");
+  return user ? JSON.parse(user) : null;
+};
+
+const PublicRoute = ({ element }) => {
+  const storedUser = getStoredUser();
+
+  if (storedUser) {
+    const roleDashboards = {
+      admin: "/admin-dashboard",
+      designer: "/designer-dashboard",
+      client: "/client-dashboard",
+      expert: "/expert-dashboard",
+    };
+    return <Navigate to={roleDashboards[storedUser.role] || "/"} replace />;
+  }
+
+  return element;
+};
+
+// Private Route - Allow only authenticated users to access protected pages
+const PrivateRoute = ({ element, allowedRoles }) => {
+  const storedUser = getStoredUser();
+
+  if (!storedUser) return <Navigate to="/" replace />; // Redirect if not logged in
+
+  if (!allowedRoles.includes(storedUser.role))
+    return <Navigate to="/" replace />; // Redirect if role doesn't match
+
+  return element;
+};
 
 const App = () => {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Sign In Route */}
-          <Route path="/" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-
-          {/* Admin Dashboard with Nested Routes */}
+          {/* Public Routes */}
+          <Route path="/" element={<PublicRoute element={<SignIn />} />} />
           <Route
-            path="/admin-dashboard"
-            element={
-              <Layout>
-                <AdminDashboard />
-              </Layout>
-            }
-          >
-            {/* Nested Routes */}
-            <Route path="" element={<AdminDashboard />} />
-            <Route path="projects" element={<Projects />} />
-            <Route path="users" element={<Users />} />
-            <Route path="create-users" element={<Users />} />
-            <Route path="create-project" element={<Users />} />
-          </Route>
-
-          {/* Client Dashboard Route */}
-          <Route
-            path="/client-dashboard"
-            element={
-              <Layout>
-                <Dashboard />
-              </Layout>
-            }
+            path="/signup"
+            element={<PublicRoute element={<SignUp />} />}
           />
 
-          {/* Designer Dashboard Route */}
-          <Route
-            path="/designer-dashboard"
-            element={
-              <Layout>
-                <DesignerHome />
-              </Layout>
-            }
-          >
-          <Route path="" element={<DesignerHome />} />
+          {/* Protected Routes Wrapped in Layout */}
+          <Route element={<Layout />}>
+            {/* Admin Routes */}
+            <Route
+              path="/admin-dashboard"
+              element={
+                <PrivateRoute
+                  element={<AdminDashboard />}
+                  allowedRoles={["admin"]}
+                />
+              }
+            />
+            <Route
+              path="/admin-dashboard/projects"
+              element={
+                <PrivateRoute element={<Projects />} allowedRoles={["admin"]} />
+              }
+            />
+            <Route
+              path="/admin-dashboard/users"
+              element={
+                <PrivateRoute element={<Users />} allowedRoles={["admin"]} />
+              }
+            />
+
+            {/* Designer Routes */}
+            <Route
+              path="/designer-dashboard"
+              element={
+                <PrivateRoute
+                  element={<DesignerHome />}
+                  allowedRoles={["designer"]}
+                />
+              }
+            />
+
+            <Route
+              path="/client-dashboard"
+              element={
+                <PrivateRoute
+                  element={<AdminDashboard />}
+                  allowedRoles={["client"]}
+                />
+              }
+            />
+
+            <Route
+              path="/expert-dashboard"
+              element={
+                <PrivateRoute
+                  element={<AdminDashboard />}
+                  allowedRoles={["expert"]}
+                />
+              }
+            />
           </Route>
 
-
-          {/* Expert Dashboard Route */}
-          <Route
-            path="/expert-dashboard"
-            element={
-              <Layout>
-                <Dashboard />
-              </Layout>
-            }
-          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

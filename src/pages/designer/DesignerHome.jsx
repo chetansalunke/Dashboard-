@@ -2,18 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 
 export default function DesignerHome() {
-  const [username, setUsername] = useState("");
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user?.token) {
-      console.log("Stored Token:", user.token);
-    } else {
-      console.log("No token found");
-    }
-    console.log(user.username);
-    setUsername(user.username);
-  }, []);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   return (
     <div className="bg-gray-100 flex h-screen">
@@ -24,7 +13,7 @@ export default function DesignerHome() {
           <div className="container px-6 mx-auto grid">
             <div className="flex justify-between">
               <h5 className="my-6 text-2l font-semibold text-gray-700 light:text-gray-200">
-                Welcome {username ? `, ${username}` : ""}
+                Welcome {user.username ? ` ${user.username}` : ""}
               </h5>
             </div>
 

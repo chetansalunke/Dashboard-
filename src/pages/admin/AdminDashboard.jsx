@@ -1,15 +1,7 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 
 export default function AdminDashboard() {
-  useEffect(() => {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (user?.token) {
-        console.log("Stored Token:", user.token);
-      } else {
-        console.log("No token found");
-      }
-    }, []);
   return (
     <div className="bg-gray-100 flex h-screen">
       {/* Main Content */}
@@ -37,7 +29,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <p className="mb-2 text-sm font-medium text-gray-600 light:text-gray-400">
-                    Submitted drawings waiting for approval
+                    Submitted drawings F for approval
                   </p>
                   <p className="text-lg font-semibold text-gray-700 light:text-gray-200">
                     376

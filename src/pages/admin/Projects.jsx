@@ -6,6 +6,7 @@ import {
   ListboxOption,
 } from "@headlessui/react";
 import Header from "../../components/Header";
+import axios from "axios";
 
 export default function Projects() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -13,16 +14,21 @@ export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
 
+  const token = localStorage.getItem("accessToken");
+
+  const { id } = JSON.parse(localStorage.getItem("user"));
+  console.log(id);
+
   const [formData, setFormData] = useState({
     projectName: "",
     description: "",
     duration: "",
     projectSize: "",
-    assignedTo: "",
-    document: null,
-  }
-);
-
+    assignTo: "",
+    documents: [],
+    pendingForm: "",
+    userId: id,
+  });
   useEffect(() => {
     // Fetch users from localStorage
     const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
@@ -35,6 +41,21 @@ export default function Projects() {
 
     setSelectedUser("");
   }, []);
+  // Handle file input change
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setFormData((prev) => ({
+      ...prev,
+      documents: [...prev.documents, ...files],
+    }));
+  };
+  // Remove a selected file
+  const handleRemoveFile = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      documents: prev.documents.filter((_, i) => i !== index),
+    }));
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -44,79 +65,89 @@ export default function Projects() {
     }));
   };
 
-  const handleDelete = (index) => {
-    const updatedProjects = projects.filter((_, i) => i !== index);
-    setProjects(updatedProjects);
-    localStorage.setItem("projects", JSON.stringify(updatedProjects));
-  };
-
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Convert file to a URL before saving
-    const projectWithFile = {
-      ...formData,
-      document: formData.document
-        ? URL.createObjectURL(formData.document)
-        : null,
-    };
-
-    // Update projects state
-    const updatedProjects = [...projects, projectWithFile];
-    setProjects(updatedProjects);
-
-    // Save projects to localStorage
-    localStorage.setItem("projects", JSON.stringify(updatedProjects));
-
-    // Reset the form
-    setFormData({
-      projectName: "",
-      description: "",
-      duration: "",
-      projectSize: "",
-      assignedTo: "",
-      document: null,
+    const formDataToSend = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (key !== "documents") {
+        formDataToSend.append(key, formData[key]);
+      }
     });
-    setSelectedUser(""); 
+
+    formData.documents.forEach((file) => {
+      formDataToSend.append("documents", file);
+    });
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/projects/add",
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Upload Successful", response.data);
+      alert("Project uploaded successfully!");
+
+      setFormData({
+        projectName: "",
+        description: "",
+        duration: "",
+        projectSize: "",
+        assignTo: "",
+        documents: [],
+        pendingForm: "",
+        userId: "",
+      });
+    } catch (error) {
+      console.error("Error uploading project", error);
+      alert("Upload failed!");
+    }
     setIsFormOpen(false);
+
+    console.log(formDataToSend);
   };
-  
 
   return (
     <div className="bg-gray-100">
       <Header />
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
-          <h1 className="text-xl font-semibold tracking-wide text-left text-gray-500 uppercase">
-            Welcome, Manage & Track Your Projects.......
-          </h1>
-          <br />
-          <div
-            className={`flex ${isFormOpen ? "justify-between" : "justify-end"}`}
-          >
-            {isFormOpen && (
+          <div className="flex justify-between items-center">
+            <h1 className="text-xl font-semibold tracking-wide text-gray-700 uppercase">
+              Projects
+            </h1>
+            <div>
+              {isFormOpen && (
+                <button
+                  onClick={() => setIsFormOpen(!isFormOpen)}
+                  className="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-md active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                >
+                  Back
+                </button>
+              )}
               <button
                 onClick={() => setIsFormOpen(!isFormOpen)}
-                class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-md active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                className="ml-2 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
               >
-                Back
+                Create Project
               </button>
-              
-            )}
-            <button
-              onClick={() => setIsFormOpen(!isFormOpen)}
-              className="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
-            >
-              Create Project
-            </button>
-            
+            </div>
           </div>
-<br/>
+
+          <br />
           {isFormOpen && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="px-4 py-3 mb-8 bg-white rounded-lg shadow-md">
                 <label className="block text-sm">
-                  <span className="text-gray-700">Project Name</span>
+                  <span className="text-gray-700 text-sm font-semibold">
+                    Project Name
+                  </span>
                   <input
                     name="projectName"
                     value={formData.projectName}
@@ -128,7 +159,9 @@ export default function Projects() {
                 </label>
 
                 <label className="block mt-4 text-sm">
-                  <span className="text-gray-700">Description</span>
+                  <span className="text-gray-700 text-sm font-semibold">
+                    Description
+                  </span>
                   <textarea
                     name="description"
                     value={formData.description}
@@ -141,7 +174,9 @@ export default function Projects() {
                 </label>
 
                 <label className="block text-sm">
-                  <span className="text-gray-700">Duration (Days)</span>
+                  <span className="text-gray-700 text-sm font-semibold">
+                    Duration (Days)
+                  </span>
                   <input
                     name="duration"
                     value={formData.duration}
@@ -154,7 +189,9 @@ export default function Projects() {
                 </label>
 
                 <label className="block text-sm">
-                  <span className="text-gray-700">Project Size (MB)</span>
+                  <span className="text-gray-700 text-sm font-semibold">
+                    Project Size (MB)
+                  </span>
                   <input
                     name="projectSize"
                     value={formData.projectSize}
@@ -166,46 +203,61 @@ export default function Projects() {
                   />
                 </label>
 
-                <label className="block text-sm">
-                  <span className="text-gray-700">Upload Document</span>
+                <label className="block mt-4 text-sm">
+                  <span className="text-gray-700 text-sm font-semibold">
+                    Upload Documents
+                  </span>
                   <input
-                    name="document"
+                    name="documents"
                     type="file"
-                    onChange={handleInputChange}
-                    className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
+                    multiple
+                    onChange={handleFileChange}
+                    className="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm"
                   />
                 </label>
 
+                {formData.documents.length > 0 && (
+                  <div className="mt-3">
+                    <h2 className="text-gray-700 text-sm font-semibold">
+                      Selected Files:
+                    </h2>
+                    <ul className="mt-2 space-y-1">
+                      {formData.documents.map((file, index) => (
+                        <li
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-gray-200 rounded-md"
+                        >
+                          <span className="text-gray-800 text-sm">
+                            {file.name}
+                          </span>
+                          <button
+                            onClick={() => handleRemoveFile(index)}
+                            className="text-red-500 text-xs font-bold"
+                          >
+                            ❌
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 <label className="block text-sm">
                   <span className="text-gray-700">Assigned To</span>
-                  <Listbox
-                    value={selectedUser}
-                    onChange={(value) => {
-                      setSelectedUser(value);
-                      setFormData((prev) => ({ ...prev, assignedTo: value }));
-                    }}
+                  <select
+                    name="assignTo" // ✅ Fixed mismatch
+                    value={formData.assignTo || ""} // ✅ Prevent undefined errors
+                    onChange={handleInputChange}
+                    className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
+                    required
                   >
-                    <ListboxButton className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input text-left">
-                      {selectedUser || "Select a user"}
-                    </ListboxButton>
-                    <ListboxOptions className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input">
-                      {userNames.map((name, index) => (
-                        <ListboxOption
-                          key={index}
-                          value={name}
-                          className={({ active, selected }) =>
-                            `px-4 py-2 cursor-pointer text-left ${
-                              active || selected
-                                ? "bg-purple-600 text-white"
-                                : "text-black-300"
-                            }`
-                          }
-                        >
-                          {name}
-                        </ListboxOption>
-                      ))}
-                    </ListboxOptions>
-                  </Listbox>
+                    <option value="">Select a user</option>
+                    {userNames.map((name, index) => (
+                      <option key={index} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
                 </label>
 
                 <div className="flex justify-center mt-4">
@@ -216,7 +268,7 @@ export default function Projects() {
               </div>
             </form>
           )}
-          {!isFormOpen && (
+          {/* {!isFormOpen && projects.length > 0 && (
             <div className="w-full overflow-hidden rounded-lg shadow-xs mt-6">
               <div className="w-full">
                 <table className="w-full table-fixed">
@@ -263,16 +315,20 @@ export default function Projects() {
                           )}
                         </td>
                         <td className="p-3">
-                      <button onClick={() => handleDelete(index)} className="px-3 py-1 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600">Delete</button>
-                    </td>
+                          <button
+                            onClick={() => handleDelete(index)}
+                            className="px-3 py-1 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
-          )}
-
+          )} */}
         </div>
       </main>
     </div>
