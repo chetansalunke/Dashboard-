@@ -6,6 +6,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Layout from "./components/Layout";
 import Projects from "./pages/admin/Projects";
 import Users from "./pages/admin/Users";
+import DesignerHome from "./pages/designer/DesignerHome";
+import SignUp from "./pages/SignUp";
 
 const App = () => {
   return (
@@ -14,6 +16,7 @@ const App = () => {
         <Routes>
           {/* Sign In Route */}
           <Route path="/" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
 
           {/* Admin Dashboard with Nested Routes */}
           <Route
@@ -47,10 +50,13 @@ const App = () => {
             path="/designer-dashboard"
             element={
               <Layout>
-                <Dashboard />
+                <DesignerHome />
               </Layout>
             }
-          />
+          >
+          <Route path="" element={<DesignerHome />} />
+          </Route>
+
 
           {/* Expert Dashboard Route */}
           <Route

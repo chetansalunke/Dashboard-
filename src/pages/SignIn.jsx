@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // To navigate to another page after successful login
+import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 const SignIn = () => {
-  const { user, signIn, error } = useContext(AuthContext);
+  const { user, signIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,26 +14,30 @@ const SignIn = () => {
       signIn(parsedUser.email, parsedUser.password, parsedUser.role); // Update context
     }
   }, []);
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user)); // Store user in localStorage
 
-      switch (user.role) {
-        case "admin":
-          navigate("/admin-dashboard");
-          break;
-        case "client":
-          navigate("/client-dashboard");
-          break;
-        case "designer":
-          navigate("/designer-dashboard");
-          break;
-        case "expert":
-          navigate("/expert-dashboard");
-          break;
-        default:
-          navigate("/login"); // Fallback route
-      }
+  useEffect(() => {
+    if (user && user.role) {
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // Delay navigation to ensure state is updated
+      setTimeout(() => {
+        switch (user.role) {
+          case "admin":
+            navigate("/admin-dashboard");
+            break;
+          case "client":
+            navigate("/client-dashboard");
+            break;
+          case "designer":
+            navigate("/designer-dashboard");
+            break;
+          case "expert":
+            navigate("/expert-dashboard");
+            break;
+          default:
+            navigate("/login");
+        }
+      }, 0);
     }
   }, [user, navigate]);
 
@@ -43,18 +47,16 @@ const SignIn = () => {
     role: "",
   });
 
-  const [errors, setErrors] = useState({}); // To store validation errors
+  const [errors, setErrors] = useState({});
 
-  // Handle input changes dynamically
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserData((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: value || "", // Ensure it's never undefined
     }));
   };
 
-  // Validation function
   const validateForm = () => {
     let formErrors = {};
     if (!userData.email) {
@@ -65,76 +67,98 @@ const SignIn = () => {
     if (!userData.password) {
       formErrors.password = "Password is required";
     }
-    if (!userData.role) {
-      formErrors.role = "Role is required";
-    }
 
     setErrors(formErrors);
-    return Object.keys(formErrors).length === 0; // Returns true if no errors
+    return Object.keys(formErrors).length === 0;
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      signIn(userData.email, userData.password, userData.role);
+    if (!validateForm()) return;
 
-      if (error) {
-        // If there's an error, don't navigate and show the error
-        return;
-      }
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: userData.email,
+          password: userData.password,
+        }),
+      });
 
-      console.log("Login");
-      console.log(user);
+      const data = await response.json();
+      console.log("Login Response:", data); // Debugging
 
-      if (user) {
-        if (user.role === "admin") {
-          navigate("/admin-dashboard");
-        } else if (user.role === "client") {
-          navigate("/client-dashboard");
-        } else if (user.role === "designer") {
-          navigate("/designer-dashboard");
-        } else if (user.role === "expert") {
-          navigate("/expert-dashboard");
+      if (response.ok && data.user && data.user.role) {
+        setUserData((prev) => ({
+          ...prev,
+          email: userData.email || userData.email,
+          username: data.user.username || prev.username,
+          role: data.user.role || prev.role,
+          token: data.accessToken || prev.accessToken,
+        }));
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            email: userData.email || "",
+            username: data.user.username || "",
+            role: data.user.role || "",
+            token: data.accessToken || "",
+          })
+        );
+
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (storedUser && storedUser.token) {
+          console.log("User Token:", storedUser.token);
+          console.log("User role:", storedUser.role);
+          console.log("Username: ",storedUser.username);
         }
+
+        navigate(`/${data.user.role}-dashboard`);
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          apiError: "Invalid login credentials",
+        }));
       }
+    } catch (error) {
+      console.error("Login Error:", error);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        apiError: "Something went wrong. Please try again.",
+      }));
     }
   };
 
   return (
-    <div className="flex items-center min-h-screen p-6 bg-gray-50 light:bg-gray-900">
-      <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl light:bg-gray-800">
+    <div className="flex items-center min-h-screen p-6 bg-gray-50">
+      <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl">
         <div className="flex flex-col overflow-y-auto md:flex-row">
           <div className="h-32 md:h-auto md:w-1/2">
             <img
               aria-hidden="true"
-              className="object-cover w-full h-full light:hidden"
+              className="object-cover w-full h-full"
               src="../assets/img/login-office.jpeg"
-              alt="Office"
-            />
-            <img
-              aria-hidden="true"
-              className="hidden object-cover w-full h-full light:block"
-              src="../assets/img/login-office-light.jpeg"
               alt="Office"
             />
           </div>
           <div className="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
             <div className="w-full">
-              <h1 className="mb-4 text-xl font-semibold text-gray-700 light:text-gray-200">
+              <h1 className="mb-4 text-xl font-semibold text-gray-700">
                 Login
               </h1>
 
               {/* Email input */}
               <label className="block text-sm">
-                <span className="text-gray-700 light:text-gray-400">Email</span>
+                <span className="text-gray-700">Email</span>
                 <input
                   type="email"
                   name="email"
-                  value={userData.email}
+                  value={userData.email || ""} // Ensures it’s never undefined
                   onChange={handleInputChange}
-                  className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
+                  className="block w-full mt-1 text-sm form-input"
                   placeholder="Enter Your Email"
                 />
                 {errors.email && (
@@ -144,15 +168,13 @@ const SignIn = () => {
 
               {/* Password input */}
               <label className="block mt-4 text-sm">
-                <span className="text-gray-700 light:text-gray-400">
-                  Password
-                </span>
+                <span className="text-gray-700">Password</span>
                 <input
                   type="password"
                   name="password"
-                  value={userData.password}
+                  value={userData.password || ""} // Ensures it’s never undefined
                   onChange={handleInputChange}
-                  className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
+                  className="block w-full mt-1 text-sm form-input"
                   placeholder="***************"
                 />
                 {errors.password && (
@@ -160,33 +182,15 @@ const SignIn = () => {
                 )}
               </label>
 
-              {/* Role dropdown */}
-              <label className="block text-sm mt-4">
-                <span className="text-gray-700 light:text-gray-400">Role</span>
-                <select
-                  name="role"
-                  value={userData.role}
-                  onChange={handleInputChange}
-                  className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-select"
-                >
-                  <option value="">Select Role</option>
-                  <option value="admin">Admin</option>
-                  <option value="designer">Designer</option>
-                  <option value="expert">Expert</option>
-                  <option value="client">Client</option>
-                </select>
-                {errors.role && (
-                  <p className="text-red-500 text-xs">{errors.role}</p>
-                )}
-              </label>
-
-              {/* Login Error message */}
-              {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+              {/* API Error message */}
+              {errors.apiError && (
+                <p className="text-red-500 text-xs mt-2">{errors.apiError}</p>
+              )}
 
               {/* Submit Button */}
               <button
                 onClick={handleSubmit}
-                className="block w-full px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                className="block w-full px-4 py-2 mt-4 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
               >
                 Log in
               </button>
@@ -195,19 +199,19 @@ const SignIn = () => {
 
               <p className="mt-4">
                 <a
-                  className="text-sm font-medium text-purple-600 light:text-purple-400 hover:underline"
+                  className="text-sm font-medium text-purple-600 hover:underline"
                   href="./forgot-password.html"
                 >
                   Forgot your password?
                 </a>
               </p>
               <p className="mt-1">
-                <a
-                  className="text-sm font-medium text-purple-600 light:text-purple-400 hover:underline"
-                  href="./create-account.html"
+                <Link
+                  className="text-sm font-medium text-purple-600 hover:underline"
+                  to="/signup"
                 >
                   Create account
-                </a>
+                </Link>
               </p>
             </div>
           </div>
