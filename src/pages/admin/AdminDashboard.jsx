@@ -2,6 +2,14 @@ import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 
 export default function AdminDashboard() {
+  const [projectList, setProjectList] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/projects/all")
+      .then((response) => response.json())
+      .then((data) => setProjectList(data.projects)) // Corrected: Extract `projects`
+      .catch((error) => console.error("Error fetching projects:", error));
+  }, []);
   return (
     <div className="bg-gray-100 flex h-screen">
       {/* Main Content */}
@@ -63,20 +71,27 @@ export default function AdminDashboard() {
             </div>
 
             {/* Table - Project Details */}
-            <div className="w-full overflow-hidden rounded-lg shadow-xs">
-              <div className="w-full overflow-x-auto">
-                <table className="w-full whitespace-no-wrap">
-                  <thead>
-                    <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b light:border-gray-700 bg-gray-50 light:text-gray-400 light:bg-gray-800">
-                      <th className="px-4 py-3">Project Name</th>
-                      <th className="px-4 py-3">Timeline</th>
-                      <th className="px-4 py-3">Progress</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y light:divide-gray-700 light:bg-gray-800">
-                    <tr className="text-gray-700 light:text-gray-400">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center text-sm">
+            {projectList.length > 0 && (
+              <div className="w-full overflow-hidden rounded-lg shadow-xs">
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full whitespace-no-wrap">
+                    <thead>
+                      <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b light:border-gray-700 bg-gray-50 light:text-gray-400 light:bg-gray-800">
+                        <th className="px-4 py-3">Project Name</th>
+                        <th className="px-4 py-3">Timeline</th>
+                        <th className="px-4 py-3">Progress</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y light:divide-gray-700 light:bg-gray-800">
+                      {projectList.length > 0 ? (
+                        projectList.map((project, index) => (
+                          <tr
+                            key={index}
+                            className="text-gray-700 light:text-gray-400"
+                          >
+                            <td className="px-4 py-3 text-sm break-words">
+                              {project.projectName}
+                              {/* <div className="flex items-center text-sm">
                           <div className="relative hidden w-8 h-8 mr-3 rounded-full md:block">
                             <img
                               className="object-cover w-full h-full rounded-full"
@@ -88,19 +103,42 @@ export default function AdminDashboard() {
                           <div>
                             <p className="font-semibold">Enclave IT Park</p>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm">2 years</td>
-                      <td className="px-4 py-3 text-xs">
-                        <span className="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full light:bg-green-700 light:text-green-100">
-                          Approved
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                        </div> */}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              {project.duration} days
+                            </td>
+                            <td className="px-4 py-3 text-xs">
+                              {/* <span className="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full light:bg-green-700 light:text-green-100">
+                        {project.status} 
+                        </span> */}
+                              <span
+                                className={`px-2 py-1 font-semibold leading-tight rounded-full 
+      ${
+        project.status === "Approved"
+          ? "text-green-700 bg-green-100 dark:bg-green-700 dark:text-green-100"
+          : project.status === "Pending"
+          ? "text-yellow-700 bg-yellow-100 dark:bg-yellow-700 dark:text-yellow-100"
+          : "text-red-700 bg-red-100 dark:bg-red-700 dark:text-red-100"
+      }`}
+                              >
+                                {project.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="9" className="text-center border p-2">
+                            No projects found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </main>
       </div>
