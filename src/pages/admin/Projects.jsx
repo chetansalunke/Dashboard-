@@ -7,10 +7,10 @@ import {
 } from "@headlessui/react";
 import Header from "../../components/Header";
 import axios from "axios";
+import { FaDownload } from "react-icons/fa"; // Import download icon
 
 export default function Projects() {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [userNames, setUserNames] = useState([]);
   const [projects, setProjects] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
 
@@ -29,12 +29,41 @@ export default function Projects() {
     pendingForm: "",
     userId: id,
   });
-  useEffect(() => {
-    // Fetch users from localStorage
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-    const names = storedUsers.map((user) => user.fullName);
-    setUserNames(names);
 
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/auth/all")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.users) {
+          const filteredUsers = data.users.filter(
+            (user) => user.role !== "admin"
+          );
+          setUsers(filteredUsers); // Access the "users" array inside the object
+        } else {
+          console.error("Unexpected API response format", data);
+        }
+      })
+      .catch((error) => console.error("Error fetching users:", error));
+  }, []);
+
+  const [projectList, setProjectList] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/projects/all")
+      .then((response) => response.json())
+      .then((data) => setProjectList(data.projects)) // Corrected: Extract `projects`
+      .catch((error) => console.error("Error fetching projects:", error));
+  }, []);
+
+  // Function to handle deletion
+  const handleDelete = (index) => {
+    const updatedProjects = projectList.filter((_, i) => i !== index);
+    setProjectList(updatedProjects);
+  };
+
+  useEffect(() => {
     // Load projects from localStorage
     const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
     setProjects(storedProjects);
@@ -251,10 +280,10 @@ export default function Projects() {
                     className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
                     required
                   >
-                    <option value="">Select a user</option>
-                    {userNames.map((name, index) => (
-                      <option key={index} value={name}>
-                        {name}
+                    <option value="">-- Select User --</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.username}>
+                        {user.username}
                       </option>
                     ))}
                   </select>
@@ -268,7 +297,7 @@ export default function Projects() {
               </div>
             </form>
           )}
-          {/* {!isFormOpen && projects.length > 0 && (
+          {!isFormOpen && projectList.length > 0 && (
             <div className="w-full overflow-hidden rounded-lg shadow-xs mt-6">
               <div className="w-full">
                 <table className="w-full table-fixed">
@@ -284,51 +313,84 @@ export default function Projects() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y">
-                    {projects.map((project, index) => (
-                      <tr key={index} className="text-gray-700">
-                        <td className="px-4 py-3 text-sm break-words">
-                          {project.projectName}
-                        </td>
-                        <td className="px-4 py-3 text-sm break-words">
-                          {project.description}
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          {project.duration} days
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          {project.projectSize} MB
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          {project.assignedTo}
-                        </td>
-                        <td className="px-4 py-3">
-                          {project.document ? (
-                            <a
-                              href={project.document}
-                              download
-                              className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none"
+                    {projectList.length > 0 ? (
+                      projectList.map((project, index) => (
+                        <tr key={index} className="text-gray-700">
+                          <td className="px-4 py-3 text-sm break-words">
+                            {project.projectName}
+                          </td>
+                          <td className="px-4 py-3 text-sm break-words">
+                            {project.description}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {project.duration} days
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {project.projectSize} MB
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {project.assignTo}
+                          </td>
+                          <td className="px-4 py-2">
+                            {project.documents.length > 0 ? (
+                              <div className="flex flex-wrap gap-4">
+                                {project.documents.map((docUrl, index) => {
+                                  const isImage =
+                                    /\.(jpg|jpeg|png|gif|webp)$/i.test(docUrl); // Check if it's an image
+
+                                  return (
+                                    <div
+                                      key={index}
+                                      className="flex flex-col items-center"
+                                    >
+                                      {isImage ? (
+                                        <img
+                                          src={docUrl}
+                                          alt="Document Thumbnail"
+                                          className="w-12 h-12 object-cover rounded-lg border"
+                                        />
+                                      ) : (
+                                        <div className="w-12 h-12 flex items-center justify-center bg-gray-200 text-gray-600 border rounded-lg">
+                                          📄
+                                        </div>
+                                      )}
+                                      <a
+                                        href={docUrl}
+                                        download
+                                        className="flex items-center gap-1 text-purple-600 hover:text-purple-800 hover:underline text-sm mt-1"
+                                      >
+                                        <FaDownload className="text-purple-600" />
+                                      </a>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <span className="text-gray-500">No files</span>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            <button
+                              onClick={() => handleDelete(index)}
+                              className="px-3 py-1 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
                             >
-                              Download
-                            </a>
-                          ) : (
-                            <span className="text-gray-500">No file</span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          <button
-                            onClick={() => handleDelete(index)}
-                            className="px-3 py-1 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="9" className="text-center border p-2">
+                          No projects found.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-          )} */}
+          )}
         </div>
       </main>
     </div>
