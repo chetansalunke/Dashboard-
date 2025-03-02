@@ -39,20 +39,20 @@ export default function Users() {
   // Handle form submission to add a new user
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload
-  
+
     try {
       const response = await fetch("http://localhost:3000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-  
+
       if (!response.ok) throw new Error("Failed to add user");
-  
+
       const newUser = await response.json(); // Get the newly added user
-  
+
       setUsers((prevUsers) => [...prevUsers, newUser]); // Add without refresh
-  
+
       // Reset form state & close form
       setFormData({ username: "", email: "", password: "", role: "Select" });
       setIsFormOpen(false);
@@ -61,44 +61,41 @@ export default function Users() {
     }
   };
 
-  
+  //   const handleSubmit = (e) => {
+  //     e.preventDefault();
 
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
+  //     let imageUrl = formData.profilePicture;
 
-//     let imageUrl = formData.profilePicture;
+  //     if (formData.profilePicture && typeof formData.profilePicture !== "string") {
+  //       const reader = new FileReader();
+  //       reader.onloadend = () => {
+  //         imageUrl = reader.result;
+  //         saveUser(imageUrl);
+  //       };
+  //       reader.readAsDataURL(formData.profilePicture);
+  //     } else {
+  //       saveUser(imageUrl);
+  //     }
+  //   };
 
-//     if (formData.profilePicture && typeof formData.profilePicture !== "string") {
-//       const reader = new FileReader();
-//       reader.onloadend = () => {
-//         imageUrl = reader.result;
-//         saveUser(imageUrl);
-//       };
-//       reader.readAsDataURL(formData.profilePicture);
-//     } else {
-//       saveUser(imageUrl);
-//     }
-//   };
+  //   // Save user to local storage
+  //   const saveUser = (imageUrl) => {
+  //     const newUser = { ...formData, profilePicture: imageUrl };
+  //     const updatedUsers = [...users, newUser];
 
-//   // Save user to local storage
-//   const saveUser = (imageUrl) => {
-//     const newUser = { ...formData, profilePicture: imageUrl };
-//     const updatedUsers = [...users, newUser];
+  //     setUsers(updatedUsers);
+  //     localStorage.setItem("users", JSON.stringify(updatedUsers));
 
-//     setUsers(updatedUsers);
-//     localStorage.setItem("users", JSON.stringify(updatedUsers));
-
-//     // Clear form
-//     setFormData({
-//       fullName: "",
-//       email: "",
-//       role: "Select",
-//       phone: "",
-//       profilePicture: null,
-//     });
-//     setIsFormOpen(false);
-//   };
-  
+  //     // Clear form
+  //     setFormData({
+  //       fullName: "",
+  //       email: "",
+  //       role: "Select",
+  //       phone: "",
+  //       profilePicture: null,
+  //     });
+  //     setIsFormOpen(false);
+  //   };
 
   // Handle user deletion
   const handleDelete = async (index) => {};
@@ -111,8 +108,8 @@ export default function Users() {
       <Header />
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
-          <h1 className="text-xl font-semibold tracking-wide text-left text-gray-500 uppercase">
-            Welcome, Manage & Track Your Users
+          <h1 className="text-xl font-semibold tracking-wide text-left text-gray-700 uppercase">
+            Users
           </h1>
           <br />
           <div
@@ -229,12 +226,12 @@ export default function Users() {
                         <td className="px-4 py-3 text-sm">{user.email}</td>
                         <td className="px-4 py-3 text-sm">{user.role}</td>
                         <td className="p-3 flex space-x-2">
-                          <button
+                          {/* <button
                             onClick={() => handleEdit(index)}
                             className="px-3 py-1 text-xs font-medium text-white bg-purple-500 rounded-md hover:bg-purple-600"
                           >
                             Edit
-                          </button>
+                          </button> */}
                           <button
                             onClick={() => handleDelete(index)}
                             className="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
@@ -254,8 +251,3 @@ export default function Users() {
     </div>
   );
 }
-
-
-
-
-

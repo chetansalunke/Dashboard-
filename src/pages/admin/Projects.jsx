@@ -7,7 +7,7 @@ import {
 } from "@headlessui/react";
 import Header from "../../components/Header";
 import axios from "axios";
-import { FaDownload } from "react-icons/fa"; // Import download icon
+import { FaDownload } from "react-icons/fa";
 
 export default function Projects() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -59,6 +59,7 @@ export default function Projects() {
 
   // Function to handle deletion
   const handleDelete = (index) => {
+    console.log("");
     const updatedProjects = projectList.filter((_, i) => i !== index);
     setProjectList(updatedProjects);
   };
@@ -162,7 +163,7 @@ export default function Projects() {
               )}
               <button
                 onClick={() => setIsFormOpen(!isFormOpen)}
-                className="ml-2 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                className="px-3 py-1 text-sm font-medium leading-5 ml-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-md active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
               >
                 Create Project
               </button>
