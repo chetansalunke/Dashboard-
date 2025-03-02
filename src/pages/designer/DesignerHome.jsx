@@ -13,7 +13,7 @@ export default function DesignerHome() {
     const user = JSON.parse(storedUser);
     const username = user?.username || "";
 
-    fetch("http://localhost:3000/api/projects/all")
+    fetch("http://52.66.249.107:3000/api/projects/all")
       .then((response) => response.json())
       .then((data) => {
         if (data && Array.isArray(data.projects)) {
@@ -102,9 +102,7 @@ export default function DesignerHome() {
 
                 <div className="mt-5 p-5 bg-white shadow-lg rounded-lg">
                   <div className="flex justify-between">
-                    <h2 className="text-xl">
-                      {selectedProject.projectName}
-                    </h2>
+                    <h2 className="text-xl">{selectedProject.projectName}</h2>
                     {/* Format the Submission Date */}
                     <h6 className="text-xl">
                       Start Date:{" "}
@@ -200,16 +198,15 @@ export default function DesignerHome() {
               </div>
             )}
             <div className="container px-6 my-6 grid flex justify-end">
-            <br/>
+              <br />
               {selectedProject && (
                 <button
-                onClick={() => handleUpload()}
-                className="ml-2 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
-              >
-                Upload
-              </button>
+                  onClick={() => handleUpload()}
+                  className="ml-2 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                >
+                  Upload
+                </button>
               )}
-              
             </div>
           </div>
         </main>

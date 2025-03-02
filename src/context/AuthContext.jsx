@@ -4,7 +4,7 @@ import axios from "axios";
 export const AuthContext = createContext();
 
 const API = axios.create({
-  baseURL: "http://localhost:3000/",
+  baseURL: "http://52.66.249.107:3000/",
   withCredentials: true,
 });
 
