@@ -148,10 +148,10 @@ export default function Projects() {
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
           <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold tracking-wide text-gray-700 uppercase">
+            <h1 className="text-xl font-semibold tracking-wide text-gray-500 uppercase">
               Projects
             </h1>
-            <div>
+            <div className="flex justify-end gap-2">
               {isFormOpen && (
                 <button
                   onClick={() => setIsFormOpen(!isFormOpen)}
@@ -168,10 +168,8 @@ export default function Projects() {
               </button>
             </div>
           </div>
-
-          <br />
           {isFormOpen && (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="px-4 py-3 mb-8 bg-white rounded-lg shadow-md">
                 <label className="block text-sm">
                   <span className="text-gray-700 text-sm font-semibold">
@@ -270,7 +268,6 @@ export default function Projects() {
                     </ul>
                   </div>
                 )}
-
                 <label className="block text-sm">
                   <span className="text-gray-700">Assigned To</span>
                   <select
@@ -288,7 +285,6 @@ export default function Projects() {
                     ))}
                   </select>
                 </label>
-
                 <div className="flex justify-center mt-4">
                   <button className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
                     Submit

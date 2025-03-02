@@ -11,6 +11,7 @@ export default function Users() {
   });
 
   const [users, setUsers] = useState([]);
+  const [editingIndex, setEditingIndex] = useState(null);
 
   // Fetch all users from the API
   useEffect(() => {
@@ -39,20 +40,20 @@ export default function Users() {
   // Handle form submission to add a new user
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload
-  
+
     try {
       const response = await fetch("http://localhost:3000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-  
+
       if (!response.ok) throw new Error("Failed to add user");
-  
+
       const newUser = await response.json(); // Get the newly added user
-  
+
       setUsers((prevUsers) => [...prevUsers, newUser]); // Add without refresh
-  
+
       // Reset form state & close form
       setFormData({ username: "", email: "", password: "", role: "Select" });
       setIsFormOpen(false);
@@ -61,85 +62,92 @@ export default function Users() {
     }
   };
 
-  
+  //   const handleSubmit = (e) => {
+  //     e.preventDefault();
 
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
+  //     let imageUrl = formData.profilePicture;
 
-//     let imageUrl = formData.profilePicture;
+  //     if (formData.profilePicture && typeof formData.profilePicture !== "string") {
+  //       const reader = new FileReader();
+  //       reader.onloadend = () => {
+  //         imageUrl = reader.result;
+  //         saveUser(imageUrl);
+  //       };
+  //       reader.readAsDataURL(formData.profilePicture);
+  //     } else {
+  //       saveUser(imageUrl);
+  //     }
+  //   };
 
-//     if (formData.profilePicture && typeof formData.profilePicture !== "string") {
-//       const reader = new FileReader();
-//       reader.onloadend = () => {
-//         imageUrl = reader.result;
-//         saveUser(imageUrl);
-//       };
-//       reader.readAsDataURL(formData.profilePicture);
-//     } else {
-//       saveUser(imageUrl);
-//     }
-//   };
+  //   // Save user to local storage
+  //   const saveUser = (imageUrl) => {
+  //     const newUser = { ...formData, profilePicture: imageUrl };
+  //     const updatedUsers = [...users, newUser];
 
-//   // Save user to local storage
-//   const saveUser = (imageUrl) => {
-//     const newUser = { ...formData, profilePicture: imageUrl };
-//     const updatedUsers = [...users, newUser];
+  //     setUsers(updatedUsers);
+  //     localStorage.setItem("users", JSON.stringify(updatedUsers));
 
-//     setUsers(updatedUsers);
-//     localStorage.setItem("users", JSON.stringify(updatedUsers));
-
-//     // Clear form
-//     setFormData({
-//       fullName: "",
-//       email: "",
-//       role: "Select",
-//       phone: "",
-//       profilePicture: null,
-//     });
-//     setIsFormOpen(false);
-//   };
-  
+  //     // Clear form
+  //     setFormData({
+  //       fullName: "",
+  //       email: "",
+  //       role: "Select",
+  //       phone: "",
+  //       profilePicture: null,
+  //     });
+  //     setIsFormOpen(false);
+  //   };
 
   // Handle user deletion
   const handleDelete = async (index) => {};
 
-  // Handle edit (mock function for now)
-  const handleEdit = (index) => {};
+  // Handle edit user
+  const handleEdit = (index) => {
+    const userToEdit = users[index];
+    setFormData({
+      username: userToEdit.username,
+      email: userToEdit.email,
+      password: "", // Don't pre-fill password for security reasons
+      role: userToEdit.role,
+    });
+    setEditingIndex(index);
+    setIsFormOpen(true); // Open the form only when "Edit" is clicked
+  };
 
   return (
     <div className="bg-gray-100">
       <Header />
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
-          <h1 className="text-xl font-semibold tracking-wide text-left text-gray-500 uppercase">
-            Welcome, Manage & Track Your Users
-          </h1>
-          <br />
-          <div
-            className={`flex ${isFormOpen ? "justify-between" : "justify-end"}`}
-          >
-            {isFormOpen && (
+          <div className="flex justify-between items-center">
+            <h1 className="text-xl font-semibold tracking-wide text-gray-500 uppercase">
+              Welcome, Manage & Track Your Users
+            </h1>
+            <div className="flex justify-end gap-2">
+              {isFormOpen && (
+                <button
+                  onClick={() => setIsFormOpen(false)}
+                  className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                >
+                  Back
+                </button>
+              )}
               <button
-                onClick={() => setIsFormOpen(false)}
-                className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                onClick={() => {
+                  setEditingIndex(null); // Ensure edit mode is off
+                  setFormData({
+                    username: "",
+                    email: "",
+                    password: "",
+                    role: "Select",
+                  });
+                  setIsFormOpen(true); // Open form only when "New User" is clicked
+                }}
+                className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
               >
-                Back
+                New User
               </button>
-            )}
-            <button
-              onClick={() => {
-                setIsFormOpen(!isFormOpen);
-                setFormData({
-                  username: "",
-                  email: "",
-                  password: "",
-                  role: "Select",
-                }); // Reset form
-              }}
-              className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
-            >
-              New User
-            </button>
+            </div>
           </div>
           <br />
           {isFormOpen && (
@@ -254,8 +262,3 @@ export default function Users() {
     </div>
   );
 }
-
-
-
-
-
