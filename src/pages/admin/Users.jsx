@@ -16,7 +16,7 @@ export default function Users() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/auth/all");
+        const response = await fetch("http://65.0.178.244:3000/api/auth/all");
         if (!response.ok) throw new Error("Failed to fetch users");
         const data = await response.json();
         setUsers(Array.isArray(data) ? data : data.users || []);
@@ -41,11 +41,14 @@ export default function Users() {
     e.preventDefault(); // Prevent page reload
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "http://65.0.178.244:3000/api/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to add user");
 

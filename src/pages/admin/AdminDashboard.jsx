@@ -5,10 +5,28 @@ export default function AdminDashboard() {
   const [projectList, setProjectList] = useState([]);
 
   useEffect(() => {
-    fetch("http://65.0.178.244:3000/api/projects/all")
-      .then((response) => response.json())
-      .then((data) => setProjectList(data.projects)) // Corrected: Extract `projects`
-      .catch((error) => console.error("Error fetching projects:", error));
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch(
+          "http://65.0.178.244:3000/api/projects/all"
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        // Check if projects exist and set accordingly
+        setProjectList(data.projects || []); // Default to empty array if no projects
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        setError("Failed to load projects. Please try again later.");
+        setProjectList([]); // Reset to empty array on error
+      } finally {
+        setLoading(false); // Done loading, whether success or failure
+      }
+    };
+
+    fetchProjects();
   }, []);
   return (
     <div className="bg-gray-100 flex h-screen">

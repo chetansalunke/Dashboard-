@@ -31,31 +31,66 @@ export default function Projects() {
   });
 
   const [users, setUsers] = useState([]);
+  console.log(users);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/auth/all")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.users) {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://65.0.178.244:3000/api/auth/all");
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (data.users && Array.isArray(data.users)) {
           const filteredUsers = data.users.filter(
             (user) => user.role !== "admin"
           );
-          setUsers(filteredUsers); // Access the "users" array inside the object
+          setUsers(filteredUsers);
         } else {
-          console.error("Unexpected API response format", data);
+          throw new Error("Unexpected API response format");
         }
-      })
-      .catch((error) => console.error("Error fetching users:", error));
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setUsersError("Failed to load users. Please try again later.");
+        setUsers([]);
+      } finally {
+        setUsersLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   const [projectList, setProjectList] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/projects/all")
-      .then((response) => response.json())
-      .then((data) => setProjectList(data.projects)) // Corrected: Extract `projects`
-      .catch((error) => console.error("Error fetching projects:", error));
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch(
+          "http://65.0.178.244:3000/api/projects/all"
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        setProjectList(Array.isArray(data.projects) ? data.projects : []);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+
+        setProjectList([]);
+      }
+    };
+
+    fetchProjects();
   }, []);
+  // useEffect(() => {
+  //   fetch("http://65.0.178.244:3000/api/projects/all")
+  //     .then((response) => response.json())
+  //     .then((data) => setProjectList(data.projects)) // Corrected: Extract `projects`
+  //     .catch((error) => console.error("Error fetching projects:", error));
+  // }, []);
 
   // Function to handle deletion
   const handleDelete = (index) => {
@@ -220,7 +255,7 @@ export default function Projects() {
 
                 <label className="block text-sm">
                   <span className="text-gray-700 text-sm font-semibold">
-                    Project Size (MB)
+                    Project Size
                   </span>
                   <input
                     name="projectSize"
@@ -228,7 +263,7 @@ export default function Projects() {
                     onChange={handleInputChange}
                     className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
                     type="number"
-                    placeholder="Size in MB"
+                    placeholder="Size "
                     required
                   />
                 </label>
