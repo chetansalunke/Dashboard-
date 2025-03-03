@@ -111,7 +111,7 @@ export default function Projects() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/projects/add",
+        "http://65.0.178.244:3000/api/projects/add",
         formDataToSend,
         {
           headers: {

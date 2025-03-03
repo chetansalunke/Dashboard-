@@ -5,7 +5,7 @@ export default function AdminDashboard() {
   const [projectList, setProjectList] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/projects/all")
+    fetch("http://65.0.178.244:3000/api/projects/all")
       .then((response) => response.json())
       .then((data) => setProjectList(data.projects)) // Corrected: Extract `projects`
       .catch((error) => console.error("Error fetching projects:", error));

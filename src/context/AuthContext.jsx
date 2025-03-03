@@ -4,7 +4,7 @@ import axios from "axios";
 export const AuthContext = createContext();
 
 const API = axios.create({
-  baseURL: "http://52.66.249.107:3000/",
+  baseURL: "http://65.0.178.244:3000/",
   withCredentials: true,
 });
 
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   const refreshToken = useCallback(async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/auth/refresh",
+        "http://65.0.178.244:3000/api/auth/refresh",
         {
           withCredentials: true,
         }

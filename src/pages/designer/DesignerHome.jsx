@@ -13,7 +13,7 @@ export default function DesignerHome() {
     const user = JSON.parse(storedUser);
     const username = user?.username || "";
 
-    fetch("http://52.66.249.107:3000/api/projects/all")
+    fetch("http://65.0.178.244:3000/api/projects/all")
       .then((response) => response.json())
       .then((data) => {
         if (data && Array.isArray(data.projects)) {
