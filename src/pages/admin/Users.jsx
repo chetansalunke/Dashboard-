@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
-
+import BASE_URL from "../../config";
 export default function Users() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -11,19 +11,19 @@ export default function Users() {
   });
 
   const [users, setUsers] = useState([]);
-
+  const [editingIndex, setEditingIndex] = useState(null);
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/all`);
+      if (!response.ok) throw new Error("Failed to fetch users");
+      const data = await response.json();
+      setUsers(Array.isArray(data) ? data : data.users || []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
   // Fetch all users from the API
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("http://65.0.178.244:3000/api/auth/all");
-        if (!response.ok) throw new Error("Failed to fetch users");
-        const data = await response.json();
-        setUsers(Array.isArray(data) ? data : data.users || []);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
     fetchUsers();
   }, []);
 
@@ -41,14 +41,11 @@ export default function Users() {
     e.preventDefault(); // Prevent page reload
 
     try {
-      const response = await fetch(
-        "http://65.0.178.244:3000/api/auth/register",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
       if (!response.ok) throw new Error("Failed to add user");
 
@@ -59,6 +56,7 @@ export default function Users() {
       // Reset form state & close form
       setFormData({ username: "", email: "", password: "", role: "Select" });
       setIsFormOpen(false);
+      fetchUsers();
     } catch (error) {
       console.error("Error adding user:", error);
     }

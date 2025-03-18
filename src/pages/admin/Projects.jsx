@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  Listbox,
-  ListboxButton,
-  ListboxOptions,
-  ListboxOption,
-} from "@headlessui/react";
+
 import Header from "../../components/Header";
 import axios from "axios";
 import { FaDownload } from "react-icons/fa";
-
+import BASE_URL from "../../config";
 export default function Projects() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -36,7 +31,7 @@ export default function Projects() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://65.0.178.244:3000/api/auth/all");
+        const response = await fetch(`${BASE_URL}/api/auth/all`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -63,36 +58,25 @@ export default function Projects() {
   }, []);
 
   const [projectList, setProjectList] = useState([]);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch(
-          "http://65.0.178.244:3000/api/projects/all"
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-
-        setProjectList(Array.isArray(data.projects) ? data.projects : []);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-
-        setProjectList([]);
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/projects/all`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-    };
+      const data = await response.json();
 
+      setProjectList(Array.isArray(data.projects) ? data.projects : []);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+
+      setProjectList([]);
+    }
+  };
+  useEffect(() => {
     fetchProjects();
   }, []);
-  // useEffect(() => {
-  //   fetch("http://65.0.178.244:3000/api/projects/all")
-  //     .then((response) => response.json())
-  //     .then((data) => setProjectList(data.projects)) // Corrected: Extract `projects`
-  //     .catch((error) => console.error("Error fetching projects:", error));
-  // }, []);
 
-  // Function to handle deletion
   const handleDelete = (index) => {
     console.log("");
     const updatedProjects = projectList.filter((_, i) => i !== index);
@@ -146,7 +130,7 @@ export default function Projects() {
 
     try {
       const response = await axios.post(
-        "http://65.0.178.244:3000/api/projects/add",
+        `${BASE_URL}/api/projects/add`,
         formDataToSend,
         {
           headers: {
@@ -169,6 +153,7 @@ export default function Projects() {
         pendingForm: "",
         userId: "",
       });
+      fetchProjects();
     } catch (error) {
       console.error("Error uploading project", error);
       alert("Upload failed!");
@@ -362,7 +347,7 @@ export default function Projects() {
                             {project.duration} days
                           </td>
                           <td className="px-4 py-3 text-sm">
-                            {project.projectSize} MB
+                            {project.projectSize} sqft
                           </td>
                           <td className="px-4 py-3 text-sm">
                             {project.assignTo}

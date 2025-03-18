@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
+import BASE_URL from "../../config";
 
 export default function AdminDashboard() {
   const [projectList, setProjectList] = useState([]);
@@ -7,22 +8,17 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch(
-          "http://65.0.178.244:3000/api/projects/all"
-        );
+        const response = await fetch(`${BASE_URL}/api/projects/all`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-
         // Check if projects exist and set accordingly
-        setProjectList(data.projects || []); // Default to empty array if no projects
+        setProjectList(data.projects || []);
       } catch (error) {
         console.error("Error fetching projects:", error);
         setError("Failed to load projects. Please try again later.");
-        setProjectList([]); // Reset to empty array on error
-      } finally {
-        setLoading(false); // Done loading, whether success or failure
+        setProjectList([]);
       }
     };
 

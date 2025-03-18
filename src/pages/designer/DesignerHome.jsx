@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import { FaDownload } from "react-icons/fa"; // Import download icon
+import BASE_URL from "../../config";
 
 export default function DesignerHome() {
   const [projects, setProjects] = useState([]);
@@ -13,7 +14,7 @@ export default function DesignerHome() {
     const user = JSON.parse(storedUser);
     const username = user?.username || "";
 
-    fetch("http://65.0.178.244:3000/api/projects/all")
+    fetch(`${BASE_URL}/api/projects/all`)
       .then((response) => response.json())
       .then((data) => {
         if (data && Array.isArray(data.projects)) {
