@@ -11,19 +11,19 @@ export default function Users() {
   });
 
   const [users, setUsers] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/api/auth/all`);
-      if (!response.ok) throw new Error("Failed to fetch users");
-      const data = await response.json();
-      setUsers(Array.isArray(data) ? data : data.users || []);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
+
   // Fetch all users from the API
   useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/auth/all");
+        if (!response.ok) throw new Error("Failed to fetch users");
+        const data = await response.json();
+        setUsers(Array.isArray(data) ? data : data.users || []);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
     fetchUsers();
   }, []);
 
@@ -101,43 +101,52 @@ export default function Users() {
   // Handle user deletion
   const handleDelete = async (index) => {};
 
-  // Handle edit (mock function for now)
-  const handleEdit = (index) => {};
+  // Handle edit user
+  const handleEdit = (index) => {
+    const userToEdit = users[index];
+    setFormData({
+      username: userToEdit.username,
+      email: userToEdit.email,
+      password: "", // Don't pre-fill password for security reasons
+      role: userToEdit.role,
+    });
+    setEditingIndex(index);
+    setIsFormOpen(true); // Open the form only when "Edit" is clicked
+  };
 
   return (
     <div className="bg-gray-100">
       <Header />
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
-          <h1 className="text-xl font-semibold tracking-wide text-left text-gray-700 uppercase">
-            Users
-          </h1>
-          <br />
-          <div
-            className={`flex ${isFormOpen ? "justify-between" : "justify-end"}`}
-          >
-            {isFormOpen && (
+          <div className="flex justify-between items-center">
+            <h1 className="text-xl font-semibold tracking-wide text-left text-gray-500 uppercase">
+              Welcome, Manage & Track Your Users
+            </h1>
+            <div className="flex justify-end gap-2">
+              {isFormOpen && (
+                <button
+                  onClick={() => setIsFormOpen(false)}
+                  className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                >
+                  Back
+                </button>
+              )}
               <button
-                onClick={() => setIsFormOpen(false)}
-                className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                onClick={() => {
+                  setIsFormOpen(!isFormOpen);
+                  setFormData({
+                    username: "",
+                    email: "",
+                    password: "",
+                    role: "Select",
+                  }); // Reset form
+                }}
+                className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
               >
-                Back
+                New User
               </button>
-            )}
-            <button
-              onClick={() => {
-                setIsFormOpen(!isFormOpen);
-                setFormData({
-                  username: "",
-                  email: "",
-                  password: "",
-                  role: "Select",
-                }); // Reset form
-              }}
-              className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
-            >
-              New User
-            </button>
+            </div>
           </div>
           <br />
           {isFormOpen && (
