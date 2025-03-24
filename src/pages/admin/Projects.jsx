@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  Listbox,
-  ListboxButton,
-  ListboxOptions,
-  ListboxOption,
-} from "@headlessui/react";
+
 import Header from "../../components/Header";
 import axios from "axios";
-import { FaDownload } from "react-icons/fa"; // Import download icon
-
+import { FaDownload } from "react-icons/fa";
+import BASE_URL from "../../config";
 export default function Projects() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -31,34 +26,59 @@ export default function Projects() {
   });
 
   const [users, setUsers] = useState([]);
+  console.log(users);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/auth/all")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.users) {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/auth/all`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (data.users && Array.isArray(data.users)) {
           const filteredUsers = data.users.filter(
             (user) => user.role !== "admin"
           );
-          setUsers(filteredUsers); // Access the "users" array inside the object
+          setUsers(filteredUsers);
         } else {
-          console.error("Unexpected API response format", data);
+          throw new Error("Unexpected API response format");
         }
-      })
-      .catch((error) => console.error("Error fetching users:", error));
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setUsersError("Failed to load users. Please try again later.");
+        setUsers([]);
+      } finally {
+        setUsersLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   const [projectList, setProjectList] = useState([]);
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/projects/all`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
 
+      setProjectList(Array.isArray(data.projects) ? data.projects : []);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+
+      setProjectList([]);
+    }
+  };
   useEffect(() => {
-    fetch("http://localhost:3000/api/projects/all")
-      .then((response) => response.json())
-      .then((data) => setProjectList(data.projects)) // Corrected: Extract `projects`
-      .catch((error) => console.error("Error fetching projects:", error));
+    fetchProjects();
   }, []);
 
-  // Function to handle deletion
   const handleDelete = (index) => {
+    console.log("");
     const updatedProjects = projectList.filter((_, i) => i !== index);
     setProjectList(updatedProjects);
   };
@@ -110,7 +130,7 @@ export default function Projects() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/projects/add",
+        `${BASE_URL}/api/projects/add`,
         formDataToSend,
         {
           headers: {
@@ -133,6 +153,7 @@ export default function Projects() {
         pendingForm: "",
         userId: "",
       });
+      fetchProjects();
     } catch (error) {
       console.error("Error uploading project", error);
       alert("Upload failed!");
@@ -162,7 +183,7 @@ export default function Projects() {
               )}
               <button
                 onClick={() => setIsFormOpen(!isFormOpen)}
-                className="ml-2 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                className="px-3 py-1 text-sm font-medium leading-5 ml-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-md active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
               >
                 Create Project
               </button>
@@ -217,7 +238,7 @@ export default function Projects() {
 
                 <label className="block text-sm">
                   <span className="text-gray-700 text-sm font-semibold">
-                    Project Size (MB)
+                    Project Size
                   </span>
                   <input
                     name="projectSize"
@@ -225,7 +246,7 @@ export default function Projects() {
                     onChange={handleInputChange}
                     className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
                     type="number"
-                    placeholder="Size in MB"
+                    placeholder="Size "
                     required
                   />
                 </label>
@@ -322,7 +343,7 @@ export default function Projects() {
                             {project.duration} days
                           </td>
                           <td className="px-4 py-3 text-sm">
-                            {project.projectSize} MB
+                            {project.projectSize} sqft
                           </td>
                           <td className="px-4 py-3 text-sm">
                             {project.assignTo}

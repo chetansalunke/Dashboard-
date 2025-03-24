@@ -2,9 +2,10 @@ import { createContext, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 export const AuthContext = createContext();
+import BASE_URL from "../config";
 
 const API = axios.create({
-  baseURL: "http://localhost:3000/",
+  baseURL: BASE_URL,
   withCredentials: true,
 });
 
@@ -20,15 +21,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ✅ Refresh token function
   const refreshToken = useCallback(async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/auth/refresh",
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.get(`${BASE_URL}/api/auth/refresh`, {
+        withCredentials: true,
+      });
 
       if (response.data.accessToken) {
         setAccessToken(response.data.accessToken);

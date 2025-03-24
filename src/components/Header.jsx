@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const Header = ({ toggleSidebar }) => {
+  const navigate = useNavigate();
   const [islightMode, setIslightMode] = useState(false);
   const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -12,8 +14,20 @@ const Header = ({ toggleSidebar }) => {
     setIsNotificationsMenuOpen(!isNotificationsMenuOpen);
   const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);
 
-  const handleLogout = () => {
-    alert("Logout clicked");
+  const handleLogout = async () => {
+    try {
+      // Clear user session data
+      localStorage.removeItem("user");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("projects");
+      delete axios.defaults.headers.common["Authorization"];
+
+      // Navigate to the login page
+      navigate("/");
+    } catch (error) {
+      console.error("Error while logging out:", error);
+    }
   };
 
   // Close profile menu when clicking outside
@@ -116,7 +130,7 @@ const Header = ({ toggleSidebar }) => {
           </li> */}
 
           {/* Notifications menu */}
-          <li className="relative">
+          {/* <li className="relative">
             <button
               className="relative align-middle rounded-md focus:outline-none focus:shadow-outline-purple"
               onClick={toggleNotificationsMenu}
@@ -138,11 +152,9 @@ const Header = ({ toggleSidebar }) => {
               <ul
                 className="absolute right-0 w-56 p-2 mt-2 space-y-2 text-gray-600 bg-white border border-gray-100 rounded-md shadow-md light:text-gray-300 light:border-gray-700 light:bg-gray-700"
                 onBlur={() => setIsNotificationsMenuOpen(false)}
-              >
-                {/* Notification items */}
-              </ul>
+              ></ul>
             )}
-          </li>
+          </li> */}
 
           {/* Profile menu */}
           <li className="relative" ref={profileMenuRef}>

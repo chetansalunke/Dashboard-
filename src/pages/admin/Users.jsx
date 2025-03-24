@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
-
+import BASE_URL from "../../config";
 export default function Users() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -11,7 +11,6 @@ export default function Users() {
   });
 
   const [users, setUsers] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
 
   // Fetch all users from the API
   useEffect(() => {
@@ -42,7 +41,7 @@ export default function Users() {
     e.preventDefault(); // Prevent page reload
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      const response = await fetch(`${BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -57,6 +56,7 @@ export default function Users() {
       // Reset form state & close form
       setFormData({ username: "", email: "", password: "", role: "Select" });
       setIsFormOpen(false);
+      fetchUsers();
     } catch (error) {
       console.error("Error adding user:", error);
     }
@@ -120,7 +120,7 @@ export default function Users() {
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
           <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold tracking-wide text-gray-500 uppercase">
+            <h1 className="text-xl font-semibold tracking-wide text-left text-gray-500 uppercase">
               Welcome, Manage & Track Your Users
             </h1>
             <div className="flex justify-end gap-2">
@@ -134,14 +134,13 @@ export default function Users() {
               )}
               <button
                 onClick={() => {
-                  setEditingIndex(null); // Ensure edit mode is off
+                  setIsFormOpen(!isFormOpen);
                   setFormData({
                     username: "",
                     email: "",
                     password: "",
                     role: "Select",
-                  });
-                  setIsFormOpen(true); // Open form only when "New User" is clicked
+                  }); // Reset form
                 }}
                 className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
               >
@@ -237,12 +236,12 @@ export default function Users() {
                         <td className="px-4 py-3 text-sm">{user.email}</td>
                         <td className="px-4 py-3 text-sm">{user.role}</td>
                         <td className="p-3 flex space-x-2">
-                          <button
+                          {/* <button
                             onClick={() => handleEdit(index)}
                             className="px-3 py-1 text-xs font-medium text-white bg-purple-500 rounded-md hover:bg-purple-600"
                           >
                             Edit
-                          </button>
+                          </button> */}
                           <button
                             onClick={() => handleDelete(index)}
                             className="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
