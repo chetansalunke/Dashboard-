@@ -79,7 +79,7 @@ export default function Received() {
 
   return (
     <div className="bg-gray-100 mx-8">
-      <Header />
+      {/* <Header /> */}
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
           <div className="w-full overflow-hidden rounded-lg shadow-xs">
