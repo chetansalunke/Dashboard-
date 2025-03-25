@@ -50,7 +50,7 @@ const Header = ({ toggleSidebar }) => {
     <header className="z-10 py-4 bg-white shadow-md light:bg-gray-800">
       <div className="container flex items-center justify-between h-full px-6 mx-auto text-purple-600 light:text-purple-300">
         {/* Mobile hamburger */}
-        <button
+        {/* <button
           className="p-1 mr-5 -ml-1 rounded-md md:hidden focus:outline-none focus:shadow-outline-purple"
           onClick={toggleSidebar}
           aria-label="Menu"
@@ -67,7 +67,14 @@ const Header = ({ toggleSidebar }) => {
               clipRule="evenodd"
             />
           </svg>
-        </button>
+        </button> */}
+
+        {/* Sidebar Toggle Button */}
+      <button onClick={toggleSidebar} className="mr-4">
+        <svg className="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M3 5h14a1 1 0 100-2H3a1 1 0 000 2zm0 5h14a1 1 0 100-2H3a1 1 0 000 2zm0 5h14a1 1 0 100-2H3a1 1 0 000 2z" clipRule="evenodd" />
+        </svg>
+      </button>
 
         {/* Search input */}
         <div className="flex justify-center flex-1 lg:mr-32">
@@ -130,7 +137,7 @@ const Header = ({ toggleSidebar }) => {
           </li> */}
 
           {/* Notifications menu */}
-          {/* <li className="relative">
+          <li className="relative">
             <button
               className="relative align-middle rounded-md focus:outline-none focus:shadow-outline-purple"
               onClick={toggleNotificationsMenu}
@@ -154,7 +161,7 @@ const Header = ({ toggleSidebar }) => {
                 onBlur={() => setIsNotificationsMenuOpen(false)}
               ></ul>
             )}
-          </li> */}
+          </li>
 
           {/* Profile menu */}
           <li className="relative" ref={profileMenuRef}>

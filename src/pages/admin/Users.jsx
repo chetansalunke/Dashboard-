@@ -116,7 +116,6 @@ export default function Users() {
 
   return (
     <div className="bg-gray-100">
-      <Header />
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
           <div className="flex justify-between items-center">

@@ -55,7 +55,7 @@ export default function Approval() {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <Header />
+      {/* <Header /> */}
       <main className="p-6">
         <div className="container mx-auto">
           {!selectedDocument ? (

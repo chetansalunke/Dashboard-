@@ -28,7 +28,6 @@ export default function AdminDashboard() {
     <div className="bg-gray-100 flex h-screen">
       {/* Main Content */}
       <div className="flex-1 h-full flex flex-col">
-        <Header />
         <main className="flex-1 overflow-y-auto ">
           <div className="container px-6 mx-auto grid">
             <div className="flex justify-between">

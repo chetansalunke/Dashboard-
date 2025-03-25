@@ -4,7 +4,7 @@ import Header from "../components/Header";
 export default function Dashboard() {
   return (
     <div className="bg-gray-100 mx-8">
-      <Header />
+      {/* <Header /> */}
       <main className="h-full overflow-y-auto ">
         <div className="container px-6 mx-auto grid">
           <div className="flex justify-between">
