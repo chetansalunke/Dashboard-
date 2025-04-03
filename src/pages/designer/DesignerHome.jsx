@@ -6,20 +6,18 @@ import BASE_URL from "../../config";
 export default function DesignerHome() {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
-  const [viewingDocument, setViewingDocument] = useState(null);
   const [loading, setLoading] = useState(true);
-  // Checklist items state (unchecked by default)
+  const [uploadedDocument, setUploadedDocument] = useState(null);
+  const [viewingDocument, setViewingDocument] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
-
-  // Toggle checkbox state
+  const [submittedChecklists, setSubmittedChecklists] = useState([]);
   const handleCheckboxChange = (index) => {
     setCheckedItems((prev) => ({
       ...prev,
-      [index]: !prev[index], // Toggle state
+      [index]: !prev[index],
     }));
   };
 
-  // Checklist items
   const checklistItems = [
     "Location of ducts",
     "Necessary details",
@@ -39,26 +37,48 @@ export default function DesignerHome() {
     "Detail Scale",
   ];
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const fileURL = URL.createObjectURL(file);
+      setUploadedDocument(fileURL);
+    }
+  };
+
+  const handleSubmitChecklist = () => {
+    const selectedItems = checklistItems.filter(
+      (_, index) => checkedItems[index]
+    );
+
+    if (uploadedDocument && selectedItems.length > 0) {
+      const newChecklist = {
+        document: uploadedDocument, // Associate checklist with the document
+        checklist: selectedItems,
+        timestamp: new Date().toLocaleString(),
+      };
+
+      setSubmittedChecklists((prev) => [...prev, newChecklist]);
+      setUploadedDocument(null);
+      setCheckedItems({});
+    }
+  };
+
   useEffect(() => {
     const fetchProjects = async () => {
       const storedUser = localStorage.getItem("user");
       if (!storedUser) return;
-
       const user = JSON.parse(storedUser);
       const username = user?.username || "";
 
       try {
         const response = await fetch(`${BASE_URL}/api/projects/all`);
         if (!response.ok) throw new Error("Failed to fetch projects");
-
         const data = await response.json();
         if (data && Array.isArray(data.projects)) {
           const userProjects = data.projects.filter(
             (project) => project.assignTo === username
           );
           setProjects(userProjects);
-        } else {
-          console.error("Unexpected response format:", data);
         }
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -66,19 +86,18 @@ export default function DesignerHome() {
         setLoading(false);
       }
     };
-
     fetchProjects();
   }, []);
 
   return (
     <div className="h-screen flex flex-col">
       <div className="flex-1 overflow-hidden flex">
-        {!viewingDocument ? (
+        {!uploadedDocument ? (
           <div className="flex-1 overflow-y-auto p-6">
             {loading ? (
               <p className="text-center text-gray-500">Loading projects...</p>
             ) : !selectedProject ? (
-              <div className="text-gray-500">
+              <div>
                 <h5 className="text-2xl font-semibold text-gray-700">
                   Welcome{" "}
                   {JSON.parse(localStorage.getItem("user"))?.username || ""}
@@ -227,19 +246,24 @@ export default function DesignerHome() {
                       Checklist
                     </strong>
                     <br />
-                    {Array.isArray(selectedProject.documents) &&
-                    selectedProject.documents.length > 0 ? (
-                      selectedProject.documents.map((docUrl, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setViewingDocument(docUrl)}
-                          className="block mt-1 text-purple-600 hover:text-purple-800 hover:underline text-sm"
-                        >
-                          Document {index + 1}
-                        </button>
+
+                    {submittedChecklists.length > 0 ? (
+                      submittedChecklists.map((submission, index) => (
+                        <div key={index} className="pl-4 pt-2">
+                          <button
+                            onClick={() =>
+                              setViewingDocument(submission.document)
+                            }
+                            className="text-blue-600 hover:underline"
+                          >
+                            Document {index + 1}
+                          </button>
+                        </div>
                       ))
                     ) : (
-                      <span className="text-gray-500">No files</span>
+                      <p className="text-gray-500">
+                        No checklists submitted yet.
+                      </p>
                     )}
                   </p>
                   <br />
@@ -251,17 +275,30 @@ export default function DesignerHome() {
                     {selectedProject.assignedBy || "Admin"}
                   </p>
                 </div>
+                <div className="mt-4 flex justify-end">
+                  <input
+                    type="file"
+                    id="fileUpload"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <label
+                    htmlFor="fileUpload"
+                    className="px-4 py-2 bg-purple-600 text-white rounded cursor-pointer hover:bg-purple-700"
+                  >
+                    Upload Document
+                  </label>
+                </div>
               </div>
             )}
           </div>
         ) : null}
 
-        {/* 🟢 Document Viewer - Only Takes Space Below Navbar */}
         {viewingDocument && (
-          <div className="flex-1 flex bg-white shadow-lg">
-            {/* Left Side - Document Preview (Takes 2/3 width) */}
-            <div className="w-2/3 flex flex-col">
-              <div className="p-3 flex justify-end ">
+          <div className="flex flex-row w-full h-screen overflow-hidden">
+             <div className="w-2/3 bg-white p-4 overflow-y-auto overflow-x-hidden scrollbar-fix">
+
+              <div className="flex justify-end">
                 <button
                   onClick={() => setViewingDocument(null)}
                   className="text-red-500 hover:text-red-700 font-bold"
@@ -270,36 +307,75 @@ export default function DesignerHome() {
                 </button>
               </div>
               {/\.(jpg|jpeg|png|gif|webp)$/i.test(viewingDocument) ? (
-                // If it's an image, scale it up and center it
                 <img
                   src={viewingDocument}
                   alt="Document Preview"
                   className="max-w-[90%] max-h-[80vh] object-contain rounded-lg shadow-lg"
                 />
               ) : (
-                // If it's a PDF or other file, make it full size
                 <iframe
                   src={viewingDocument}
                   className="w-full h-[80vh] border-none"
                   title="Document Preview"
-                />
+                ></iframe>
               )}
             </div>
+            <div className="w-1/3 p-5 bg-white shadow-lg">
+              <h3 className="text-lg font-semibold mb-3">Uploaded Checklist</h3>
+              {submittedChecklists.filter(
+                (sub) => sub.document === viewingDocument
+              ).length > 0 ? (
+                submittedChecklists
+                  .filter((sub) => sub.document === viewingDocument) // Only show checklist of this document
+                  .map((submission, index) => (
+                    <div
+                      key={index}
+                      className="mb-4 p-4 bg-white rounded-lg shadow"
+                    >
+                      <ul className="list-disc list-inside text-gray-700 mt-2">
+                        {submission.checklist.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+              ) : (
+                <p className="text-gray-500">
+                  No checklists submitted for this document.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
-            {/* Right Side - "Hello" Content Column (Takes 1/3 width) */}
-            <div className="w-1/3 p-5  shadow-lg rounded-lg">
-              {/* Checklist Header */}
+        {uploadedDocument && (
+          <div className="flex flex-row w-full p-6">
+            <div className="w-2/3 bg-white p-4 ">
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setUploadedDocument(null)}
+                  className="text-red-500 hover:text-red-700 font-bold"
+                >
+                  <FaTimes size={20} />
+                </button>
+              </div>
+              <iframe
+                src={uploadedDocument}
+                className="w-full h-[80vh] border"
+                title="Uploaded Document"
+              ></iframe>
+            </div>
+
+            <div className="w-1/3 p-5 bg-white shadow-lg">
               <h3 className="text-lg font-semibold mb-3">
                 Pre Upload Checklist
               </h3>
-
-              {/* Checklist Items */}
               <ul className="space-y-2">
                 {checklistItems.map((item, index) => (
                   <li key={index} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      checked={!!checkedItems[index]} // Ensure it's boolean
+                      checked={!!checkedItems[index]}
                       onChange={() => handleCheckboxChange(index)}
                       className="w-4 h-4"
                     />
@@ -307,14 +383,12 @@ export default function DesignerHome() {
                   </li>
                 ))}
               </ul>
-
-              {/* Final Message & Upload Button */}
               <div className="mt-4 flex justify-center">
                 <button
-                  type="submit"
                   className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+                  onClick={handleSubmitChecklist}
                 >
-                  Upload
+                  Submit Checklist
                 </button>
               </div>
             </div>
