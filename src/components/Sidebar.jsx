@@ -17,6 +17,8 @@ const Sidebar = ({ role }) => {
     setOpenMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
   };
 
+  
+
   // Define different menu items based on user role
   const menuItems = {
     admin: [
@@ -45,6 +47,7 @@ const Sidebar = ({ role }) => {
       {
         name: "Projects",
         icon: <IoDocumentTextOutline className="w-5 h-5" />,
+        path: "/designer-dashboard/projects",
         subItems: [
           {
             name: "Design",
@@ -105,7 +108,10 @@ const Sidebar = ({ role }) => {
                 <>
                   {/* Parent Menu Item */}
                   <button
-                    onClick={() => toggleMenu(item.name)}
+                    onClick={() => {
+                      if (item.path) navigate(item.path);
+                      toggleMenu(item.name);
+                    }}
                     className="flex items-center justify-between w-full text-sm font-semibold text-gray-800 hover:text-gray-600 transition-all duration-150 focus:outline-none"
                   >
                     <div className="flex items-center">

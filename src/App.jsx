@@ -10,8 +10,13 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Projects from "./pages/admin/Projects";
 import Users from "./pages/admin/Users";
 import DesignerHome from "./pages/designer/DesignerHome";
+import Design from "./pages/designer/Design";
 import Layout from "./components/Layout";
 import { AuthProvider } from "./context/AuthContext";
+import Submission from "./pages/designer/Submission";
+import RFI from "./pages/designer/RFI";
+import Management from "./pages/designer/Management";
+import DesignerProjects from "./pages/designer/DesignerProjects";
 
 const getStoredUser = () => {
   const user = localStorage.getItem("user");
@@ -89,6 +94,52 @@ const App = () => {
               element={
                 <PrivateRoute
                   element={<DesignerHome />}
+                  allowedRoles={["designer"]}
+                />
+              }
+            />
+            <Route
+              path="/designer-dashboard/projects"
+              element={
+                <PrivateRoute
+                  element={<DesignerProjects />}
+                  allowedRoles={["designer"]}
+                />
+              }
+            />
+
+            <Route
+              path="/designer-dashboard/projects/design"
+              element={
+                <PrivateRoute
+                  element={<Design />}
+                  allowedRoles={["designer"]}
+                />
+              }
+            />
+
+            <Route
+              path="/designer-dashboard/projects/communication/rfi"
+              element={
+                <PrivateRoute element={<RFI />} allowedRoles={["designer"]} />
+              }
+            />
+
+            <Route
+              path="/designer-dashboard/projects/communication/submission"
+              element={
+                <PrivateRoute
+                  element={<Submission />}
+                  allowedRoles={["designer"]}
+                />
+              }
+            />
+
+            <Route
+              path="/designer-dashboard/management"
+              element={
+                <PrivateRoute
+                  element={<Management />}
                   allowedRoles={["designer"]}
                 />
               }
