@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import BASE_URL from "../../config";
+import Projects from "../admin/Projects";
 
 export default function RFI() {
   const [rfis, setRfis] = useState([]);
@@ -26,7 +27,7 @@ export default function RFI() {
     details: "",
     status: "Pending",
     send_to: "",
-    document_upload: null,
+    documents: [],
     project_id: "",
     priority: "",
     created_by: userID,
@@ -52,6 +53,14 @@ export default function RFI() {
   useEffect(() => {
     fetchProjects();
   }, []);
+  useEffect(() => {
+    if (projectId) {
+      setFormData((prev) => ({
+        ...prev,
+        project_id: projectId,
+      }));
+    }
+  }, [projectId]);
 
   useEffect(() => {
     if (token) {
@@ -141,15 +150,12 @@ export default function RFI() {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        document_upload: data.filePath,
-      }));
-    }
+    const files = Array.from(e.target.files);
+    setFormData((prev) => ({
+      ...prev,
+      documents: files,
+    }));
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -161,9 +167,12 @@ export default function RFI() {
     formDataToSend.append("created_by", formData.created_by);
     formDataToSend.append("project_id", formData.project_id);
     formDataToSend.append("priority", formData.priority);
+    formDataToSend.append("details", formData.details);
 
-    if (formData.document_upload) formDataToSend.append("document_upload", formData.document_upload);
-
+    formData.documents.forEach((file) => {
+      formDataToSend.append("documents", file);
+    });
+    console.log(formData);
     try {
       const response = await fetch(`${BASE_URL}/api/createRfi`, {
         method: "POST",
@@ -308,14 +317,13 @@ export default function RFI() {
                   value={formData.project_id}
                   onChange={handleInputChange}
                   className="block w-full mt-1 text-sm form-input mb-4"
-                  required
+                  disabled
                 >
-                  <option value="">Select Project</option>
-                  {projectList.map((project) => (
-                    <option key={project.id} value={project.id}>
-                      {project.projectName}
-                    </option>
-                  ))}
+                  <option value={formData.project_id}>
+                    {projectList.find(
+                      (project) => project.id === formData.project_id
+                    )?.projectName || "Loading project..."}
+                  </option>
                 </select>
 
                 <label className="block text-sm">Status:</label>
@@ -362,20 +370,27 @@ export default function RFI() {
                   name="priority"
                   value={formData.priority}
                   onChange={handleInputChange}
-                  className="block w-full mt-1 text-sm form-input mb-4"
+                  className="block w-full mt-1 text-sm form-select mb-4"
                   required
                 >
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
+                  <option value="">Select Priority</option>
                   <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
                 </select>
 
-                <label className="block text-sm">Document:</label>
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  className="block w-full mt-1 text-sm form-input mb-4"
-                />
+                <label className="block mt-4 text-sm">
+                  <span className="text-gray-700 text-sm font-semibold">
+                    Upload Documents
+                  </span>
+                  <input
+                    name="documents"
+                    type="file"
+                    multiple
+                    onChange={handleFileChange}
+                    className="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm"
+                  />
+                </label>
 
                 <div className="flex justify-end gap-2">
                   <button

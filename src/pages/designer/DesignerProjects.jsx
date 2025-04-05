@@ -35,7 +35,7 @@ export default function DesignerProjects() {
 
   const handleCardClick = (projectId,projectName) => {
     navigate(`/designer-dashboard/projects/communication/rfi`, {
-      state: { projectId,projectName }, // Passing projectId to RFI component
+      state: { projectId,projectName }, 
     });
   };
 
