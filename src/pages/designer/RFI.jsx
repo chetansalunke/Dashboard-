@@ -12,6 +12,7 @@ export default function RFI() {
   const [activeTab, setActiveTab] = useState("");
   const [filteredRfis, setFilteredRfis] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
 
   const location = useLocation();
   const projectId = location?.state?.projectId || null;
@@ -189,6 +190,27 @@ export default function RFI() {
       console.error("Error creating RFI:", error);
     }
   };
+
+
+  const handleResolve = (rfiId) => {
+    const rfiToResolve = rfis.find((rfi) => rfi.id === rfiId);
+    if (!rfiToResolve) return;
+  
+    setFormData({
+      title: rfiToResolve.title || "",
+      details: rfiToResolve.details || "",
+      status: "Resolved", 
+      send_to: rfiToResolve.send_to || "",
+      documents: [], 
+      project_id: rfiToResolve.project_id || "",
+      priority: rfiToResolve.priority || "",
+      created_by: rfiToResolve.created_by || userID,
+    });
+  
+    setIsResolving(true);  
+    setShowForm(true);
+  };
+  
 
   const handleRefreshToken = async () => {
     try {
@@ -423,6 +445,7 @@ export default function RFI() {
                       <th className="px-4 py-3">Sent To</th>
                       <th className="px-4 py-3">Document</th>
                       <th className="px-4 py-3">Created By</th>
+                      <th className="px-4 py-3">Action</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y">
@@ -457,6 +480,17 @@ export default function RFI() {
                           </td>
                           <td className="px-4 py-3 text-sm">
                             {users[rfi.created_by] ?? "N/A"}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {rfi.send_to === userID &&
+                              rfi.status === "Pending" && (
+                                <button
+                                  onClick={() => handleResolve(rfi.id)}
+                                  className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+                                >
+                                  Resolve
+                                </button>
+                              )}
                           </td>
                         </tr>
                       ))
