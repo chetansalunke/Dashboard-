@@ -152,51 +152,51 @@ export default function Users() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="px-4 py-3 bg-white rounded-lg shadow-md">
                 <label className="block text-sm">
-                  <span className="text-gray-700">Username</span>
+                  <span className="text-gray-700 text-sm font-semibold">Username</span>
                   <input
                     type="text"
                     name="username"
                     placeholder="Username"
                     value={formData.username}
                     onChange={handleChange}
-                    className="block w-full mt-1 text-sm form-input"
+                    className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
                     required
                   />
                 </label>
                 <br />
                 <label className="block text-sm">
-                  <span className="text-gray-700">Email</span>
+                  <span className="text-gray-700 text-sm font-semibold">Email</span>
                   <input
                     type="email"
                     name="email"
                     placeholder="Email Address"
                     value={formData.email}
                     onChange={handleChange}
-                    className="block w-full mt-1 text-sm form-input"
+                    className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
                     required
                   />
                 </label>
                 <br />
                 <label className="block text-sm">
-                  <span className="text-gray-700">Password</span>
+                  <span className="text-gray-700 text-sm font-semibold">Password</span>
                   <input
                     type="password"
                     name="password"
                     placeholder="Enter Password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="block w-full mt-1 text-sm form-input"
+                    className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
                     required
                   />
                 </label>
                 <br />
                 <label className="block text-sm">
-                  <span className="text-gray-700">Role</span>
+                  <span className="text-gray-700 text-sm font-semibold">Role</span>
                   <select
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    className="block w-full mt-1 text-sm form-input"
+                    className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
                   >
                     <option value="Select">Select</option>
                     <option value="designer">Designer</option>
@@ -208,7 +208,7 @@ export default function Users() {
                 <div className="flex justify-center">
                   <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+                    className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
                   >
                     Submit
                   </button>

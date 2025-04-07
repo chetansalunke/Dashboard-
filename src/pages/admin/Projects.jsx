@@ -220,7 +220,7 @@ export default function Projects() {
                   ></textarea>
                 </label>
 
-                <label className="block text-sm">
+                <label className="block mt-4 text-sm">
                   <span className="text-gray-700 text-sm font-semibold">
                     Duration (Days)
                   </span>
@@ -235,7 +235,7 @@ export default function Projects() {
                   />
                 </label>
 
-                <label className="block text-sm">
+                <label className="block mt-4 text-sm">
                   <span className="text-gray-700 text-sm font-semibold">
                     Project Size
                   </span>
@@ -288,8 +288,8 @@ export default function Projects() {
                     </ul>
                   </div>
                 )}
-                <label className="block text-sm">
-                  <span className="text-gray-700">Assigned To</span>
+                <label className="block mt-4 text-sm">
+                  <span className="text-gray-700 text-sm font-semibold">Assigned To</span>
                   <select
                     name="assignTo" // ✅ Fixed mismatch
                     value={formData.assignTo || ""} // ✅ Prevent undefined errors
@@ -363,10 +363,10 @@ export default function Projects() {
                                         <img
                                           src={docUrl}
                                           alt="Document Thumbnail"
-                                          className="w-12 h-12 object-cover rounded-lg border"
+                                          className="w-5 h-5 object-cover rounded-lg border"
                                         />
                                       ) : (
-                                        <div className="w-12 h-12 flex items-center justify-center bg-gray-200 text-gray-600 border rounded-lg">
+                                        <div className="w-5 h-5 flex items-center justify-center bg-gray-200 text-gray-600 border rounded-lg">
                                           📄
                                         </div>
                                       )}

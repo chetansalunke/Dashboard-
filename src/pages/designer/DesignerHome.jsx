@@ -98,7 +98,7 @@ export default function DesignerHome() {
               <p className="text-center text-gray-500">Loading projects...</p>
             ) : !selectedProject ? (
               <div>
-                <h5 className="text-2xl font-semibold text-gray-700">
+                <h5 className="text-xl font-semibold tracking-wide text-gray-500 uppercase">
                   Welcome{" "}
                   {JSON.parse(localStorage.getItem("user"))?.username || ""}
                 </h5>
@@ -154,24 +154,26 @@ export default function DesignerHome() {
             ) : (
               /* 🟢 Task Details & Checklist */
               <div className="w-full overflow-x-auto">
-                <p className="text-xl font-semibold text-gray-700">
+                <h1 className="text-xl font-semibold tracking-wide text-gray-500 uppercase">
                   Task Assigned
-                </p>
+                </h1>
                 <div className="mt-5 p-5 bg-white shadow-lg rounded-lg">
                   <div className="flex justify-between">
-                    <h2 className="text-xl">{selectedProject.projectName}</h2>
+                    <h1 className="text-xm font-semibold tracking-wide text-gray-500 uppercase">
+                      {selectedProject.projectName}
+                    </h1>
                     {/* Format the Submission Date */}
-                    <h6 className="text-xl">
+                    <h1 className="text-xm font-semibold tracking-wide text-gray-500 uppercase">
                       Start Date:{" "}
                       {
                         new Date(selectedProject.submissionDate)
                           .toISOString()
                           .split("T")[0]
                       }
-                    </h6>
+                    </h1>
 
                     {/* Corrected Due Date Calculation */}
-                    <h6 className="text-xl">
+                    <h1 className="text-xm font-semibold tracking-wide text-gray-500 uppercase">
                       Due Date:{" "}
                       {
                         new Date(
@@ -181,99 +183,99 @@ export default function DesignerHome() {
                           .toISOString()
                           .split("T")[0]
                       }
-                    </h6>
+                    </h1>
                     <button
                       onClick={() => setSelectedProject(null)} // Hide details and show table again
-                      className="text-red-500 hover:text-red-700 font-bold"
+                      className="px-2 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-md active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
                     >
                       X
                     </button>
                   </div>
                   <hr />
-                  <p className="mt-2">
-                    <strong className="text-gray-7000 text-xm font-semibold">
+                  <label className="block text-sm mb-4 mt-2">
+                    <strong className="text-gray-700 text-xm font-semibold">
                       Instructions
+                      <br />
+                      {selectedProject.description || "N/A"}
                     </strong>
-                    <br />
-                    {selectedProject.description || "N/A"}
-                  </p>
+                  </label>
                   <br />
-                  <strong className="text-gray-7000 text-xm font-semibold">
-                    Input
-                  </strong>
-                  <p className="px-4 py-2">
-                    {selectedProject.documents.length > 0 ? (
-                      <div className="flex flex-wrap gap-4">
-                        {selectedProject.documents.map((docUrl, index) => {
-                          const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(
-                            docUrl
-                          ); // Check if it's an image
+                  <label className="block text-sm mb-4">
+                    <strong className="text-gray-700 text-xm font-semibold">
+                      Input
+                      <p className="block text-sm mt-3">
+                        {selectedProject.documents.length > 0 ? (
+                          <div className="flex flex-wrap gap-4">
+                            {selectedProject.documents.map((docUrl, index) => {
+                              const isImage =
+                                /\.(jpg|jpeg|png|gif|webp)$/i.test(docUrl); // Check if it's an image
 
-                          return (
-                            <div
-                              key={index}
-                              className="flex flex-col items-center"
-                            >
-                              {isImage ? (
-                                <img
-                                  src={docUrl}
-                                  alt="Document Thumbnail"
-                                  className="w-12 h-12 object-cover rounded-lg border"
-                                />
-                              ) : (
-                                <div className="w-12 h-12 flex items-center justify-center bg-gray-200 text-gray-600 border rounded-lg">
-                                  📄
+                              return (
+                                <div
+                                  key={index}
+                                  className="flex flex-col items-center"
+                                >
+                                  {isImage ? (
+                                    <img
+                                      src={docUrl}
+                                      alt="Document Thumbnail"
+                                      className="w-10 h-10 object-cover rounded-lg border"
+                                    />
+                                  ) : (
+                                    <div className="w-10 h-10 flex items-center justify-center bg-gray-200 text-gray-600 border rounded-lg">
+                                      📄
+                                    </div>
+                                  )}
+                                  <a
+                                    href={docUrl}
+                                    download
+                                    className="flex items-center gap-1 text-purple-600 hover:text-purple-800 hover:underline text-sm mt-1"
+                                  >
+                                    <FaDownload className="text-purple-600" />
+                                  </a>
                                 </div>
-                              )}
-                              <a
-                                href={docUrl}
-                                download
-                                className="flex items-center gap-1 text-purple-600 hover:text-purple-800 hover:underline text-sm mt-1"
-                              >
-                                <FaDownload className="text-purple-600" />
-                              </a>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <span className="text-gray-500">No files</span>
-                    )}
-                  </p>
-                  <br />
-                  <p className="mt-2">
-                    <strong className="text-gray-7000 text-xm font-semibold">
-                      Checklist
-                    </strong>
-                    <br />
-
-                    {submittedChecklists.length > 0 ? (
-                      submittedChecklists.map((submission, index) => (
-                        <div key={index} className="pl-4 pt-2">
-                          <button
-                            onClick={() =>
-                              setViewingDocument(submission.document)
-                            }
-                            className="text-blue-600 hover:underline"
-                          >
-                            Document {index + 1}
-                          </button>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500">
-                        No checklists submitted yet.
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">No files</span>
+                        )}
                       </p>
-                    )}
-                  </p>
-                  <br />
-                  <p className="mt-2">
-                    <strong className="text-gray-7000 text-xm font-semibold">
-                      Assigned By
                     </strong>
-                    <br />
-                    {selectedProject.assignedBy || "Admin"}
-                  </p>
+                  </label>
+                  <br />
+                  <label className="block text-sm mb-4">
+                    <strong className="text-gray-700 text-xm font-semibold">
+                      Checklist
+                      <br />
+                      {submittedChecklists.length > 0 ? (
+                        submittedChecklists.map((submission, index) => (
+                          <div key={index} className="pl-4 pt-2">
+                            <button
+                              onClick={() =>
+                                setViewingDocument(submission.document)
+                              }
+                              className="text-blue-600 hover:underline"
+                            >
+                              Document {index + 1}
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-500">
+                          No checklists submitted yet.
+                        </p>
+                      )}
+                    </strong>
+                  </label>
+                  <br />
+                  <label className="block text-sm mb-4">
+                    <strong className="text-gray-700 text-xm font-semibold">
+                      Assigned By
+                      <br />
+                      {selectedProject.assignedBy || "Admin"}
+                    </strong>
+                  </label>
                 </div>
                 <div className="mt-4 flex justify-end">
                   <input
@@ -284,7 +286,7 @@ export default function DesignerHome() {
                   />
                   <label
                     htmlFor="fileUpload"
-                    className="px-4 py-2 bg-purple-600 text-white rounded cursor-pointer hover:bg-purple-700"
+                    className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
                   >
                     Upload Document
                   </label>
@@ -296,8 +298,7 @@ export default function DesignerHome() {
 
         {viewingDocument && (
           <div className="flex flex-row w-full h-screen overflow-hidden">
-             <div className="w-2/3 bg-white p-4 overflow-y-auto overflow-x-hidden scrollbar-fix">
-
+            <div className="w-2/3 bg-white p-4 overflow-y-auto overflow-x-hidden scrollbar-fix">
               <div className="flex justify-end">
                 <button
                   onClick={() => setViewingDocument(null)}
