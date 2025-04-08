@@ -43,7 +43,7 @@ export default function DesignerProjects() {
     <div className="bg-gray-100 min-h-screen">
       <main className="h-full overflow-y-auto">
         <div className="container px-6 py-6 grid gap-6">
-          <h1 className="text-2xl font-semibold">Projects</h1>
+          <h1 className="text-xl font-semibold tracking-wide text-gray-500 uppercase">Projects</h1>
           {loading ? (
             <p>Loading...</p>
           ) : projects.length === 0 ? (
