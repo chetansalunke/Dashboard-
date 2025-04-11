@@ -78,7 +78,7 @@ const SignIn = () => {
                   name="email"
                   value={userData.email}
                   onChange={handleInputChange}
-                  className="block w-full mt-1 text-sm form-input"
+                  className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
                   placeholder="Enter Your Email"
                 />
                 {errors.email && (
@@ -94,7 +94,7 @@ const SignIn = () => {
                   name="password"
                   value={userData.password}
                   onChange={handleInputChange}
-                  className="block w-full mt-1 text-sm form-input"
+                  className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
                   placeholder="***************"
                 />
                 {errors.password && (

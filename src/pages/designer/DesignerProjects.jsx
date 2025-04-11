@@ -34,7 +34,7 @@ export default function DesignerProjects() {
   }, []);
 
   const handleCardClick = (projectId,projectName) => {
-    navigate(`/designer-dashboard/projects/communication/rfi`, {
+    navigate(`/designer-dashboard/projects/design`, {
       state: { projectId,projectName }, 
     });
   };

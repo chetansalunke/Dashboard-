@@ -14,7 +14,7 @@ import Design from "./pages/designer/Design";
 import Layout from "./components/Layout";
 import { AuthProvider } from "./context/AuthContext";
 import Submission from "./pages/designer/Submission";
-import RFI from "./pages/designer/RFI";
+import RFI from "./pages/designer/RFI/RFI";
 import Management from "./pages/designer/Management";
 import DesignerProjects from "./pages/designer/DesignerProjects";
 

@@ -116,7 +116,7 @@ export default function DesignerHome() {
                       <tbody className="bg-white divide-y">
                         {projects.length > 0 ? (
                           projects.map((project, index) => (
-                            <tr key={index} className="text-gray-700">
+                            <tr key={index} className="hover:bg-gray-50 text-gray-700">
                               <td className="px-4 py-3 text-sm">
                                 {project.taskName || "N/A"}
                               </td>
