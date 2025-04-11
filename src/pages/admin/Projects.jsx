@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
-
+import React, { useState, useEffect, useRef } from "react";
 import Header from "../../components/Header";
 import axios from "axios";
 import { FaDownload } from "react-icons/fa";
 import BASE_URL from "../../config";
+
 export default function Projects() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
+  const [users, setUsers] = useState([]);
+  const [projectList, setProjectList] = useState([]);
 
+  const hasFetchedProjects = useRef(false); // Prevent duplicate fetches
   const token = localStorage.getItem("accessToken");
-
-  const { id } = JSON.parse(localStorage.getItem("user"));
-  console.log(id);
 
   const [formData, setFormData] = useState({
     projectName: "",
@@ -22,12 +22,18 @@ export default function Projects() {
     assignTo: "",
     documents: [],
     pendingForm: "",
-    userId: id,
+    userId: "",
   });
 
-  const [users, setUsers] = useState([]);
-  console.log(users);
+  // Get userId only once
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.id) {
+      setFormData((prev) => ({ ...prev, userId: user.id }));
+    }
+  }, []);
 
+  // Fetch Users once
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -47,17 +53,21 @@ export default function Projects() {
         }
       } catch (error) {
         console.error("Error fetching users:", error);
-        setUsersError("Failed to load users. Please try again later.");
         setUsers([]);
-      } finally {
-        setUsersLoading(false);
       }
     };
 
     fetchUsers();
   }, []);
 
-  const [projectList, setProjectList] = useState([]);
+  // Fetch Projects only once
+  useEffect(() => {
+    if (!hasFetchedProjects.current) {
+      fetchProjects();
+      hasFetchedProjects.current = true;
+    }
+  }, []);
+
   const fetchProjects = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/projects/all`);
@@ -65,32 +75,18 @@ export default function Projects() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-
       setProjectList(Array.isArray(data.projects) ? data.projects : []);
     } catch (error) {
       console.error("Error fetching projects:", error);
-
       setProjectList([]);
     }
   };
-  useEffect(() => {
-    fetchProjects();
-  }, []);
 
   const handleDelete = (index) => {
-    console.log("");
     const updatedProjects = projectList.filter((_, i) => i !== index);
     setProjectList(updatedProjects);
   };
 
-  useEffect(() => {
-    // Load projects from localStorage
-    const storedProjects = JSON.parse(localStorage.getItem("projects")) || [];
-    setProjects(storedProjects);
-
-    setSelectedUser("");
-  }, []);
-  // Handle file input change
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setFormData((prev) => ({
@@ -113,11 +109,11 @@ export default function Projects() {
       [name]: type === "file" ? files[0] : value,
     }));
   };
-
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataToSend = new FormData();
+
     Object.keys(formData).forEach((key) => {
       if (key !== "documents") {
         formDataToSend.append(key, formData[key]);
@@ -140,9 +136,7 @@ export default function Projects() {
         }
       );
 
-      console.log("Upload Successful", response.data);
       alert("Project uploaded successfully!");
-
       setFormData({
         projectName: "",
         description: "",
@@ -151,16 +145,15 @@ export default function Projects() {
         assignTo: "",
         documents: [],
         pendingForm: "",
-        userId: "",
+        userId: formData.userId,
       });
       fetchProjects();
     } catch (error) {
       console.error("Error uploading project", error);
       alert("Upload failed!");
     }
-    setIsFormOpen(false);
 
-    console.log(formDataToSend);
+    setIsFormOpen(false);
   };
 
   return (
@@ -174,14 +167,14 @@ export default function Projects() {
             <div className="flex justify-end gap-2">
               {isFormOpen && (
                 <button
-                  onClick={() => setIsFormOpen(!isFormOpen)}
+                  onClick={() => setIsFormOpen(false)}
                   className="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-md active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
                 >
                   Back
                 </button>
               )}
               <button
-                onClick={() => setIsFormOpen(!isFormOpen)}
+                onClick={() => setIsFormOpen(true)}
                 className="px-3 py-1 text-sm font-medium leading-5 ml-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-md active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
               >
                 Create Project
@@ -289,7 +282,9 @@ export default function Projects() {
                   </div>
                 )}
                 <label className="block mt-4 text-sm">
-                  <span className="text-gray-700 text-sm font-semibold">Assigned To</span>
+                  <span className="text-gray-700 text-sm font-semibold">
+                    Assigned To
+                  </span>
                   <select
                     name="assignTo" // ✅ Fixed mismatch
                     value={formData.assignTo || ""} // ✅ Prevent undefined errors
