@@ -1,4 +1,5 @@
 import React from "react";
+import BASE_URL from "../../../../src/config";
 export default function RfiTable({ rfis, users, userID, onResolve }) {
   return (
     <div className="w-full overflow-hidden rounded-lg shadow">
@@ -37,19 +38,22 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                   {users[rfi.send_to] ?? "N/A"}
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  {rfi.document_upload ? (
-                    <a
-                      href={rfi.document_upload}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline"
-                    >
-                      Document
-                    </a>
-                  ) : (
-                    "No file"
-                  )}
+                  {rfi.document_upload
+                    ? rfi.document_upload.split(",").map((file, index) => (
+                        <div key={index}>
+                          <a
+                            href={`${BASE_URL}/${file}`} // add leading slash if needed
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 underline"
+                          >
+                            Document {index + 1}
+                          </a>
+                        </div>
+                      ))
+                    : "No file"}
                 </td>
+
                 <td className="px-4 py-3 text-sm">
                   {users[rfi.created_by] ?? "N/A"}
                 </td>
