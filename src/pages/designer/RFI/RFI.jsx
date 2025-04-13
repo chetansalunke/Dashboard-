@@ -245,26 +245,27 @@ export default function RFI() {
             />
           )}
 
-          {!showForm &&
-            !resolvingRfi &&
-            (!selectedProjectId ? (
-              <p className="text-center text-gray-500">
-                Please select a project.
-              </p>
-            ) : loading ? (
-              <p className="text-center text-gray-500">Loading RFIs...</p>
-            ) : filteredRfis.length > 0 ? (
-              <RfiTable
-                rfis={filteredRfis}
-                users={users}
-                userID={userID}
-                onResolve={(rfi) => setResolvingRfi(rfi)}
-              />
-            ) : (
-              <p className="text-center text-gray-500">
-                No RFIs found for this project.
-              </p>
-            ))}
+          {!showForm && !resolvingRfi && (
+            <RfiTable
+              rfis={selectedProjectId ? filteredRfis : []}
+              users={users}
+              userID={userID}
+              onResolve={(rfi) => setResolvingRfi(rfi)}
+            />
+          )}
+          {!selectedProjectId && (
+            <p className="text-center text-gray-500 mt-4">
+              Please select a project.
+            </p>
+          )}
+          {selectedProjectId && !loading && filteredRfis.length === 0 && (
+            <p className="text-center text-gray-500 mt-4">
+              No RFIs found for this project.
+            </p>
+          )}
+          {selectedProjectId && loading && (
+            <p className="text-center text-gray-500 mt-4">Loading RFIs...</p>
+          )}
         </div>
       </main>
     </div>
