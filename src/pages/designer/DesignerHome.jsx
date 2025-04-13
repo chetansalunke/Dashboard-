@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Header from "../../components/Header";
-import { FaTimes, FaDownload } from "react-icons/fa";
+import { FaTimes, FaDownload, FaUserCircle } from "react-icons/fa";
 import BASE_URL from "../../config";
 
 export default function DesignerHome() {
@@ -11,6 +10,10 @@ export default function DesignerHome() {
   const [viewingDocument, setViewingDocument] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
   const [submittedChecklists, setSubmittedChecklists] = useState([]);
+
+  const [selectedProjectName, setSelectedProjectName] =
+    useState("All Projects");
+
   const handleCheckboxChange = (index) => {
     setCheckedItems((prev) => ({
       ...prev,
@@ -98,14 +101,75 @@ export default function DesignerHome() {
               <p className="text-center text-gray-500">Loading projects...</p>
             ) : !selectedProject ? (
               <div>
-                <h5 className="text-xl font-semibold tracking-wide text-gray-500 uppercase">
-                  Welcome{" "}
-                  {JSON.parse(localStorage.getItem("user"))?.username || ""}
-                </h5>
-                <div className="w-full overflow-hidden rounded-lg shadow mt-4">
-                  <div className="w-full overflow-x-auto">
-                    <table className="w-full whitespace-no-wrap">
-                      <thead>
+                <div className="flex flex-wrap items-center gap-4 mb-4">
+                  <FaUserCircle className="text-3xl text-gray-500" />
+                  <h5 className="text-xl font-semibold tracking-wide text-gray-500 uppercase">
+                    Welcome{" "}
+                    {JSON.parse(localStorage.getItem("user"))?.username || ""}
+                  </h5>
+
+                  {/* Search */}
+                  <div className="relative w-[280px]">
+                    <div className="absolute inset-y-0 left-3 flex items-center">
+                      <svg
+                        className="w-4 h-4 text-gray-500"
+                        aria-hidden="true"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <input
+                      className="w-full pl-10 pr-2 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md focus:border-purple-500 focus:ring focus:ring-purple-200 focus:outline-none"
+                      type="text"
+                      placeholder="Search"
+                      aria-label="Search"
+                      onChange={(e) => onSearchChange(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Dropdown for project filtering */}
+
+                  <div className="flex items-center gap-4">
+                    <select
+                      value={selectedProjectName}
+                      onChange={(e) => setSelectedProjectName(e.target.value)}
+                      className="w-64 text-sm border border-gray-300 rounded-lg px-8 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 mt-1 light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
+                    >
+                      <option
+                        value="All Projects"
+                        className="text-sm font-semibold text-gray-700"
+                      >
+                        All Projects
+                      </option>
+                      {Array.from(
+                        new Set(projects.map((p) => p.projectName))
+                      ).map((name, idx) => (
+                        <option
+                          key={idx}
+                          value={name}
+                          className="text-sm font-semibold text-gray-700"
+                        >
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <span className="text-[19px] font-semibold tracking-wide text-black">
+                  Task Assigned
+                </span>
+
+                <div className="w-full max-h-[50vh] overflow-hidden rounded-lg shadow mt-2 mb-4">
+                  <div className="w-full max-h-[250px] overflow-y-auto">
+                    <table className="w-full table-auto">
+                      <thead className="bg-gray-50 sticky top-0 z-10">
                         <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
                           <th className="px-4 py-3">Task Name</th>
                           <th className="px-4 py-3">Project Name</th>
@@ -114,9 +178,17 @@ export default function DesignerHome() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y">
-                        {projects.length > 0 ? (
-                          projects.map((project, index) => (
-                            <tr key={index} className="hover:bg-gray-50 text-gray-700">
+                        {projects
+                          .filter((project) =>
+                            selectedProjectName === "All Projects"
+                              ? true
+                              : project.projectName === selectedProjectName
+                          )
+                          .map((project, index) => (
+                            <tr
+                              key={index}
+                              className="hover:bg-gray-50 text-gray-700"
+                            >
                               <td className="px-4 py-3 text-sm">
                                 {project.taskName || "N/A"}
                               </td>
@@ -135,17 +207,49 @@ export default function DesignerHome() {
                                 </button>
                               </td>
                             </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td
-                              colSpan="4"
-                              className="px-4 py-3 text-center text-gray-500"
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <span className="text-[19px] font-semibold tracking-wide text-black">
+                  Upcoming Deliverables
+                </span>
+
+                <div className="w-full max-h-[50vh] overflow-hidden rounded-lg shadow mt-2">
+                  <div className="w-full max-h-[220px] overflow-y-auto">
+                    <table className="w-full table-auto">
+                      <thead className="bg-gray-50 sticky top-0 z-10">
+                        <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
+                          <th className="px-4 py-3">Task Name</th>
+                          <th className="px-4 py-3">Project Name</th>
+                          <th className="px-4 py-3">Assigned By</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y">
+                        {projects
+                          .filter((project) =>
+                            selectedProjectName === "All Projects"
+                              ? true
+                              : project.projectName === selectedProjectName
+                          )
+                          .map((project, index) => (
+                            <tr
+                              key={index}
+                              className="hover:bg-gray-50 text-gray-700"
                             >
-                              No projects assigned to you.
-                            </td>
-                          </tr>
-                        )}
+                              <td className="px-4 py-3 text-sm">
+                                {project.taskName || "N/A"}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {project.projectName}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {project.assignedBy || "Admin"}
+                              </td>
+                            </tr>
+                          ))}
                       </tbody>
                     </table>
                   </div>
@@ -399,3 +503,4 @@ export default function DesignerHome() {
     </div>
   );
 }
+
