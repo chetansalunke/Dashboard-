@@ -15,9 +15,13 @@ import Layout from "./components/Layout";
 import { AuthProvider } from "./context/AuthContext";
 import Submission from "./pages/designer/Submission";
 import RFI from "./pages/designer/RFI/RFI";
+import ClientRFI from "./pages/client/ClientRFI";
 import Management from "./pages/designer/Management";
 import DesignerProjects from "./pages/designer/DesignerProjects";
-
+import ClientHome from "./pages/client/ClientHome";
+import Approvals from "./pages/client/Approvals";
+import Received from "./pages/client/Received";
+import Send from "./pages/client/Send";
 const getStoredUser = () => {
   const user = localStorage.getItem("user");
   return user ? JSON.parse(user) : null;
@@ -144,14 +148,48 @@ const App = () => {
                 />
               }
             />
-
+            {/* Client Routes */}
             <Route
               path="/client-dashboard"
               element={
                 <PrivateRoute
-                  element={<AdminDashboard />}
+                  element={<ClientHome />}
                   allowedRoles={["client"]}
                 />
+              }
+            />
+
+            <Route
+              path="/client-aprovels"
+              element={
+                <PrivateRoute
+                  element={<Approvals />}
+                  allowedRoles={["client"]}
+                />
+              }
+            />
+            <Route
+              path="/client-rif"
+              element={
+                <PrivateRoute
+                  element={<ClientRFI />}
+                  allowedRoles={["client"]}
+                />
+              }
+            />
+            <Route
+              path="/client-files-received"
+              element={
+                <PrivateRoute
+                  element={<Received />}
+                  allowedRoles={["client"]}
+                />
+              }
+            />
+            <Route
+              path="/client-files-send"
+              element={
+                <PrivateRoute element={<Send />} allowedRoles={["client"]} />
               }
             />
 

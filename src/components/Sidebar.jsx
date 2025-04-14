@@ -7,6 +7,8 @@ import {
   IoDocumentTextOutline,
   IoPeopleOutline,
 } from "react-icons/io5";
+import { IoChatbubbleOutline } from "react-icons/io5";
+import { IoCheckmarkDoneOutline } from "react-icons/io5";
 
 const Sidebar = ({ role }) => {
   const navigate = useNavigate();
@@ -16,8 +18,6 @@ const Sidebar = ({ role }) => {
   const toggleMenu = (menu) => {
     setOpenMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
   };
-
-  
 
   // Define different menu items based on user role
   const menuItems = {
@@ -91,6 +91,38 @@ const Sidebar = ({ role }) => {
         name: "Users",
         icon: <IoPeopleOutline className="w-5 h-5" />,
         path: "/users", // Changed to absolute path
+      },
+    ],
+    client: [
+      {
+        name: "Home",
+        icon: <IoHomeOutline className="w-5 h-5" />,
+        path: "/client-dashboard",
+      },
+      {
+        name: "Approvals",
+        icon: <IoCheckmarkDoneOutline className="w-5 h-5" />,
+        path: "/client-aprovels",
+      },
+      {
+        name: "RFI",
+        icon: <IoChatbubbleOutline className="w-5 h-5" />,
+        path: "/client-rif",
+      },
+      {
+        name: "Files",
+        icon: <IoDocumentTextOutline className="w-5 h-5" />,
+        subItems: [
+          {
+            name: "Received",
+            path: "/client-files-received",
+          },
+
+          {
+            name: "Send",
+            path: "/client-files-send",
+          },
+        ],
       },
     ],
   };

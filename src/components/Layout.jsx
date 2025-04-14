@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext"; // Ensure correct import
+import { AuthContext } from "../context/AuthContext";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
@@ -20,7 +20,11 @@ const Layout = () => {
       </div>
 
       {/* Main Section (Expands When Sidebar Closed) */}
-      <div className={`flex flex-col flex-1 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
+      <div
+        className={`flex flex-col flex-1 transition-all duration-300 ${
+          isSidebarOpen ? "ml-64" : "ml-0"
+        }`}
+      >
         {/* Header (Stretch When Sidebar is Closed) */}
         <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
