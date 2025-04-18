@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import BASE_URL from "../../config.js";
 
-import RfiTable from "../../components/RFI /RfiTable";
+import RfiTable from "../../components/RFI/RfiTable";
 
 import RfiControls from "../../components/RFI/RfiControls";
 import RFIResolveForm from "../../components/RFI/RFIResolveForm";
