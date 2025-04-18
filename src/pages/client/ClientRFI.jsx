@@ -4,8 +4,8 @@ import BASE_URL from "../../config.js";
 import RfiTable from "../../components/RFI /RfiTable";
 
 import RfiControls from "../../components/RFI /RfiControls";
-import RFIResolveForm from "../../components/RFI /RFIResolveForm";
-import ProjectDropdown from "../../components/RFI /ProjectDropdown.jsx";
+import RFIResolveForm from "../../components/RFI/RFIResolveForm";
+import ProjectDropdown from "../../components/RFI/ProjectDropdown.jsx";
 import CreateRFIForm from "../../components/RFI/CreateRFIForm.jsx";
 
 export default function ClientRFI() {
