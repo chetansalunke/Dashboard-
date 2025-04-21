@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa"; // Font Awesome Trash icon
 import axios from "axios";
 import BASE_URL from "../../config";
@@ -6,6 +6,7 @@ import RoleDropdown from "./RoleDropdown";
 
 export default function DrawingList({ selectedProject }) {
   const [tasks, setTasks] = useState([]);
+  const [dropdownKey, setDropdownKey] = useState(0); // 🔑 key for forcing RoleDropdown re-render
 
   const token = localStorage.getItem("accessToken");
 
@@ -33,7 +34,6 @@ export default function DrawingList({ selectedProject }) {
     }
   };
 
-  
   const handleRemoveFile = (index) => {
     const updatedFiles = [...newTask.documents];
     updatedFiles.splice(index, 1);
@@ -81,6 +81,9 @@ export default function DrawingList({ selectedProject }) {
         endDate: "",
         assignedTo: null,
       });
+
+      // 🔄 Reset the dropdown by updating its key
+      setDropdownKey((prev) => prev + 1);
     } catch (error) {
       console.error("Error adding drawing:", error);
       alert("Failed to add drawing. Check console.");
@@ -185,6 +188,7 @@ export default function DrawingList({ selectedProject }) {
 
                   <td className="px-4 py-2">
                     <RoleDropdown
+                      key={dropdownKey} // 👈 Force re-render to clear previous selection
                       role={["designer", "expert"]}
                       label=""
                       width=""

@@ -36,31 +36,10 @@ export default function Projects() {
     }
   };
 
-  // useEffect(() => {
-  //   fetchUsers();
-  //   fetchProjects()
-  // }, [projectList]);
-
-  // useEffect(() => {
-  //   if (!hasFetchedProjects.current) {
-  //     fetchProjects();
-  //     hasFetchedProjects.current = true;
-  //   }
-  // }, []);
-
-
   useEffect(() => {
     fetchUsers();
     fetchProjects();
   }, []); // ✅ Only run once on mount
-  
-  // useEffect(() => {
-  //   if (!hasFetchedProjects.current) {
-  //     fetchProjects();
-  //     hasFetchedProjects.current = true;
-  //   }
-  // }, []); // ❌ This second useEffect is now redundant
-  
 
   const handleManageClick = (project) => {
     setSelectedProject(project);

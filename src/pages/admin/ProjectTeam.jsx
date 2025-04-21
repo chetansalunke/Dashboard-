@@ -29,10 +29,6 @@ export default function ProjectTeam({ selectedProject }) {
     }
   };
 
-  // useEffect(() => {
-  //   fetchTeamMembers();
-  // }, [selectedProject, token, teamMembers]);
-
 
   useEffect(() => {
     fetchTeamMembers();

@@ -1,67 +1,83 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import BASE_URL from "../../config";
+import RoleDropdown from "./RoleDropdown";
 
-const dummyUsers = ["Priya M.", "Rahul S.", "Ananya K."];
-
-export default function AssignTask() {
+export default function AssignTask({ selectedProject }) {
   const [activeTab, setActiveTab] = useState("Pending");
-  const [tasks, setTasks] = useState([
-    {
-      taskName: "5th floor certificate to be issued",
-      priority: "High",
-      startDate: "2024-12-18",
-      dueDate: "2024-12-20",
-      assignedTo: "Priya M.",
-      checklist: "Certificate",
-      attachments: 1,
-    },
-    {
-      taskName: "Conduct site visits",
-      priority: "Low",
-      startDate: "2024-12-22",
-      dueDate: "2024-12-22",
-      assignedTo: "Priya M.",
-      checklist: "Site visit",
-      attachments: 0,
-    },
-    {
-      taskName: "Typical floor plan layout",
-      priority: "Medium",
-      startDate: "2024-12-20",
-      dueDate: "2024-12-22",
-      assignedTo: "Priya M.",
-      checklist: "Floor plans",
-      attachments: 3,
-    },
-  ]);
+  const [dropdownKey, setDropdownKey] = useState(0);
+  const [tasks, setTasks] = useState([]);
+  const fileInputRef = useRef(null);
 
   const [newTask, setNewTask] = useState({
     taskName: "",
     priority: "Medium",
     startDate: "",
     dueDate: "",
-    assignedTo: "",
+    assignedTo: null,
     checklist: "",
     attachments: 0,
+    file: null,
   });
 
-  const handleAddTask = () => {
-    setTasks((prev) => [...prev, newTask]);
-    setNewTask({
-      taskName: "",
-      priority: "Medium",
-      startDate: "",
-      dueDate: "",
-      assignedTo: "",
-      checklist: "",
-      attachments: 0,
-    });
+  const handleAddTask = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("taskName", newTask.taskName);
+      formData.append("priority", newTask.priority);
+      formData.append("startDate", newTask.startDate);
+      formData.append("dueDate", newTask.dueDate);
+      formData.append("assignTo", newTask.assignedTo?.id);
+      formData.append("projectId", selectedProject.id);
+      formData.append("checklist", JSON.stringify(["Checklist"]));
+      if (newTask.file) {
+        formData.append("documents", newTask.file);
+      }
+
+      const response = await fetch(`${BASE_URL}/api/projects/assignTask`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to assign task");
+      }
+
+      const result = await response.json();
+      console.log("Task Assigned Successfully:", result);
+
+      setTasks((prev) => [
+        ...prev,
+        { ...newTask, assignedTo: newTask.assignedTo?.username },
+      ]);
+
+      setNewTask({
+        taskName: "",
+        priority: "Medium",
+        startDate: "",
+        dueDate: "",
+        assignedTo: null,
+        checklist: "",
+        attachments: 0,
+        file: null,
+      });
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      setDropdownKey((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error assigning task:", error);
+    }
   };
 
   return (
     <div className="bg-gray-100">
       <main className="h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-4 mt-4">
-          {/* Tabs */}
           <div className="flex border border-purple-300 rounded-lg overflow-hidden shadow-md">
             {["All", "Completed", "Pending"].map((tab) => (
               <button
@@ -78,7 +94,6 @@ export default function AssignTask() {
             ))}
           </div>
 
-          {/* Task Tracker */}
           <button className="px-2 py-1 text-sm font-medium leading-5 text-white bg-orange-600 hover:bg-orange-700">
             Task Tracker
           </button>
@@ -102,22 +117,12 @@ export default function AssignTask() {
                 {tasks.map((task, idx) => (
                   <tr key={idx} className="text-gray-700">
                     <td className="px-4 py-3 text-sm">{task.taskName}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <span
-                        className={`px-2 py-1 rounded text-xs text-white ${
-                          task.priority === "High"
-                            ? "bg-red-500"
-                            : task.priority === "Medium"
-                            ? "bg-yellow-500"
-                            : "bg-green-500"
-                        }`}
-                      >
-                        {task.priority}
-                      </span>
-                    </td>
+                    <td className="px-4 py-3 text-sm">{task.priority}</td>
                     <td className="px-4 py-3 text-sm">{task.startDate}</td>
                     <td className="px-4 py-3 text-sm">{task.dueDate}</td>
-                    <td className="px-4 py-3 text-sm">{task.assignedTo}</td>
+                    <td className="px-4 py-3 text-sm">
+                      {task.assignedTo || "—"}
+                    </td>
                     <td className="px-4 py-3 text-blue-500 underline cursor-pointer">
                       {task.checklist}
                     </td>
@@ -174,18 +179,15 @@ export default function AssignTask() {
                     />
                   </td>
                   <td className="px-4 py-2">
-                    <select
-                      value={newTask.assignedTo}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, assignedTo: e.target.value })
+                    <RoleDropdown
+                      key={dropdownKey}
+                      role={["designer", "expert"]}
+                      label=""
+                      width=""
+                      onSelect={(user) =>
+                        setNewTask({ ...newTask, assignedTo: user })
                       }
-                      className="w-full border px-2 py-1 rounded"
-                    >
-                      <option value="">-- Select --</option>
-                      {dummyUsers.map((u) => (
-                        <option key={u}>{u}</option>
-                      ))}
-                    </select>
+                    />
                   </td>
                   <td className="px-4 py-2">
                     <button
@@ -198,17 +200,19 @@ export default function AssignTask() {
                     </button>
                   </td>
                   <td className="px-4 py-2">
-                    <button
-                      onClick={() =>
+                    <input
+                      type="file"
+                      multiple
+                      ref={fileInputRef}
+                      onChange={(e) =>
                         setNewTask({
                           ...newTask,
-                          attachments: newTask.attachments + 1,
+                          file: e.target.files[0],
+                          attachments: 1,
                         })
                       }
-                      className="text-blue-600 underline"
-                    >
-                      Attach
-                    </button>
+                      className="w-full"
+                    />
                   </td>
                 </tr>
               </tbody>

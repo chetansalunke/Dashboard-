@@ -4,19 +4,7 @@ import axios from 'axios';
 
 const RoleDropdown = ({ role=[], label = "Select User", width = "w-1/4", onSelect, }) => {
   const [users, setUsers] = useState([]);
-
-  // useEffect(() => {
-  //   axios
-  //     .get(`${BASE_URL}/api/auth/role?role=${role}`)
-  //     .then((response) => {
-  //       setUsers(response.data.users);
-  //     })
-  //     .catch((error) => {
-  //       console.error(`Error fetching ${role}s:`, error);
-  //     });
-  // }, [role]);
-
-
+  
   useEffect(() => {
     const fetchUsers = async () => {
       try {

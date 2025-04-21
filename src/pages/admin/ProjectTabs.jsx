@@ -19,7 +19,7 @@ export default function ProjectTabs({
       case "Drawing List":
         return <DrawingList selectedProject={selectedProject}/>;
       case "Assign Task":
-        return <AssignTask />;
+        return <AssignTask selectedProject={selectedProject}/>;
       case "Team":
         return <ProjectTeam selectedProject={selectedProject}/>;
       default:
