@@ -22,6 +22,8 @@ import ClientHome from "./pages/client/ClientHome";
 import Approvals from "./pages/client/Approvals";
 import Received from "./pages/client/Received";
 import Send from "./pages/client/Send";
+// import AdminDesignerProjects from "./pages/admin/AdminDesignerProjects";
+import AdminDesignWrapper from "./pages/admin/AdminDesignWrapper";
 const getStoredUser = () => {
   const user = localStorage.getItem("user");
   return user ? JSON.parse(user) : null;
@@ -91,6 +93,31 @@ const App = () => {
                 <PrivateRoute element={<Users />} allowedRoles={["admin"]} />
               }
             />
+            <Route
+              path="/admin-dashboard/design"
+              element={
+                <PrivateRoute
+                  element={<AdminDesignWrapper />}
+                  allowedRoles={["admin"]}
+                />
+              }
+            />
+            <Route
+              path="/admin-dashboard/communication/rfi"
+              element={
+                <PrivateRoute element={<RFI />} allowedRoles={["admin"]} />
+              }
+            />
+
+            <Route
+              path="/admin-dashboard/communication/submission"
+              element={
+                <PrivateRoute
+                  element={<Submission />}
+                  allowedRoles={["admin"]}
+                />
+              }
+            />
 
             {/* Designer Routes */}
             <Route
@@ -123,14 +150,14 @@ const App = () => {
             />
 
             <Route
-              path="/designer-dashboard/projects/communication/rfi"
+              path="/designer-dashboard/communication/rfi"
               element={
                 <PrivateRoute element={<RFI />} allowedRoles={["designer"]} />
               }
             />
 
             <Route
-              path="/designer-dashboard/projects/communication/submission"
+              path="/designer-dashboard/communication/submission"
               element={
                 <PrivateRoute
                   element={<Submission />}

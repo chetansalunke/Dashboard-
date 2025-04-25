@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaTimes, FaDownload, FaUserCircle } from "react-icons/fa";
 import BASE_URL from "../../config";
+import ProjectDropdown from "./ProjectDropdown";
+import TaskAssignTable from "./TaskAssignTable";
 
 export default function DesignerHome() {
   const [projects, setProjects] = useState([]);
@@ -20,6 +22,9 @@ export default function DesignerHome() {
       [index]: !prev[index],
     }));
   };
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const usernameID = user?.id;
 
   const checklistItems = [
     "Location of ducts",
@@ -74,7 +79,9 @@ export default function DesignerHome() {
       const username = user?.username || "";
 
       try {
-        const response = await fetch(`${BASE_URL}/api/projects/all`);
+        const response = await fetch(
+          `${BASE_URL}/api/projects/assigned-projects/${usernameID}`
+        );
         if (!response.ok) throw new Error("Failed to fetch projects");
         const data = await response.json();
         if (data && Array.isArray(data.projects)) {
@@ -136,29 +143,13 @@ export default function DesignerHome() {
                   {/* Dropdown for project filtering */}
 
                   <div className="flex items-center gap-4">
-                    <select
-                      value={selectedProjectName}
-                      onChange={(e) => setSelectedProjectName(e.target.value)}
-                      className="w-64 text-sm border border-gray-300 rounded-lg px-8 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 mt-1 light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
-                    >
-                      <option
-                        value="All Projects"
-                        className="text-sm font-semibold text-gray-700"
-                      >
-                        All Projects
-                      </option>
-                      {Array.from(
-                        new Set(projects.map((p) => p.projectName))
-                      ).map((name, idx) => (
-                        <option
-                          key={idx}
-                          value={name}
-                          className="text-sm font-semibold text-gray-700"
-                        >
-                          {name}
-                        </option>
-                      ))}
-                    </select>
+                    <ProjectDropdown
+                      userId={usernameID}
+                      onSelectProject={(projectId) => {
+                        console.log("Selected Project ID:", projectId);
+                        // You can store this projectId in state and use it for submission
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -168,48 +159,7 @@ export default function DesignerHome() {
 
                 <div className="w-full max-h-[50vh] overflow-hidden rounded-lg shadow mt-2 mb-4">
                   <div className="w-full max-h-[250px] overflow-y-auto">
-                    <table className="w-full table-auto">
-                      <thead className="bg-gray-50 sticky top-0 z-10">
-                        <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
-                          <th className="px-4 py-3">Task Name</th>
-                          <th className="px-4 py-3">Project Name</th>
-                          <th className="px-4 py-3">Assigned By</th>
-                          <th className="px-4 py-3">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y">
-                        {projects
-                          .filter((project) =>
-                            selectedProjectName === "All Projects"
-                              ? true
-                              : project.projectName === selectedProjectName
-                          )
-                          .map((project, index) => (
-                            <tr
-                              key={index}
-                              className="hover:bg-gray-50 text-gray-700"
-                            >
-                              <td className="px-4 py-3 text-sm">
-                                {project.taskName || "N/A"}
-                              </td>
-                              <td className="px-4 py-3 text-sm">
-                                {project.projectName}
-                              </td>
-                              <td className="px-4 py-3 text-sm">
-                                {project.assignedBy || "Admin"}
-                              </td>
-                              <td className="px-4 py-3 text-sm">
-                                <button
-                                  onClick={() => setSelectedProject(project)}
-                                  className="px-3 py-1 text-sm font-medium text-white bg-purple-500 rounded-md hover:bg-purple-600"
-                                >
-                                  View
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
+                  <TaskAssignTable userId={usernameID} />
                   </div>
                 </div>
 
@@ -503,4 +453,3 @@ export default function DesignerHome() {
     </div>
   );
 }
-

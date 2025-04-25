@@ -9,7 +9,7 @@ export default function RfiControls({
   onCreateClick,
 }) {
   return (
-    <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+    <div className="flex flex-wrap justify-between items-center gap-4">
       <div className="flex flex-wrap items-center gap-4">
         {/* Tabs */}
         <div className="flex border border-purple-300 rounded-md overflow-hidden shadow-md">

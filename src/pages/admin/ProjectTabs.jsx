@@ -15,11 +15,11 @@ export default function ProjectTabs({
   const renderTabContent = () => {
     switch (activeTab) {
       case "Project Information":
-        return <ProjectForm setIsFormOpen={setIsFormOpen} />;
+        return <ProjectForm setIsFormOpen={setIsFormOpen} selectedProject={selectedProject} users={users}/>;
       case "Drawing List":
-        return <DrawingList selectedProject={selectedProject}/>;
+        return <DrawingList selectedProject={selectedProject} users={users}/>;
       case "Assign Task":
-        return <AssignTask selectedProject={selectedProject}/>;
+        return <AssignTask selectedProject={selectedProject} users={users}/>;
       case "Team":
         return <ProjectTeam selectedProject={selectedProject}/>;
       default:

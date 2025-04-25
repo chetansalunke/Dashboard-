@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import BASE_URL from "../../config";
 import { useNavigate } from "react-router-dom";
@@ -11,47 +9,47 @@ export default function DesignerProjects() {
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const [sortOption, setSortOption] = useState("");
+  
 
   const navigate = useNavigate();
 
-
-
-  const handleSortByLatest = () => {
-    setSortOption("date-latest");
-    setShowDropdown(false);
-  };
-
-  useEffect(() => {
-    let sortedProjects = [...projects];
+    const handleSortByLatest = () => {
+      setSortOption("date-latest");
+      setShowDropdown(false);
+    };
   
-    if (sortOption === "date-latest") {
-      sortedProjects.sort((a, b) => new Date(b.submissionDate) - new Date(a.submissionDate));
-    } else if (sortOption === "date-oldest") {
-      sortedProjects.sort((a, b) => new Date(a.submissionDate) - new Date(b.submissionDate));
-    } else if (sortOption === "a-z") {
-      sortedProjects.sort((a, b) => a.projectName.localeCompare(b.projectName));
-    }
-  
-    setProjects(sortedProjects);
-  }, [sortOption]);
-  
+    useEffect(() => {
+      let sortedProjects = [...projects];
+    
+      if (sortOption === "date-latest") {
+        sortedProjects.sort((a, b) => new Date(b.submissionDate) - new Date(a.submissionDate));
+      } else if (sortOption === "date-oldest") {
+        sortedProjects.sort((a, b) => new Date(a.submissionDate) - new Date(b.submissionDate));
+      } else if (sortOption === "a-z") {
+        sortedProjects.sort((a, b) => a.projectName.localeCompare(b.projectName));
+      }
+    
+      setProjects(sortedProjects);
+    }, [sortOption]);
 
   useEffect(() => {
     const fetchProjects = async () => {
       const storedUser = localStorage.getItem("user");
       if (!storedUser) return;
       const user = JSON.parse(storedUser);
-      const username = user?.username || "";
+      const userID = user?.id || "";
 
       try {
-        const response = await fetch(`${BASE_URL}/api/projects/all`);
+        const response = await fetch(`${BASE_URL}/api/projects/assigned-projects/${userID}`);
         if (!response.ok) throw new Error("Failed to fetch projects");
         const data = await response.json();
         if (data && Array.isArray(data.projects)) {
-          const userProjects = data.projects.filter(
-            (project) => project.assignTo === username
-          );
-          setProjects(userProjects);
+          // Optional: add status if your API doesn't include it
+          const enrichedProjects = data.projects.map((p) => ({
+            ...p,
+            status: "In Progress", // You can randomize or update based on actual API data
+          }));
+          setProjects(enrichedProjects);
         }
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -59,20 +57,32 @@ export default function DesignerProjects() {
         setLoading(false);
       }
     };
+
     fetchProjects();
   }, []);
 
-  // const handleCardClick = (projectId, projectName) => {
-  //   navigate(`/designer-dashboard/projects/design`, {
-  //     state: { projectId, projectName },
-  //   });
-  // };
+  useEffect(() => {
+    let sortedProjects = [...projects];
+
+    if (sortOption === "date-latest") {
+      sortedProjects.sort(
+        (a, b) => new Date(b.submissionDate) - new Date(a.submissionDate)
+      );
+    } else if (sortOption === "date-oldest") {
+      sortedProjects.sort(
+        (a, b) => new Date(a.submissionDate) - new Date(b.submissionDate)
+      );
+    } else if (sortOption === "a-z") {
+      sortedProjects.sort((a, b) => a.projectName.localeCompare(b.projectName));
+    }
+
+    setProjects(sortedProjects);
+  }, [sortOption]);
 
   const handleCardClick = (projectId, projectName) => {
     localStorage.setItem("selectedProject", JSON.stringify({ projectId, projectName }));
-    navigate("/designer-dashboard/projects/design"); // You can change this path if needed
+    navigate("/designer-dashboard/projects/design");
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -87,20 +97,16 @@ export default function DesignerProjects() {
       {/* Tabs and Sort Button */}
       <div className="flex justify-between items-center gap-3 mb-4 bg-white w-full">
         <div className="flex gap-3">
-          {[
-            "Concept",
-            "Design Development",
-            "Tendering",
-            "Execution",
-            "Handover",
-          ].map((phase, index) => (
-            <button
-              key={index}
-              className="px-3 py-1 bg-white rounded hover:bg-gray-300 text-sm font-medium"
-            >
-              {phase}
-            </button>
-          ))}
+          {["Concept", "Design Development", "Tendering", "Execution", "Handover"].map(
+            (phase, index) => (
+              <button
+                key={index}
+                className="px-3 py-1 bg-white rounded hover:bg-gray-300 text-sm font-medium"
+              >
+                {phase}
+              </button>
+            )
+          )}
         </div>
 
         <div className="relative">
@@ -142,7 +148,7 @@ export default function DesignerProjects() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {projects.map((project) => (
             <div
-              key={project._id}
+              key={project.id}
               onClick={() => handleCardClick(project.id, project.projectName)}
               className="bg-white max-w-xs w-full mx-auto p-3 border hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col items-center space-y-3"
             >

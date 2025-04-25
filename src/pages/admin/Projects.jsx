@@ -27,7 +27,7 @@ export default function Projects() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/all`);
+      const res = await fetch(`${BASE_URL}/api/auth/all`); //http://localhost:3000/api/auth/all
       const data = await res.json();
       const filteredUsers = data.users?.filter((u) => u.role !== "admin") || [];
       setUsers(filteredUsers);
@@ -35,6 +35,8 @@ export default function Projects() {
       console.error("Error fetching users:", err);
     }
   };
+
+  console.log(users);
 
   useEffect(() => {
     fetchUsers();

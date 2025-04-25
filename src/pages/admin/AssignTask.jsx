@@ -1,12 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import BASE_URL from "../../config";
+import axios from "axios";
 import RoleDropdown from "./RoleDropdown";
 
-export default function AssignTask({ selectedProject }) {
+export default function AssignTask({ selectedProject,users }) {
   const [activeTab, setActiveTab] = useState("Pending");
   const [dropdownKey, setDropdownKey] = useState(0);
   const [tasks, setTasks] = useState([]);
   const fileInputRef = useRef(null);
+
+  const token = localStorage.getItem("accessToken");
 
   const [newTask, setNewTask] = useState({
     taskName: "",
@@ -18,6 +21,48 @@ export default function AssignTask({ selectedProject }) {
     attachments: 0,
     file: null,
   });
+
+  // 🔄 Fetch assign task when selectedProject changes
+  const fetchTasks = async () => {
+    if (!selectedProject?.id) return;
+  
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/api/projects/${selectedProject.id}/assignTask`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const taskArray = response.data.tasks;
+  
+      // Format the task(s) to fit the table
+      const formattedTasks = taskArray.map((item) => {
+        const assignedUser = users.find((user) => user.id === item.assign_to);
+        return {
+          taskName: item.task_name,
+          priority: item.priority,
+          startDate: item.start_date?.split("T")[0] || "",
+          dueDate: item.due_date?.split("T")[0] || "",
+          assignedTo: assignedUser?.username || "—",
+          checklist: item.checklist ? "Checklist" : "—",
+          attachments: item.assign_task_document ? 1 : 0,
+        };
+      });
+  
+      setTasks(formattedTasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+  
+  
+
+  useEffect(() => {
+    fetchTasks();
+  }, [selectedProject, token]); // Only trigger when selectedProject or token changes
 
   const handleAddTask = async () => {
     try {
@@ -36,7 +81,7 @@ export default function AssignTask({ selectedProject }) {
       const response = await fetch(`${BASE_URL}/api/projects/assignTask`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
@@ -45,8 +90,8 @@ export default function AssignTask({ selectedProject }) {
         throw new Error("Failed to assign task");
       }
 
-      const result = await response.json();
-      console.log("Task Assigned Successfully:", result);
+      // const result = await response.json();
+      // console.log("Task Assigned Successfully:", result);
 
       setTasks((prev) => [
         ...prev,

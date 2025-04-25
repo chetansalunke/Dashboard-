@@ -127,7 +127,7 @@ import BASE_URL from "../../../../src/config";
 
 export default function RfiTable({ rfis, users, userID, onResolve }) {
   return (
-    <div className="w-full overflow-hidden rounded-lg shadow">
+    <div className="w-full overflow-hidden rounded-lg shadow mt-2">
       <div className="w-full overflow-x-auto">
         <table className="w-full whitespace-no-wrap">
           <thead>
@@ -187,7 +187,7 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                     {rfi.status === "Pending" && rfi.send_to === userID ? (
                       <button
                         onClick={() => onResolve(rfi)}
-                        className="text-sm px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                        className="text-sm px-3 py-1 bg-green-500 text-white rounded"// hover:bg-green-600"
                       >
                         Resolve
                       </button>

@@ -6,6 +6,8 @@ import {
   IoHomeOutline,
   IoDocumentTextOutline,
   IoPeopleOutline,
+  IoChatbubbleEllipsesOutline,
+  IoBrushOutline,
 } from "react-icons/io5";
 import { IoChatbubbleOutline } from "react-icons/io5";
 import { IoCheckmarkDoneOutline } from "react-icons/io5";
@@ -37,6 +39,25 @@ const Sidebar = ({ role }) => {
         icon: <IoPeopleOutline className="w-5 h-5" />,
         path: "/admin-dashboard/users", // Changed to absolute path
       },
+      {
+        name: "Design",
+        icon: <IoBrushOutline className="w-5 h-5" />,
+        path: "/admin-dashboard/design",
+      },
+      {
+        name: "Communication",
+        icon: <IoChatbubbleEllipsesOutline className="w-5 h-5" />,
+        subItems: [
+          {
+            name: "RFI",
+            path: "/admin-dashboard/communication/rfi",
+          },
+          {
+            name: "Submission",
+            path: "/admin-dashboard/communication/submission",
+          },
+        ],
+      },
     ],
     designer: [
       {
@@ -53,22 +74,24 @@ const Sidebar = ({ role }) => {
             name: "Design",
             path: "/designer-dashboard/projects/design",
           },
-          {
-            name: "Communication",
-            subItems: [
-              {
-                name: "RFI",
-                path: "/designer-dashboard/projects/communication/rfi",
-              },
-              {
-                name: "Submission",
-                path: "/designer-dashboard/projects/communication/submission",
-              },
-            ],
-          },
+          
           {
             name: "Management",
             path: "/designer-dashboard/management",
+          },
+        ],
+      },
+      {
+        name: "Communication",
+        icon: <IoChatbubbleEllipsesOutline className="w-5 h-5" />,
+        subItems: [
+          {
+            name: "RFI",
+            path: "/designer-dashboard/communication/rfi",
+          },
+          {
+            name: "Submission",
+            path: "/designer-dashboard/communication/submission",
           },
         ],
       },
