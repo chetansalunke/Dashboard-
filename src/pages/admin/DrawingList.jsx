@@ -1,11 +1,12 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa"; // Font Awesome Trash icon
 import axios from "axios";
 import BASE_URL from "../../config";
 import RoleDropdown from "./RoleDropdown";
 
-export default function DrawingList({ selectedProject }) {
+export default function DrawingList({ selectedProject, users }) {
   const [tasks, setTasks] = useState([]);
+  const [dropdownKey, setDropdownKey] = useState(0); // 🔑 key for forcing RoleDropdown re-render
 
   const token = localStorage.getItem("accessToken");
 
@@ -18,6 +19,45 @@ export default function DrawingList({ selectedProject }) {
     assignedTo: null, // Will store full user object
     documents: [],
   });
+
+  // 🔄 Fetch drawing list when selectedProject changes
+  const fetchDrawingList = async () => {
+    if (!selectedProject?.id) return;
+  
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/api/projects/drawingList/${selectedProject.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const taskArray = response.data.drawings || [];
+  
+      const formattedTasks = taskArray.map((item) => {
+        const assignedUser = users.find((user) => user.id === item.assign_to);
+        return {
+          projectId: selectedProject.id,
+          drawingNo: item.drawing_number,
+          drawingName: item.drawing_name,
+          startDate: item.start_date.split("T")[0],
+          endDate: item.end_date.split("T")[0],
+          assignedTo: assignedUser || null,
+        };
+      });
+  
+      setTasks(formattedTasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+  
+
+  useEffect(() => {
+    fetchDrawingList();
+  }, [selectedProject, token]); // Only trigger when selectedProject or token changes
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
@@ -33,7 +73,6 @@ export default function DrawingList({ selectedProject }) {
     }
   };
 
-  
   const handleRemoveFile = (index) => {
     const updatedFiles = [...newTask.documents];
     updatedFiles.splice(index, 1);
@@ -59,19 +98,12 @@ export default function DrawingList({ selectedProject }) {
         }
       );
 
-      console.log("Adding drawing with data:", {
-        drawingNumber: newTask.drawingNo,
-        drawingName: newTask.drawingName,
-        startDate: newTask.startDate,
-        endDate: newTask.endDate,
-        assignTo: newTask.assignedTo?.id,
-        projectId: selectedProject.id,
-      });
+      setTasks((prev) => [
+        ...prev,
+        { ...newTask,},
+      ]);
 
-      // Append to tasks
-      setTasks((prev) => [...prev, response.data]);
 
-      console.log();
       // Reset form
       setNewTask({
         projectId: "",
@@ -81,6 +113,9 @@ export default function DrawingList({ selectedProject }) {
         endDate: "",
         assignedTo: null,
       });
+
+      // 🔄 Reset the dropdown by updating its key
+      setDropdownKey((prev) => prev + 1);
     } catch (error) {
       console.error("Error adding drawing:", error);
       alert("Failed to add drawing. Check console.");
@@ -185,6 +220,7 @@ export default function DrawingList({ selectedProject }) {
 
                   <td className="px-4 py-2">
                     <RoleDropdown
+                      key={dropdownKey} // 👈 Force re-render to clear previous selection
                       role={["designer", "expert"]}
                       label=""
                       width=""

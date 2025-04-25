@@ -15,6 +15,7 @@ export default function RFI() {
   const [token, setToken] = useState(localStorage.getItem("accessToken"));
   const [showForm, setShowForm] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [selectedProjectName, setSelectedProjectName] = useState("");
   const [activeTab, setActiveTab] = useState("All");
   const [searchText, setSearchText] = useState("");
   const [resolvingRfi, setResolvingRfi] = useState(null);
@@ -177,6 +178,8 @@ export default function RFI() {
     }
   };
 
+  // console.log(selectedProjectName);
+
   const handleRefreshToken = async () => {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
@@ -201,12 +204,21 @@ export default function RFI() {
     <div className="bg-gray-100">
       <main className="h-full w-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
-          <div className="flex justify-between mb-4">
+          <h1 className="text-xl font-semibold tracking-wide text-black uppercase mb-1">
+            {selectedProjectName && `${selectedProjectName}`}
+          </h1>
+          <div className="flex justify-between">
             {!showForm && !resolvingRfi && (
               <ProjectDropdown
                 projectList={projectList}
                 selectedProjectId={selectedProjectId}
-                onChange={(selectedId) => setSelectedProjectId(selectedId)}
+                onChange={(selectedId) => {
+                  setSelectedProjectId(selectedId);
+                  const selectedProject = projectList.find(
+                    (p) => p.id === Number(selectedId)
+                  );
+                  setSelectedProjectName(selectedProject?.projectName || "");
+                }}
               />
             )}
 
@@ -219,6 +231,7 @@ export default function RFI() {
               />
             )}
           </div>
+          <hr className="border border-gray-400 m-2" />
 
           {selectedProjectId && showForm && (
             <CreateRFIForm

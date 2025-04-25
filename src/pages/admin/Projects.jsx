@@ -27,7 +27,7 @@ export default function Projects() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/all`);
+      const res = await fetch(`${BASE_URL}/api/auth/all`); //http://localhost:3000/api/auth/all
       const data = await res.json();
       const filteredUsers = data.users?.filter((u) => u.role !== "admin") || [];
       setUsers(filteredUsers);
@@ -36,31 +36,12 @@ export default function Projects() {
     }
   };
 
-  // useEffect(() => {
-  //   fetchUsers();
-  //   fetchProjects()
-  // }, [projectList]);
-
-  // useEffect(() => {
-  //   if (!hasFetchedProjects.current) {
-  //     fetchProjects();
-  //     hasFetchedProjects.current = true;
-  //   }
-  // }, []);
-
+  console.log(users);
 
   useEffect(() => {
     fetchUsers();
     fetchProjects();
   }, []); // ✅ Only run once on mount
-  
-  // useEffect(() => {
-  //   if (!hasFetchedProjects.current) {
-  //     fetchProjects();
-  //     hasFetchedProjects.current = true;
-  //   }
-  // }, []); // ❌ This second useEffect is now redundant
-  
 
   const handleManageClick = (project) => {
     setSelectedProject(project);

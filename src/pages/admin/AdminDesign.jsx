@@ -1,34 +1,19 @@
 import React, { useState, useEffect } from "react";
 import BASE_URL from "../../config";
-import { useLocation,useNavigate } from "react-router-dom";
-import UploadDrawingForm from "../admin/UploadDrawingForm";
+import UploadDrawingForm from "./UploadDrawingForm";
 
-export default function Design() {
+export default function AdminDesign({ selectedProject, onBack }) {
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [drawings, setDrawings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const navigate = useNavigate();
-
-  const location = useLocation();
-  const { projectName } = location.state || {};
-
-  const selectedProject = JSON.parse(localStorage.getItem("selectedProject") || "{}");
-
-
-
-  const handleUploadSubmit = (data) => {
-    console.log("Form Submitted:", data);
-    // Handle upload logic here
-  };
-
   useEffect(() => {
     const fetchDrawings = async () => {
-      if (!selectedProject?.projectId) return;
+      if (!selectedProject?.projectId) return; // ✅ Corrected condition
 
       try {
         const response = await fetch(
-          `${BASE_URL}/api/projects/design_drawing/${selectedProject.projectId}`
+          `${BASE_URL}/api/projects/design_drawing/${selectedProject.projectId}` // http://localhost:3000/api/projects/design_drawing/2
         );
         if (!response.ok) throw new Error("Failed to fetch drawings");
 
@@ -45,6 +30,11 @@ export default function Design() {
 
     fetchDrawings();
   }, [selectedProject]);
+
+  const handleUploadSubmit = (data) => {
+    console.log("Form Submitted:", data);
+    // Handle submission logic
+  };
 
   const filteredDrawings = drawings.filter((drawing) =>
     drawing.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -68,13 +58,14 @@ export default function Design() {
           <div className="container px-6 my-6 grid">
             <div className="flex justify-between">
               <h1 className="text-2xl font-semibold text-gray-600 mb-2">
-                {selectedProject?.projectName || "No Project Selected"}
+                {selectedProject.projectName || "No Project Selected"}
               </h1>
               <div className="flex justify-end gap-4 mb-2">
                 <div className="relative w-[280px]">
                   <div className="absolute inset-y-0 left-3 flex items-center">
                     <svg
                       className="w-4 h-4 text-gray-500"
+                      aria-hidden="true"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -86,11 +77,11 @@ export default function Design() {
                     </svg>
                   </div>
                   <input
+                    className="w-full pl-10 pr-2 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md focus:border-purple-500 focus:ring focus:ring-purple-200 focus:outline-none"
                     type="text"
                     placeholder="Search"
                     aria-label="Search"
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-2 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md focus:border-purple-500 focus:ring focus:ring-purple-200 focus:outline-none"
                   />
                 </div>
 
@@ -101,7 +92,7 @@ export default function Design() {
                   Upload Drawing
                 </button>
                 <button
-                  onClick={()=>navigate(-1)}
+                  onClick={onBack}
                   className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
                 >
                   Back
@@ -123,7 +114,9 @@ export default function Design() {
 
               <div className="flex gap-4">
                 <select className="text-sm border border-gray-300 rounded-lg px-8 py-2 shadow-sm">
-                  <option disabled selected>Filter By</option>
+                  <option disabled selected>
+                    Filter By
+                  </option>
                   <option value="version">Version</option>
                   <option value="sentBy">Sent By</option>
                   <option value="status">Status</option>
@@ -131,7 +124,9 @@ export default function Design() {
                 </select>
 
                 <select className="text-sm border border-gray-300 rounded-lg px-8 py-2 shadow-sm">
-                  <option disabled selected>Sort By</option>
+                  <option disabled selected>
+                    Sort By
+                  </option>
                   <option value="date">Date</option>
                   <option value="aToZ">A to Z</option>
                 </select>
@@ -157,42 +152,25 @@ export default function Design() {
                   </thead>
                   <tbody className="bg-white divide-y">
                     {filteredDrawings.map((drawing) => (
-                      <tr key={drawing.id || drawing.name} className="text-gray-700 text-sm">
+                      <tr key={drawing.id} className="text-gray-700 text-sm">
                         <td className="px-4 py-3">
-                          {(() => {
-                            try {
-                              const paths = JSON.parse(drawing.document_path);
-                              return paths.map((path, index) => (
-                                <a
-                                  key={index}
-                                  href={path}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline block"
-                                >
-                                  View Document {index + 1}
-                                </a>
-                              ));
-                            } catch {
-                              return <span className="text-red-500">Invalid Document</span>;
-                            }
-                          })()}
+                          {drawing.document_path && JSON.parse(drawing.document_path).map((path, index) => (
+                            <a key={index} href={path} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                              View Document {index + 1}
+                            </a>
+                          ))}
                         </td>
                         <td className="px-4 py-3">{drawing.name}</td>
-                        <td className="px-4 py-3">
-                          {drawing.latest_version_path ? `v${drawing.version_number || 1}` : "N/A"}
-                        </td>
+                        <td className="px-4 py-3">{drawing.latest_version_path ? "v1.0" : "N/A"}</td>
                         <td className="px-4 py-3">{drawing.discipline}</td>
-                        <td className="px-4 py-3">
-                          {new Date(drawing.created_date).toLocaleDateString()}
-                        </td>
+                        <td className="px-4 py-3">{new Date(drawing.created_date).toLocaleDateString()}</td>
                         <td className="px-4 py-3">{drawing.status}</td>
                         <td className="px-4 py-3">{drawing.sent_by || "Unassigned"}</td>
+                        <td className="px-4 py-3">{drawing.previous_versions === "NULL" ? "None" : drawing.previous_versions}</td>
                         <td className="px-4 py-3">
-                          {drawing.previous_versions === "NULL" ? "None" : drawing.previous_versions}
-                        </td>
-                        <td className="px-4 py-3">
-                          <button className="text-sm text-purple-600 hover:underline">View</button>
+                          <button className="text-sm text-purple-600 hover:underline">
+                            View
+                          </button>
                         </td>
                       </tr>
                     ))}

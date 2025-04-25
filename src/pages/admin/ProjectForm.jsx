@@ -3,14 +3,15 @@ import axios from "axios";
 import BASE_URL from "../../config";
 import RoleDropdown from "./RoleDropdown";
 
-export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
+export default function ProjectForm({ setIsFormOpen, selectedProject, users }) {
+  
   const token = localStorage.getItem("accessToken");
 
   const [formData, setFormData] = useState({
     projectName: "",
     siteaddress: "",
     description: "",
-    projectsize:"",
+    projectsize: "",
     timeline: "",
     startdate: "",
     completiondate: "",
@@ -21,31 +22,42 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
     consultantId: null,
   });
 
-  const [clientInfo, setClientInfo] = useState({ email: "", phone_number: "" });
-  const [consultantInfo, setConsultantInfo] = useState({
-    email: "",
-    phone_number: "",
-  });
+  const [clientInfo, setClientInfo] = useState({ email: "", phone_number: "", username: "" });
+  const [consultantInfo, setConsultantInfo] = useState({ email: "", phone_number: "", username: "" });
 
-  const handleClientSelect = (user) => {
-    if (user) {
-      setClientInfo({ email: user.email, phone_number: user.phone_number });
-      setFormData((prev) => ({ ...prev, clientId: user.id }));
-    } else {
-      setClientInfo({ email: "", phone_number: "" });
-      setFormData((prev) => ({ ...prev, clientId: null }));
-    }
-  };
+  useEffect(() => {
+    if (selectedProject) {
+      const formatDate = (dateString) =>
+        dateString ? new Date(dateString).toISOString().split("T")[0] : "";
 
-  const handleConsultantSelect = (user) => {
-    if (user) {
-      setConsultantInfo({ email: user.email, phone_number: user.phone_number });
-      setFormData((prev) => ({ ...prev, consultantId: user.id }));
-    } else {
-      setConsultantInfo({ email: "", phone_number: "" });
-      setFormData((prev) => ({ ...prev, consultantId: null }));
+      setFormData((prev) => ({
+        ...prev,
+        projectName: selectedProject.projectName || "",
+        siteaddress: selectedProject.site_address || "",
+        description: selectedProject.description || "",
+        projectsize: selectedProject.projectSize || "",
+        timeline: selectedProject.duration || "",
+        startdate: formatDate(selectedProject.project_start_date),
+        completiondate: formatDate(selectedProject.project_completion_date),
+        projectid: selectedProject.project_id || "",
+        clientId: selectedProject.client_id || null,
+        consultantId: selectedProject.consultant_id || null,
+        documents: [],
+      }));
+
+      if (users && users.length > 0) {
+        const client = users.find((u) => u.id === selectedProject.client_id);
+        const consultant = users.find((u) => u.id === selectedProject.consultant_id);
+
+        if (client) {
+          setClientInfo({ email: client.email, phone_number: client.phone_number, username: client.username });
+        }
+        if (consultant) {
+          setConsultantInfo({ email: consultant.email, phone_number: consultant.phone_number, username: consultant.username });
+        }
+      }
     }
-  };
+  }, [selectedProject, users]);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -53,6 +65,26 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
       setFormData((prev) => ({ ...prev, userId: user.id }));
     }
   }, []);
+
+  const handleClientSelect = (user) => {
+    if (user) {
+      setClientInfo({ email: user.email, phone_number: user.phone_number, username: user.username });
+      setFormData((prev) => ({ ...prev, clientId: user.id }));
+    } else {
+      setClientInfo({ email: "", phone_number: "", username: "" });
+      setFormData((prev) => ({ ...prev, clientId: null }));
+    }
+  };
+
+  const handleConsultantSelect = (user) => {
+    if (user) {
+      setConsultantInfo({ email: user.email, phone_number: user.phone_number, username: user.username });
+      setFormData((prev) => ({ ...prev, consultantId: user.id }));
+    } else {
+      setConsultantInfo({ email: "", phone_number: "", username: "" });
+      setFormData((prev) => ({ ...prev, consultantId: null }));
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -79,7 +111,7 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const form = new FormData();
     form.append("projectName", formData.projectName);
     form.append("site_address", formData.siteaddress);
@@ -92,12 +124,11 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
     form.append("projectId", formData.projectid);
     form.append("clientId", formData.clientId);
     form.append("consultantId", formData.consultantId);
-  
-    // Append all files to FormData
+
     formData.documents.forEach((file) => {
       form.append("documents", file);
     });
-  
+
     try {
       const res = await axios.post(`${BASE_URL}/api/projects/add`, form, {
         headers: {
@@ -105,11 +136,10 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
           Authorization: `Bearer ${token}`,
         },
       });
-  
-      console.log("✅ Project uploaded successfully:", res.data);
+
       alert("Project uploaded successfully!");
-  
-      // Reset form
+      console.log("✅ Project uploaded:", res.data);
+
       setFormData({
         projectName: "",
         siteaddress: "",
@@ -124,14 +154,13 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
         clientId: null,
         consultantId: null,
       });
-  
+
       setIsFormOpen(false);
     } catch (error) {
       console.error("❌ Error uploading project:", error);
       alert("Failed to upload project. Please try again.");
     }
   };
-  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mt-4">
@@ -276,10 +305,12 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
         <hr className="mt-2 mb-4 border-gray-400" />
 
         <div className="flex gap-4 justify-between">
-          <RoleDropdown
+        <RoleDropdown
             role="client"
-            label="Name"
+            label="Client"
+            width="w-1/3"
             onSelect={handleClientSelect}
+            value={formData.clientId}
           />
           <div className="w-1/4 ">
             <span className="text-gray-700 font-semibold">Email</span>
@@ -295,7 +326,7 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
         <div className="w-1/4 mt-4">
           <span className="text-gray-700 font-semibold">Phone Number</span>
           <input
-            name="phonenumber"
+            name="phone_number"
             type="text"
             value={clientInfo.phone_number}
             readOnly
@@ -309,10 +340,12 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
         <hr className="mt-2 mb-4 border-gray-400" />
 
         <div className="flex gap-4 justify-between">
-          <RoleDropdown
+        <RoleDropdown
             role="consultant"
-            label="Name"
+            label="Consultant"
+            width="w-1/3"
             onSelect={handleConsultantSelect}
+            value={formData.consultantId}
           />
           <div className="w-1/4 ">
             <span className="text-gray-700 font-semibold">Email</span>
@@ -328,7 +361,7 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
         <div className="w-1/4 mt-4">
           <span className="text-gray-700 font-semibold">Phone Number</span>
           <input
-            name="phonenumber"
+            name="phone_number"
             type="text"
             value={consultantInfo.phone_number}
             readOnly
@@ -337,10 +370,14 @@ export default function ProjectForm({ setIsFormOpen , fetchProjects}) {
         </div>
 
         <div className="flex justify-end gap-4 mt-4">
-          {/* <button className="px-4 py-2 text-sm font-medium text-black bg-white rounded-lg border border-transparent hover:border-black transition">
-
-            Edit
-          </button> */}
+          {selectedProject && (
+            <button
+              onClick={() => {}}
+              className="px-4 py-2 text-sm font-medium text-black bg-white rounded-lg border border-transparent hover:border-black transition"
+            >
+              Edit
+            </button>
+          )}
           <button className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
             Submit
           </button>
