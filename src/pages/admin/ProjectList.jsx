@@ -13,7 +13,7 @@ export default function ProjectList({ projects, onDelete, onManage }) {
               <th className="px-4 py-3">Description</th>
               <th className="px-4 py-3">Duration</th>
               <th className="px-4 py-3">Project Size</th>
-              <th className="px-4 py-3">Assigned To</th>
+              {/* <th className="px-4 py-3">Assigned To</th> */}
               <th className="px-4 py-3">Document</th>
               <th className="px-4 py-3">Action</th>
             </tr>
@@ -32,7 +32,7 @@ export default function ProjectList({ projects, onDelete, onManage }) {
                   <td className="px-4 py-3 text-sm">
                     {project.projectSize} sqft
                   </td>
-                  <td className="px-4 py-3 text-sm">{project.assignTo}</td>
+                  {/* <td className="px-4 py-3 text-sm">{project.assignTo}</td> */}
                   <td className="px-4 py-2">
                     {project.documents.length > 0 ? (
                       <div className="flex flex-wrap gap-4">

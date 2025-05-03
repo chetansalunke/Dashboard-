@@ -57,7 +57,8 @@ export default function UploadDrawingForm({ onClose, onSubmit , selectedProject}
       const result = await response.json();
       // console.log("Upload successful:", result);
       // onSubmit(result); // You can pass the result to parent if needed
-      onClose();
+      await onSubmit();  // trigger parent fetch
+      onClose();        // close modal after parent state update
     } catch (error) {
       console.error("Upload failed:", error.message);
     }
