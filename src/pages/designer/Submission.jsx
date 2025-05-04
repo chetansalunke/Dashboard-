@@ -22,9 +22,13 @@ export default function Submission() {
 
   const fetchDrawings = async (projectId) => {
     try {
-      const response = await fetch(`${BASE_URL}/api/projects/design_drawing/${projectId}`);
+      const response = await fetch(
+        `${BASE_URL}/api/projects/design_drawing/${projectId}`
+      );
       const data = await response.json();
-      setDrawings(Array.isArray(data.designDrawings) ? data.designDrawings : []);
+      setDrawings(
+        Array.isArray(data.designDrawings) ? data.designDrawings : []
+      );
     } catch (error) {
       console.error("Error fetching design drawings:", error);
       setDrawings([]);
@@ -99,13 +103,17 @@ export default function Submission() {
 
               {/* View & Filter dropdowns (optional behavior) */}
               <select className="h-9 text-sm border rounded-lg px-6 py-2">
-                <option disabled selected>View</option>
+                <option disabled selected>
+                  View
+                </option>
                 <option value="list">List</option>
                 <option value="content">Content</option>
               </select>
 
               <select className="h-9 text-sm border rounded-lg px-6 py-2">
-                <option disabled selected>Filter By</option>
+                <option disabled selected>
+                  Filter By
+                </option>
                 <option value="type">Type</option>
                 <option value="discipline">Discipline</option>
                 <option value="purpose">Purpose</option>
@@ -138,7 +146,9 @@ export default function Submission() {
                         <tr key={drawing.id} className="text-gray-700">
                           <td className="px-4 py-3">
                             <a
-                              href={`${BASE_URL}/${JSON.parse(drawing.document_path)[0]}`}
+                              href={`${BASE_URL}/${
+                                JSON.parse(drawing.document_path)[0]
+                              }`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-purple-600 underline text-sm"
@@ -148,17 +158,28 @@ export default function Submission() {
                           </td>
                           <td className="px-4 py-3 text-sm">{drawing.name}</td>
                           <td className="px-4 py-3 text-sm">
-                            {new Date(drawing.created_date).toLocaleDateString()}
+                            {new Date(
+                              drawing.created_date
+                            ).toLocaleDateString()}
                           </td>
                           <td className="px-4 py-3 text-sm">PDF</td>
-                          <td className="px-4 py-3 text-sm">{drawing.discipline}</td>
-                          <td className="px-4 py-3 text-sm">{drawing.remark}</td>
-                          <td className="px-4 py-3 text-sm">{drawing.sent_by}</td>
+                          <td className="px-4 py-3 text-sm">
+                            {drawing.discipline}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {drawing.remark}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {drawing.sent_by}
+                          </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="7" className="text-center py-4 text-gray-500">
+                        <td
+                          colSpan="7"
+                          className="text-center py-4 text-gray-500"
+                        >
                           No drawings available for this project.
                         </td>
                       </tr>
@@ -168,7 +189,9 @@ export default function Submission() {
               </div>
             </div>
           ) : (
-            <p className="text-center text-gray-500 mt-4">Please select a project.</p>
+            <p className="text-center text-gray-500 mt-4">
+              Please select a project.
+            </p>
           )}
         </div>
       </main>

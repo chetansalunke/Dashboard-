@@ -6,32 +6,33 @@ export default function AdminDesign({ selectedProject, onBack }) {
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [drawings, setDrawings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const fetchDrawings = async () => {
+    if (!selectedProject?.projectId) return; // ✅ Corrected condition
 
-  useEffect(() => {
-    const fetchDrawings = async () => {
-      if (!selectedProject?.projectId) return; // ✅ Corrected condition
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/projects/design_drawing/${selectedProject.projectId}` // http://localhost:3000/api/projects/design_drawing/2
+      );
+      if (!response.ok) throw new Error("Failed to fetch drawings");
 
-      try {
-        const response = await fetch(
-          `${BASE_URL}/api/projects/design_drawing/${selectedProject.projectId}` // http://localhost:3000/api/projects/design_drawing/2
-        );
-        if (!response.ok) throw new Error("Failed to fetch drawings");
-
-        const data = await response.json();
-        if (data && Array.isArray(data.designDrawings)) {
-          setDrawings(data.designDrawings);
-        } else {
-          setDrawings([]);
-        }
-      } catch (error) {
-        console.error("Error fetching drawings:", error);
+      const data = await response.json();
+      if (data && Array.isArray(data.designDrawings)) {
+        setDrawings(data.designDrawings);
+      } else {
+        setDrawings([]);
       }
-    };
-
+    } catch (error) {
+      console.error("Error fetching drawings:", error);
+    }
+  };
+  useEffect(() => {
     fetchDrawings();
   }, [selectedProject]);
 
-  const handleUploadSubmit = (data) => {
+  const handleUploadSubmit = async (data) => {
+    await fetchDrawings(); // Wait for fetch to complete before re-render
+    setShowUploadForm(false); // Close the form and show the table
+
     console.log("Form Submitted:", data);
     // Handle submission logic
   };
@@ -105,8 +106,18 @@ export default function AdminDesign({ selectedProject, onBack }) {
             {/* Filters and Tabs */}
             <div className="flex justify-between items-center gap-3 mb-4 bg-white w-full mt-4">
               <div className="flex gap-3">
-                {["All", "Architecture", "Interior", "Structural", "MEP", "Others"].map((tab, idx) => (
-                  <button key={idx} className="px-3 py-1 bg-white rounded hover:bg-gray-300 text-sm font-medium">
+                {[
+                  "All",
+                  "Architecture",
+                  "Interior",
+                  "Structural",
+                  "MEP",
+                  "Others",
+                ].map((tab, idx) => (
+                  <button
+                    key={idx}
+                    className="px-3 py-1 bg-white rounded hover:bg-gray-300 text-sm font-medium"
+                  >
                     {tab}
                   </button>
                 ))}
@@ -154,19 +165,38 @@ export default function AdminDesign({ selectedProject, onBack }) {
                     {filteredDrawings.map((drawing) => (
                       <tr key={drawing.id} className="text-gray-700 text-sm">
                         <td className="px-4 py-3">
-                          {drawing.document_path && JSON.parse(drawing.document_path).map((path, index) => (
-                            <a key={index} href={path} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                              View Document {index + 1}
-                            </a>
-                          ))}
+                          {drawing.document_path &&
+                            JSON.parse(drawing.document_path).map(
+                              (path, index) => (
+                                <a
+                                  key={index}
+                                  href={path}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  View Document {index + 1}
+                                </a>
+                              )
+                            )}
                         </td>
                         <td className="px-4 py-3">{drawing.name}</td>
-                        <td className="px-4 py-3">{drawing.latest_version_path ? "v1.0" : "N/A"}</td>
+                        <td className="px-4 py-3">
+                          {drawing.latest_version_path ? "v1.0" : "N/A"}
+                        </td>
                         <td className="px-4 py-3">{drawing.discipline}</td>
-                        <td className="px-4 py-3">{new Date(drawing.created_date).toLocaleDateString()}</td>
+                        <td className="px-4 py-3">
+                          {new Date(drawing.created_date).toLocaleDateString()}
+                        </td>
                         <td className="px-4 py-3">{drawing.status}</td>
-                        <td className="px-4 py-3">{drawing.sent_by || "Unassigned"}</td>
-                        <td className="px-4 py-3">{drawing.previous_versions === "NULL" ? "None" : drawing.previous_versions}</td>
+                        <td className="px-4 py-3">
+                          {drawing.sent_by || "Unassigned"}
+                        </td>
+                        <td className="px-4 py-3">
+                          {drawing.previous_versions === "NULL"
+                            ? "None"
+                            : drawing.previous_versions}
+                        </td>
                         <td className="px-4 py-3">
                           <button className="text-sm text-purple-600 hover:underline">
                             View
@@ -176,7 +206,10 @@ export default function AdminDesign({ selectedProject, onBack }) {
                     ))}
                     {filteredDrawings.length === 0 && (
                       <tr>
-                        <td colSpan="9" className="text-center text-gray-500 py-6">
+                        <td
+                          colSpan="9"
+                          className="text-center text-gray-500 py-6"
+                        >
                           No drawings found.
                         </td>
                       </tr>

@@ -69,15 +69,16 @@ export default function ProjectList({ projects, onDelete, onManage }) {
                     )}
                   </td>
                   <td className="p-3 ">
-                    <button
+                    {/* <button
                       onClick={() => onDelete(index)}
                       className="px-3 py-1 mr-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
                     >
                       Delete
-                    </button>
-                    <button 
-                    onClick={() => onManage(project)} // 🔥 Pass the full project object
-                    className="px-3 py-1 text-sm font-medium text-white rounded-md bg-emerald-600 hover:bg-emerald-700">
+                    </button> */}
+                    <button
+                      onClick={() => onManage(project)} // 🔥 Pass the full project object
+                      className="px-3 py-1 text-sm font-medium text-white rounded-md bg-purple-600 hover:bg-purple-700"
+                    >
                       Manage
                     </button>
                   </td>

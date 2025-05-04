@@ -18,17 +18,18 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/auth/all`);
+
       if (!response.ok) throw new Error("Failed to fetch users");
       const data = await response.json();
       setUsers(Array.isArray(data) ? data : data.users || []);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
-  }
+  };
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchUsers();
-  }, [users]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,9 +47,7 @@ export default function Users() {
 
       if (!response.ok) throw new Error("Failed to add user");
 
-      const newUser = await response.json();
-      setUsers((prev) => [...prev, newUser.user || newUser]);
-      fetchUsers();
+      await fetchUsers();
 
       setFormData({
         username: "",
