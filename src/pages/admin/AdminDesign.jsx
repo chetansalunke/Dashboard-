@@ -1,44 +1,78 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import BASE_URL from "../../config";
 import UploadDrawingForm from "./UploadDrawingForm";
+import { FiMoreHorizontal } from "react-icons/fi";
 
 export default function AdminDesign({ selectedProject, onBack }) {
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [drawings, setDrawings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("All");
+  const [sortOption, setSortOption] = useState(""); // 'date' or 'a-z'
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showActionDropdown, setShowActionDropdown] = useState(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
-    const fetchDrawings = async () => {
-      if (!selectedProject?.projectId) return; // ✅ Corrected condition
-
-      try {
-        const response = await fetch(
-          `${BASE_URL}/api/projects/design_drawing/${selectedProject.projectId}` // http://localhost:3000/api/projects/design_drawing/2
-        );
-        if (!response.ok) throw new Error("Failed to fetch drawings");
-
-        const data = await response.json();
-        if (data && Array.isArray(data.designDrawings)) {
-          setDrawings(data.designDrawings);
-        } else {
-          setDrawings([]);
-        }
-      } catch (error) {
-        console.error("Error fetching drawings:", error);
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowActionDropdown(null);
       }
     };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const fetchDrawings = async () => {
+    if (!selectedProject?.projectId) return;
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/projects/design_drawing/${selectedProject.projectId}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch drawings");
+
+      const data = await response.json();
+      if (data && Array.isArray(data.designDrawings)) {
+        setDrawings(data.designDrawings);
+      } else {
+        setDrawings([]);
+      }
+    } catch (error) {
+      console.error("Error fetching drawings:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchDrawings();
   }, [selectedProject]);
 
-  const handleUploadSubmit = (data) => {
-    console.log("Form Submitted:", data);
-    // Handle submission logic
+  const handleUploadSubmit = async (data) => {
+    setShowUploadForm(false);
+    await fetchDrawings();
   };
 
-  const filteredDrawings = drawings.filter((drawing) =>
-    drawing.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDrawings = drawings.filter((drawing) => {
+    const matchesSearch = drawing.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesDiscipline =
+      activeTab === "All" || drawing.discipline === activeTab;
+    return matchesSearch && matchesDiscipline;
+  });
+
+  const sortedDrawings = [...filteredDrawings].sort((a, b) => {
+    if (sortOption === "date") {
+      return new Date(b.created_date) - new Date(a.created_date);
+    } else if (sortOption === "a-z") {
+      return a.name.localeCompare(b.name);
+    }
+    return 0;
+  });
 
   return (
     <div className="bg-gray-100">
@@ -80,20 +114,19 @@ export default function AdminDesign({ selectedProject, onBack }) {
                     className="w-full pl-10 pr-2 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md focus:border-purple-500 focus:ring focus:ring-purple-200 focus:outline-none"
                     type="text"
                     placeholder="Search"
-                    aria-label="Search"
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
 
                 <button
                   onClick={() => setShowUploadForm(true)}
-                  className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                  className="px-3 py-1 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
                 >
                   Upload Drawing
                 </button>
                 <button
                   onClick={onBack}
-                  className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                  className="px-3 py-1 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
                 >
                   Back
                 </button>
@@ -105,31 +138,88 @@ export default function AdminDesign({ selectedProject, onBack }) {
             {/* Filters and Tabs */}
             <div className="flex justify-between items-center gap-3 mb-4 bg-white w-full mt-4">
               <div className="flex gap-3">
-                {["All", "Architecture", "Interior", "Structural", "MEP", "Others"].map((tab, idx) => (
-                  <button key={idx} className="px-3 py-1 bg-white rounded hover:bg-gray-300 text-sm font-medium">
+                {[
+                  "All",
+                  "Architecture",
+                  "Interior",
+                  "Structural",
+                  "MEP",
+                  "Others",
+                ].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-3 py-1 rounded text-sm font-medium ${
+                      activeTab === tab
+                        ? "bg-purple-600 text-white"
+                        : "bg-white hover:bg-gray-300 text-gray-700"
+                    }`}
+                  >
                     {tab}
                   </button>
                 ))}
               </div>
 
               <div className="flex gap-4">
-                <select className="text-sm border border-gray-300 rounded-lg px-8 py-2 shadow-sm">
-                  <option disabled selected>
-                    Filter By
-                  </option>
-                  <option value="version">Version</option>
-                  <option value="sentBy">Sent By</option>
-                  <option value="status">Status</option>
-                  <option value="discipline">Discipline</option>
-                </select>
+                {/* Custom Filter Dropdown (same styling as Sort By) */}
+                {/* <div className="relative">
+                  <button
+                    onClick={() => setShowFilterDropdown((prev) => !prev)}
+                    className="px-3 py-1 bg-white border text-sm font-medium rounded hover:bg-gray-100"
+                  >
+                    Filter By ▼
+                  </button>
+                  {showFilterDropdown && (
+                    <div className="absolute left-0 mt-1 w-44 bg-white border shadow-lg rounded text-sm z-20">
+                      {["Version", "Sent By", "Status", "Discipline"].map(
+                        (filter) => (
+                          <button
+                            key={filter}
+                            onClick={() => {
+                              // Handle filter selection here
+                              setShowFilterDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                          >
+                            {filter}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div> */}
 
-                <select className="text-sm border border-gray-300 rounded-lg px-8 py-2 shadow-sm">
-                  <option disabled selected>
-                    Sort By
-                  </option>
-                  <option value="date">Date</option>
-                  <option value="aToZ">A to Z</option>
-                </select>
+                {/* Custom Sort Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="px-3 py-1 bg-white border text-sm font-medium rounded hover:bg-gray-100"
+                  >
+                    Sort by ▼
+                  </button>
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-1 w-44 bg-white border shadow-lg rounded text-sm z-20">
+                      <button
+                        onClick={() => {
+                          setSortOption("date");
+                          setShowDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        Date
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSortOption("a-z");
+                          setShowDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        A to Z
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -151,32 +241,83 @@ export default function AdminDesign({ selectedProject, onBack }) {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y">
-                    {filteredDrawings.map((drawing) => (
+                    {sortedDrawings.map((drawing) => (
                       <tr key={drawing.id} className="text-gray-700 text-sm">
                         <td className="px-4 py-3">
-                          {drawing.document_path && JSON.parse(drawing.document_path).map((path, index) => (
-                            <a key={index} href={path} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                              View Document {index + 1}
-                            </a>
-                          ))}
+                          {drawing.document_path &&
+                            JSON.parse(drawing.document_path).map(
+                              (path, index) => (
+                                <a
+                                  key={index}
+                                  href={path}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  Document {index + 1}
+                                </a>
+                              )
+                            )}
                         </td>
                         <td className="px-4 py-3">{drawing.name}</td>
-                        <td className="px-4 py-3">{drawing.latest_version_path ? "v1.0" : "N/A"}</td>
-                        <td className="px-4 py-3">{drawing.discipline}</td>
-                        <td className="px-4 py-3">{new Date(drawing.created_date).toLocaleDateString()}</td>
-                        <td className="px-4 py-3">{drawing.status}</td>
-                        <td className="px-4 py-3">{drawing.sent_by || "Unassigned"}</td>
-                        <td className="px-4 py-3">{drawing.previous_versions === "NULL" ? "None" : drawing.previous_versions}</td>
                         <td className="px-4 py-3">
-                          <button className="text-sm text-purple-600 hover:underline">
-                            View
-                          </button>
+                          {drawing.latest_version_path ? "v1.0" : "N/A"}
+                        </td>
+                        <td className="px-4 py-3">{drawing.discipline}</td>
+                        <td className="px-4 py-3">
+                          {new Date(drawing.created_date).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3">{drawing.status}</td>
+                        <td className="px-4 py-3">
+                          {drawing.sent_by || "Unassigned"}
+                        </td>
+                        <td className="px-4 py-3">
+                          {drawing.previous_versions === "NULL"
+                            ? "None"
+                            : drawing.previous_versions}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div
+                            ref={dropdownRef}
+                            className="inline-block text-left"
+                          >
+                            <button
+                              onClick={() =>
+                                setShowActionDropdown((prev) =>
+                                  prev === drawing.id ? null : drawing.id
+                                )
+                              }
+                              className="p-1 rounded-full hover:bg-gray-200"
+                            >
+                              <FiMoreHorizontal className="w-5 h-5 text-gray-600" />
+                            </button>
+
+                            {showActionDropdown === drawing.id && (
+                              <div className="absolute right-10 z-10 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg text-sm">
+                                <button className="block w-full px-4 py-2 text-left hover:bg-gray-100">
+                                  Submit to client
+                                </button>
+                                <button className="block w-full px-4 py-2 text-left hover:bg-gray-100">
+                                  Share
+                                </button>
+                                <button className="block w-full px-4 py-2 text-left hover:bg-gray-100">
+                                  Rename
+                                </button>
+                                <button className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100">
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
-                    {filteredDrawings.length === 0 && (
+                    {sortedDrawings.length === 0 && (
                       <tr>
-                        <td colSpan="9" className="text-center text-gray-500 py-6">
+                        <td
+                          colSpan="9"
+                          className="text-center text-gray-500 py-6"
+                        >
                           No drawings found.
                         </td>
                       </tr>
