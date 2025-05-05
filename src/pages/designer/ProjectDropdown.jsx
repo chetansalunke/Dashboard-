@@ -39,9 +39,15 @@ const ProjectDropdown = ({ userId, onSelectProject }) => {
         className={`w-full border border-gray-300 rounded-lg px-2 py-2 shadow-sm text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:focus:shadow-outline-gray 
             `}
       >
-        <option value=""className="text-sm font-semibold text-gray-700">-- Select Project --</option>
+        <option value="" className="text-sm font-semibold text-gray-700">
+          -- All Projects --
+        </option>
         {projects.map((project) => (
-          <option key={project.id} value={project.id} className="text-sm font-semibold text-gray-700">
+          <option
+            key={project.id}
+            value={project.id}
+            className="text-sm font-semibold text-gray-700"
+          >
             {project.projectName}
           </option>
         ))}
