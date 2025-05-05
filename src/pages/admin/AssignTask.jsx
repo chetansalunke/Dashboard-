@@ -302,11 +302,11 @@ export default function AssignTask({ selectedProject, users }) {
           </button>
         </div>
 
-        <div className="w-full overflow-hidden rounded-lg shadow-lg">
-          <div className="w-full overflow-x-auto">
-            <table className="w-full whitespace-no-wrap">
+        <div className="w-full overflow-hidden rounded-lg shadow-xs mt-6">
+          <div className="w-full">
+            <table className="w-full table-fixed">
               <thead>
-                <tr className="text-xs font-semibold text-left text-gray-500 uppercase border-b bg-gray-50">
+                <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b bg-gray-50">
                   <th className="px-4 py-3">Task Name</th>
                   <th className="px-4 py-3">Priority</th>
                   <th className="px-4 py-3">Start Date</th>
@@ -314,37 +314,27 @@ export default function AssignTask({ selectedProject, users }) {
                   <th className="px-4 py-3">Assigned To</th>
                   <th className="px-4 py-3">Checklist</th>
                   <th className="px-4 py-3">Attachments</th>
+                  <th className="px-4 py-3">Status</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y">
                 {isLoading ? (
-                  <tr>
-                    <td
-                      colSpan="7"
-                      className="px-4 py-8 text-center text-gray-500"
-                    >
+                  <tr className="text-gray-700">
+                    <td colSpan="7" className="px-4 py-3 text-sm">
                       Loading tasks...
                     </td>
                   </tr>
                 ) : tasks.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="7"
-                      className="px-4 py-8 text-center text-gray-500"
-                    >
+                  <tr className="text-gray-700">
+                    <td colSpan="7" className="px-4 py-3 text-sm">
                       No tasks found. Add a new task below.
                     </td>
                   </tr>
                 ) : (
                   tasks.map((task, idx) => (
-                    <tr
-                      key={task.id || idx}
-                      className="text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-4 py-3 text-sm font-medium">
-                        {task.taskName}
-                      </td>
-                      <td className="px-4 py-3">
+                    <tr key={task.id || idx} className="text-gray-700">
+                      <td className="px-4 py-3 text-sm">{task.taskName}</td>
+                      <td className="px-4 py-3 text-sm">
                         <span
                           className={`px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(
                             task.priority
@@ -365,19 +355,19 @@ export default function AssignTask({ selectedProject, users }) {
                           {formatDate(task.dueDate)}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-sm">
                         <div className="flex items-center">
                           <div className="w-8 h-8 mr-2 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-medium">
                             {task.assignedTo
                               ? task.assignedTo.charAt(0).toUpperCase()
                               : "?"}
                           </div>
-                          <span className="text-sm">
-                            {task.assignedTo || "—"}
-                          </span>
+                          {/* <span className="text-sm"> */}
+                          {task.assignedTo || "—"}
+                          {/* </span> */}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-sm">
                         {Array.isArray(task.checklist) &&
                         task.checklist.length > 0 ? (
                           <button
@@ -385,9 +375,8 @@ export default function AssignTask({ selectedProject, users }) {
                             className="flex items-center text-blue-600 hover:text-blue-800"
                           >
                             <List size={16} className="mr-1" />
-                            <span className="underline">
-                              View ({task.checklist.length})
-                            </span>
+                            {/* <span className="underline"> */}
+                            View ({task.checklist.length}){/* </span> */}
                           </button>
                         ) : (
                           <span className="text-gray-500 flex items-center">
@@ -396,16 +385,15 @@ export default function AssignTask({ selectedProject, users }) {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-sm">
                         {task.attachments > 0 ? (
                           <button
                             onClick={() => handleAttachmentClick(task)}
                             className="flex items-center text-blue-600 hover:text-blue-800"
                           >
                             <Paperclip size={16} className="mr-1" />
-                            <span className="underline">
-                              View ({task.attachments})
-                            </span>
+                            {/* <span className="underline"> */}
+                            View ({task.attachments}){/* </span> */}
                           </button>
                         ) : (
                           <span className="text-gray-500 flex items-center">
@@ -417,6 +405,7 @@ export default function AssignTask({ selectedProject, users }) {
                           </span>
                         )}
                       </td>
+                      <td className="px-4 py-3 text-sm">{task.status}</td>
                     </tr>
                   ))
                 )}
@@ -500,6 +489,7 @@ export default function AssignTask({ selectedProject, users }) {
                         <input
                           type="file"
                           ref={fileInputRef}
+                          multiple
                           onChange={(e) =>
                             setNewTask({
                               ...newTask,
