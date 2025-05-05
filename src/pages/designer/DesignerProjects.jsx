@@ -83,6 +83,7 @@ export default function DesignerProjects() {
     localStorage.setItem("selectedProject", JSON.stringify({ projectId, projectName }));
     navigate("/designer-dashboard/projects/design");
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">

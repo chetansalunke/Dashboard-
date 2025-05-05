@@ -62,7 +62,6 @@ export default function Projects() {
       <main className="h-full overflow-y-auto">
         <div className="container px-6 my-6 grid">
           <div className="flex justify-between items-center">
-
             <h1 className="text-xl font-semibold tracking-wide text-gray-500 uppercase ">
               {!isFormOpen
                 ? "Projects"
@@ -94,7 +93,7 @@ export default function Projects() {
               users={users}
               setIsFormOpen={setIsFormOpen}
               fetchProjects={fetchProjects}
-              selectedProject={selectedProject} 
+              selectedProject={selectedProject}
             />
           ) : (
             <ProjectList
