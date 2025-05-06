@@ -3,10 +3,12 @@ import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import BASE_URL from "../../config";
 import ProjectList from "./ProjectList";
 import ProjectTabs from "./ProjectTabs";
+import ProjectForm from "./ProjectForm";
 
 export default function Projects() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [users, setUsers] = useState([]);
+  const [isNewProject, setIsNewProject] = useState(false);
   const [projectList, setProjectList] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,13 +44,21 @@ export default function Projects() {
     fetchProjects();
   }, []);
 
+  const handleCreateClick = () => {
+    setIsFormOpen(true);
+    setIsNewProject(true);
+    setSelectedProject(null);
+  };
+
   const handleManageClick = (project) => {
     setSelectedProject(project);
     setIsFormOpen(true);
+    setIsNewProject(false);
   };
 
   const handleBack = () => {
     setIsFormOpen(false);
+    setIsNewProject(false);
     setSelectedProject(null);
   };
 
@@ -63,9 +73,9 @@ export default function Projects() {
           <h1 className="text-xl font-semibold text-gray-700">
             {!isFormOpen
               ? "Manage Projects"
-              : selectedProject
-              ? `Project: ${selectedProject.projectName}`
-              : "Create Project"}
+              : isNewProject
+              ? "Create Project"
+              : `Project: ${selectedProject?.projectName}`}
           </h1>
           <div>
             {isFormOpen ? (
@@ -77,7 +87,7 @@ export default function Projects() {
               </button>
             ) : (
               <button
-                onClick={() => setIsFormOpen(true)}
+                onClick={handleCreateClick}
                 className="flex items-center px-4 py-2 bg-purple-600 rounded-md text-sm font-medium text-white hover:bg-purple-700"
               >
                 <FaPlus className="mr-2" size={12} /> Create Project
@@ -91,12 +101,20 @@ export default function Projects() {
             <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
           </div>
         ) : isFormOpen ? (
-          <ProjectTabs
-            users={users}
-            setIsFormOpen={setIsFormOpen}
-            fetchProjects={fetchProjects}
-            selectedProject={selectedProject}
-          />
+          isNewProject ? (
+            <ProjectForm
+              users={users}
+              setIsFormOpen={setIsFormOpen}
+              fetchProjects={fetchProjects}
+            />
+          ) : (
+            <ProjectTabs
+              users={users}
+              setIsFormOpen={setIsFormOpen}
+              fetchProjects={fetchProjects}
+              selectedProject={selectedProject}
+            />
+          )
         ) : (
           <ProjectList
             projects={projectList}

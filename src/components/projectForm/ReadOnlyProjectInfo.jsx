@@ -17,6 +17,7 @@ export default function ReadOnlyProjectInfo({
     projectid: "",
     clientId: null,
     consultantId: null,
+    documents: [], // Added for project documents
   });
 
   const [clientInfo, setClientInfo] = useState({
@@ -30,6 +31,8 @@ export default function ReadOnlyProjectInfo({
     phone_number: "",
     username: "",
   });
+  console.log("selected project ");
+  console.log(selectedProject);
 
   useEffect(() => {
     if (selectedProject) {
@@ -48,6 +51,13 @@ export default function ReadOnlyProjectInfo({
             })
           : "Not specified";
 
+      // Fix: Check all possible document field names
+      const projectDocuments =
+        selectedProject.projectDocuments ||
+        selectedProject.documents ||
+        selectedProject.project_documents ||
+        [];
+
       setProjectData({
         projectName: selectedProject.projectName || "Not specified",
         siteaddress: selectedProject.site_address || "Not specified",
@@ -59,6 +69,7 @@ export default function ReadOnlyProjectInfo({
         projectid: selectedProject.project_id || "Not specified",
         clientId: selectedProject.client_id || null,
         consultantId: selectedProject.consultant_id || null,
+        documents: projectDocuments, // Use our fixed documents variable
       });
 
       // Load client and consultant info
@@ -87,6 +98,108 @@ export default function ReadOnlyProjectInfo({
     }
   };
 
+  // Helper function to determine document icon based on file type
+  const getDocumentIcon = (fileName) => {
+    const extension = fileName.split(".").pop().toLowerCase();
+
+    if (["pdf"].includes(extension)) {
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-red-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+          />
+        </svg>
+      );
+    } else if (["doc", "docx"].includes(extension)) {
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-blue-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+      );
+    } else if (["xls", "xlsx"].includes(extension)) {
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-green-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+      );
+    } else if (["jpg", "jpeg", "png", "gif"].includes(extension)) {
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-purple-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
+        </svg>
+      );
+    } else {
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-gray-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+      );
+    }
+  };
+
+  // Function to format file size
+  const formatFileSize = (bytes) => {
+    if (!bytes) return "Unknown size";
+
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    if (bytes === 0) return "0 Byte";
+    const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return Math.round(bytes / Math.pow(1024, i), 2) + " " + sizes[i];
+  };
+
   const InfoField = ({ label, value }) => (
     <div className="mb-4">
       <label className="block text-sm font-medium text-gray-500 mb-1">
@@ -97,6 +210,11 @@ export default function ReadOnlyProjectInfo({
       </div>
     </div>
   );
+
+  // Check if we have documents to display
+  const hasDocuments =
+    projectData.documents && projectData.documents.length > 0;
+  console.log("Documents available:", hasDocuments, projectData.documents);
 
   return (
     <div className="space-y-4">
@@ -334,34 +452,95 @@ export default function ReadOnlyProjectInfo({
           </div>
         </div>
 
-        {/* Documents Section - Placeholder since we can't show actual documents */}
+        {/* Documents Section */}
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b">
             <span className="text-yellow-600 mr-2">●</span>Project Documents
           </h3>
 
-          <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8 text-gray-400 mx-auto mb-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <p className="text-gray-600">
-              Project documents are available for viewing
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              Contact administrator for access
-            </p>
-          </div>
+          {hasDocuments ? (
+            <div className="space-y-3">
+              {projectData.documents.map((document, index) => {
+                // Handle different document formats - might be a URL string or an object
+                const docUrl =
+                  typeof document === "string"
+                    ? document
+                    : document.url || document.fileUrl || "";
+                // Extract filename from URL
+                const fileName = docUrl
+                  ? decodeURIComponent(docUrl.split("/").pop())
+                  : document.fileName ||
+                    document.name ||
+                    `Document ${index + 1}`;
+
+                return (
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between"
+                  >
+                    <div className="flex items-center">
+                      <div className="mr-3">{getDocumentIcon(fileName)}</div>
+                      <div>
+                        <h4 className="font-medium text-gray-800">
+                          {fileName || "Untitled Document"}
+                        </h4>
+                        <p className="text-xs text-gray-500">
+                          {/* We don't have file size information, so we'll omit that */}
+                          {document.uploadDate ||
+                            new Date().toLocaleDateString()}{" "}
+                          {/* Current date as fallback */}
+                        </p>
+                      </div>
+                    </div>
+                    <div>
+                      <a
+                        href={docUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-blue-600 hover:text-blue-800 focus:outline-none"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 text-gray-400 mx-auto mb-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <p className="text-gray-600">
+                No documents available for this project
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Contact administrator to upload documents
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
