@@ -75,7 +75,7 @@ export default function ProjectList({ projects, onDelete, onManage }) {
                   <td className="px-6 py-4">
                     <button
                       onClick={() => onManage(project)}
-                      className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded hover:bg-indigo-700 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded hover:bg-purple-700 transition-colors"
                     >
                       Manage
                     </button>

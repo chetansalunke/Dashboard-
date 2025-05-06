@@ -100,10 +100,9 @@ export default function ReadOnlyProjectInfo({
 
   return (
     <div className="space-y-4">
-      <div className="p-6 mt-4 bg-white rounded-lg shadow-md">
+      <div>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Project Details</h2>
-          <span className="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+          <span className="px-3 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
             ID: {projectData.projectid}
           </span>
         </div>
@@ -193,15 +192,15 @@ export default function ReadOnlyProjectInfo({
         {/* Client Information */}
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b">
-            <span className="text-blue-600 mr-2">●</span>Client Information
+            <span className="text-purple-600 mr-2">●</span>Client Information
           </h3>
 
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center mb-4">
-              <div className="bg-blue-100 p-3 rounded-full mr-4">
+              <div className="bg-purple-100 p-3 rounded-full mr-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-blue-600"
+                  className="h-6 w-6 text-purple-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

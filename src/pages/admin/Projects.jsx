@@ -62,7 +62,7 @@ export default function Projects() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-semibold text-gray-700">
             {!isFormOpen
-              ? "Projects"
+              ? "Manage Projects"
               : selectedProject
               ? `Project: ${selectedProject.projectName}`
               : "Create Project"}

@@ -176,7 +176,7 @@ export default function ProjectForm({ setIsFormOpen, selectedProject, users }) {
       });
 
       alert("Project uploaded successfully!");
-      console.log("✅ Project uploaded:", res.data);
+      console.log(" Project uploaded:", res.data);
 
       setFormData({
         projectName: "",
@@ -201,8 +201,8 @@ export default function ProjectForm({ setIsFormOpen, selectedProject, users }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-      <div className="px-6 py-6 mt-8 bg-white rounded-xl shadow-lg border border-gray-100">
+    <form onSubmit={handleSubmit}>
+      <div>
         <h2 className="text-2xl font-bold text-purple-700 mb-6">
           Project Details
         </h2>
