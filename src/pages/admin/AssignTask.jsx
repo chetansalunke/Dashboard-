@@ -335,10 +335,10 @@ export default function AssignTask({ selectedProject, users }) {
             </div>
           </div>
 
-          <button className="px-4 py-2 text-sm font-medium leading-5 text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow flex items-center">
+          {/* <button className="px-4 py-2 text-sm font-medium leading-5 text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow flex items-center">
             <AlertCircle size={16} className="mr-2" />
             Task Tracker
-          </button>
+          </button> */}
         </div>
 
         <div className="w-full overflow-hidden rounded-lg shadow-lg mt-6 bg-white">
