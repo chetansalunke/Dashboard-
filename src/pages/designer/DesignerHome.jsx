@@ -630,18 +630,88 @@ export default function DesignerHome() {
                           <div className="w-full lg:w-1/1 border border-gray-200 rounded-md p-4 bg-gray-50">
                             {selectedTask.assign_task_document ? (
                               <div className="flex flex-col items-center">
-                                {selectedTask.assign_task_document
-                                  .toLowerCase()
-                                  .endsWith(".pdf") && (
-                                  <iframe
-                                    src={`${BASE_URL}/${selectedTask.assign_task_document.replace(
+                                {(() => {
+                                  const filePath =
+                                    selectedTask.assign_task_document.replace(
                                       /\\/g,
                                       "/"
-                                    )}`}
-                                    title="Input Document Preview"
-                                    className="w-full h-[70vh] rounded border border-gray-300"
-                                  />
-                                )}
+                                    );
+                                  const fileUrl = `${BASE_URL}/${filePath}`;
+                                  const fileExtension = filePath
+                                    .split(".")
+                                    .pop()
+                                    .toLowerCase();
+
+                                  // Image formats that can be directly displayed
+                                  if (
+                                    [
+                                      "jpg",
+                                      "jpeg",
+                                      "png",
+                                      "gif",
+                                      "svg",
+                                      "webp",
+                                    ].includes(fileExtension)
+                                  ) {
+                                    return (
+                                      <div className="w-full flex justify-center">
+                                        <img
+                                          src={fileUrl}
+                                          alt="Document Preview"
+                                          className="max-w-full max-h-[70vh] object-contain rounded border border-gray-300"
+                                        />
+                                      </div>
+                                    );
+                                  }
+                                  // PDF files
+                                  else if (fileExtension === "pdf") {
+                                    return (
+                                      <iframe
+                                        src={fileUrl}
+                                        title="PDF Document Preview"
+                                        className="w-full h-[70vh] rounded border border-gray-300"
+                                      />
+                                    );
+                                  }
+                                  // All other file types (including RVT)
+                                  else {
+                                    return (
+                                      <div className="text-center py-10">
+                                        <div className="mb-4 text-6xl">📄</div>
+                                        <p className="text-gray-700 font-medium mb-2">
+                                          {filePath.split("/").pop()} (
+                                          {fileExtension.toUpperCase()})
+                                        </p>
+                                        <p className="text-gray-500 mb-4">
+                                          Direct preview not available for this
+                                          file type
+                                        </p>
+                                        <a
+                                          href={fileUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 inline-flex items-center"
+                                        >
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-4 w-4 mr-2"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                            />
+                                          </svg>
+                                          Download File
+                                        </a>
+                                      </div>
+                                    );
+                                  }
+                                })()}
                               </div>
                             ) : (
                               <p className="text-gray-500 text-sm">
