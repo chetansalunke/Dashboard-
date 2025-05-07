@@ -4,7 +4,7 @@ import { FaDownload } from "react-icons/fa";
 import BASE_URL from "../../config";
 import ProjectList from "../../components/Management/ProjectList";
 import ProjectTabs from "../../components/Management/ProjectTabs";
-
+import FeatureUnderDevelopment from "../../components/MaintainanceScreen/FeatureUnderDevelopment";
 export default function Managment() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [users, setUsers] = useState([]);
@@ -58,53 +58,56 @@ export default function Managment() {
   };
 
   return (
-    <div className="bg-gray-100">
-      <main className="h-full overflow-y-auto">
-        <div className="container px-6 my-6 grid">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold tracking-wide text-gray-500 uppercase ">
-              {!isFormOpen
-                ? "Projects"
-                : selectedProject
-                ? selectedProject.projectName
-                : "Create Project"}
-            </h1>
-            <div className="flex justify-end gap-2">
-              {isFormOpen ? (
-                <button
-                  onClick={handleBack}
-                  className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
-                >
-                  Back
-                </button>
-              ) : (
-                <button
-                  onClick={() => setIsFormOpen(true)}
-                  className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
-                >
-                  Create Project
-                </button>
-              )}
-            </div>
-          </div>
+    <>
+      <FeatureUnderDevelopment />
+    </>
+    // <div className="bg-gray-100">
+    //   <main className="h-full overflow-y-auto">
+    //     <div className="container px-6 my-6 grid">
+    //       <div className="flex justify-between items-center">
+    //         <h1 className="text-xl font-semibold tracking-wide text-gray-500 uppercase ">
+    //           {!isFormOpen
+    //             ? "Projects"
+    //             : selectedProject
+    //             ? selectedProject.projectName
+    //             : "Create Project"}
+    //         </h1>
+    //         <div className="flex justify-end gap-2">
+    //           {isFormOpen ? (
+    //             <button
+    //               onClick={handleBack}
+    //               className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
+    //             >
+    //               Back
+    //             </button>
+    //           ) : (
+    //             <button
+    //               onClick={() => setIsFormOpen(true)}
+    //               className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
+    //             >
+    //               Create Project
+    //             </button>
+    //           )}
+    //         </div>
+    //       </div>
 
-          {isFormOpen ? (
-            <ProjectTabs
-              users={users}
-              setIsFormOpen={setIsFormOpen}
-              fetchProjects={fetchProjects}
-              selectedProject={selectedProject}
-            />
-          ) : (
-            <ProjectList
-              projects={projectList}
-              onDelete={handleDelete}
-              fetchProjects={fetchProjects}
-              onManage={handleManageClick}
-            />
-          )}
-        </div>
-      </main>
-    </div>
+    //       {isFormOpen ? (
+    //         <ProjectTabs
+    //           users={users}
+    //           setIsFormOpen={setIsFormOpen}
+    //           fetchProjects={fetchProjects}
+    //           selectedProject={selectedProject}
+    //         />
+    //       ) : (
+    //         <ProjectList
+    //           projects={projectList}
+    //           onDelete={handleDelete}
+    //           fetchProjects={fetchProjects}
+    //           onManage={handleManageClick}
+    //         />
+    //       )}
+    //     </div>
+    //   </main>
+    // </div>
   );
 }

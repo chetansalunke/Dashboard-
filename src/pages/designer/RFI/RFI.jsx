@@ -5,7 +5,8 @@ import RfiTable from "./RfiTable";
 import CreateRFIForm from "./CreateRFIForm";
 import RfiControls from "./RfiControls";
 import RFIResolveForm from "./RFIResolveForm";
-
+import { FaUserCircle } from "react-icons/fa";
+import FeatureUnderDevelopment from "../../../components/MaintainanceScreen/FeatureUnderDevelopment";
 export default function RFI() {
   const [rfis, setRfis] = useState([]);
   const [filteredRfis, setFilteredRfis] = useState([]);
@@ -201,86 +202,90 @@ export default function RFI() {
   };
 
   return (
-    <div className="bg-gray-100">
-      <main className="h-full w-full overflow-y-auto">
-        <div className="container px-6 my-6 grid">
-          <h1 className="text-xl font-semibold tracking-wide text-black uppercase mb-1">
-            {selectedProjectName && `${selectedProjectName}`}
-          </h1>
-          <div className="flex justify-between">
-            {!showForm && !resolvingRfi && (
-              <ProjectDropdown
-                projectList={projectList}
-                selectedProjectId={selectedProjectId}
-                onChange={(selectedId) => {
-                  setSelectedProjectId(selectedId);
-                  const selectedProject = projectList.find(
-                    (p) => p.id === Number(selectedId)
-                  );
-                  setSelectedProjectName(selectedProject?.projectName || "");
-                }}
-              />
-            )}
+    <>
+      {" "}
+      <FeatureUnderDevelopment />
+    </>
+    // <div className="bg-gray-100">
+    //   <main className="h-full w-full overflow-y-auto">
+    //     <div className="container px-6 my-6 grid">
+    //       <h1 className="text-xl font-semibold tracking-wide text-black uppercase mb-1">
+    //         {selectedProjectName && `${selectedProjectName}`}
+    //       </h1>
+    //       <div className="flex justify-between">
+    //         {!showForm && !resolvingRfi && (
+    //           <ProjectDropdown
+    //             projectList={projectList}
+    //             selectedProjectId={selectedProjectId}
+    //             onChange={(selectedId) => {
+    //               setSelectedProjectId(selectedId);
+    //               const selectedProject = projectList.find(
+    //                 (p) => p.id === Number(selectedId)
+    //               );
+    //               setSelectedProjectName(selectedProject?.projectName || "");
+    //             }}
+    //           />
+    //         )}
 
-            {selectedProjectId && !showForm && !resolvingRfi && (
-              <RfiControls
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                onSearchChange={setSearchText}
-                onCreateClick={() => setShowForm(true)}
-              />
-            )}
-          </div>
-          <hr className="border border-gray-400 m-2" />
+    //         {selectedProjectId && !showForm && !resolvingRfi && (
+    //           <RfiControls
+    //             activeTab={activeTab}
+    //             setActiveTab={setActiveTab}
+    //             onSearchChange={setSearchText}
+    //             onCreateClick={() => setShowForm(true)}
+    //           />
+    //         )}
+    //       </div>
+    //       <hr className="border border-gray-400 m-2" />
 
-          {selectedProjectId && showForm && (
-            <CreateRFIForm
-              formData={formData}
-              setFormData={setFormData}
-              users={users}
-              userID={userID}
-              selectedProjectId={selectedProjectId}
-              onClose={() => setShowForm(false)}
-              onSubmit={handleSubmit}
-            />
-          )}
+    //       {selectedProjectId && showForm && (
+    //         <CreateRFIForm
+    //           formData={formData}
+    //           setFormData={setFormData}
+    //           users={users}
+    //           userID={userID}
+    //           selectedProjectId={selectedProjectId}
+    //           onClose={() => setShowForm(false)}
+    //           onSubmit={handleSubmit}
+    //         />
+    //       )}
 
-          {resolvingRfi && (
-            <RFIResolveForm
-              rfi={resolvingRfi}
-              users={users}
-              token={token}
-              onCancel={() => setResolvingRfi(null)}
-              onSuccess={() => {
-                setResolvingRfi(null);
-                fetchRfis(selectedProjectId);
-              }}
-            />
-          )}
+    //       {resolvingRfi && (
+    //         <RFIResolveForm
+    //           rfi={resolvingRfi}
+    //           users={users}
+    //           token={token}
+    //           onCancel={() => setResolvingRfi(null)}
+    //           onSuccess={() => {
+    //             setResolvingRfi(null);
+    //             fetchRfis(selectedProjectId);
+    //           }}
+    //         />
+    //       )}
 
-          {!showForm && !resolvingRfi && (
-            <RfiTable
-              rfis={selectedProjectId ? filteredRfis : []}
-              users={users}
-              userID={userID}
-              onResolve={(rfi) => setResolvingRfi(rfi)}
-            />
-          )}
-          {!selectedProjectId && (
-            <p className="text-center text-gray-500 mt-4">
-              Please select a project.
-            </p>
-          )}
-          {selectedProjectId && !loading && filteredRfis.length === 0 && (
-            <p className="text-center text-gray-500 mt-4">
-              No RFIs found for this project.
-            </p>
-          )}
-          {selectedProjectId && loading && (
-            <p className="text-center text-gray-500 mt-4">Loading RFIs...</p>
-          )}
-        </div>
-      </main>
-    </div>
+    //       {!showForm && !resolvingRfi && (
+    //         <RfiTable
+    //           rfis={selectedProjectId ? filteredRfis : []}
+    //           users={users}
+    //           userID={userID}
+    //           onResolve={(rfi) => setResolvingRfi(rfi)}
+    //         />
+    //       )}
+    //       {!selectedProjectId && (
+    //         <p className="text-center text-gray-500 mt-4">
+    //           Please select a project.
+    //         </p>
+    //       )}
+    //       {selectedProjectId && !loading && filteredRfis.length === 0 && (
+    //         <p className="text-center text-gray-500 mt-4">
+    //           No RFIs found for this project.
+    //         </p>
+    //       )}
+    //       {selectedProjectId && loading && (
+    //         <p className="text-center text-gray-500 mt-4">Loading RFIs...</p>
+    //       )}
+    //     </div>
+    //   </main>
+    // </div>
   );
 }

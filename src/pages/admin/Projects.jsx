@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaArrowLeft, FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaPlus, FaSync } from "react-icons/fa";
 import BASE_URL from "../../config";
 import ProjectList from "./ProjectList";
 import ProjectTabs from "./ProjectTabs";
@@ -12,20 +12,38 @@ export default function Projects() {
   const [projectList, setProjectList] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchProjects = async () => {
     setIsLoading(true);
+    setError(null); // Reset error before trying again
     try {
       const response = await fetch(`${BASE_URL}/api/projects/all`);
-      if (!response.ok) throw new Error("HTTP error!");
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Projects not found (404)");
+        } else {
+          throw new Error(`Server Error (${response.status})`);
+        }
+      }
+
       const data = await response.json();
       setProjectList(Array.isArray(data.projects) ? data.projects : []);
     } catch (error) {
       console.error("Error fetching projects:", error);
-      setProjectList([]);
+      setError(error.message || "Unknown error");
+      setProjectList([]); // Clear existing list on error
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchProjects();
   };
 
   const fetchUsers = async () => {
@@ -60,6 +78,8 @@ export default function Projects() {
     setIsFormOpen(false);
     setIsNewProject(false);
     setSelectedProject(null);
+    // Refresh the project list when returning to the list view
+    fetchProjects();
   };
 
   const handleDelete = (index) => {
@@ -77,7 +97,25 @@ export default function Projects() {
               ? "Create Project"
               : `Project: ${selectedProject?.projectName}`}
           </h1>
-          <div>
+          <div className="flex gap-3">
+            {!isFormOpen && (
+              <button
+                onClick={handleRefresh}
+                className={`flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium ${
+                  isRefreshing ? "text-purple-600" : "text-gray-700"
+                } hover:bg-gray-50 transition-all duration-300`}
+                disabled={isRefreshing}
+              >
+                <FaSync
+                  className={`mr-2 ${
+                    isRefreshing ? "animate-spin text-purple-600" : ""
+                  }`}
+                  size={12}
+                />
+                {isRefreshing ? "Refreshing..." : "Refresh"}
+              </button>
+            )}
+
             {isFormOpen ? (
               <button
                 onClick={handleBack}
@@ -115,6 +153,16 @@ export default function Projects() {
               selectedProject={selectedProject}
             />
           )
+        ) : projectList.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-gray-500 mb-4">No projects found</div>
+            <button
+              onClick={handleRefresh}
+              className="flex items-center px-4 py-2 mx-auto bg-purple-100 rounded-md text-sm font-medium text-purple-700 hover:bg-purple-200"
+            >
+              <FaSync className="mr-2" size={12} /> Refresh Projects
+            </button>
+          </div>
         ) : (
           <ProjectList
             projects={projectList}

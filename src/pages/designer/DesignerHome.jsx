@@ -62,9 +62,16 @@ export default function DesignerHome() {
       const user = JSON.parse(storedUser);
       const username = user?.username || "";
 
+      const token = localStorage.getItem("accessToken");
+
       try {
         const response = await fetch(
-          `${BASE_URL}/api/projects/assigned-projects/${usernameID}`
+          `${BASE_URL}/api/projects/assigned-projects/${usernameID}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (!response.ok) throw new Error("Failed to fetch projects");
         const data = await response.json();
@@ -87,12 +94,7 @@ export default function DesignerHome() {
     const fetchTasks = async () => {
       try {
         const response = await axios.get(
-          `${BASE_URL}/api/projects/assigned-tasks/${usernameID}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `${BASE_URL}/api/projects/assigned-tasks/${usernameID}`
         );
         const allTasks = response.data.tasks || [];
 
@@ -207,7 +209,9 @@ export default function DesignerHome() {
   };
 
   const handleSubmit = async () => {
+    console.log("outside the try");
     try {
+      console.log("Inside try make complete button");
       // Check if all items are checked
       const allChecked = Object.values(checkedItems).every(
         (value) => value === true

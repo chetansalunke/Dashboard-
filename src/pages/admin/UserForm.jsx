@@ -109,6 +109,7 @@ const UserForm = ({ formData, handleChange, handleSubmit }) => {
               <option value="designer">Designer</option>
               <option value="expert">Expert</option>
               <option value="client">Client</option>
+              <option value="consultant">Consultant</option>
             </select>
           </div>
 

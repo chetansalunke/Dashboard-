@@ -16,7 +16,12 @@ import {
   FiPhone,
 } from "react-icons/fi";
 
-export default function ProjectForm({ setIsFormOpen, selectedProject, users }) {
+export default function ProjectForm({
+  setIsFormOpen,
+  selectedProject,
+  users,
+  fetchProjects,
+}) {
   const token = localStorage.getItem("accessToken");
 
   const [formData, setFormData] = useState({
@@ -192,6 +197,11 @@ export default function ProjectForm({ setIsFormOpen, selectedProject, users }) {
         clientId: null,
         consultantId: null,
       });
+
+      // Call fetchProjects function after successful upload to refresh the project list
+      if (fetchProjects) {
+        fetchProjects();
+      }
 
       setIsFormOpen(false);
     } catch (error) {

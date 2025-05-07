@@ -561,7 +561,7 @@ export default function AssignTask({ selectedProject, users }) {
                   <td className="px-4 py-2">
                     <RoleDropdown
                       key={dropdownKey}
-                      role={["designer", "expert"]}
+                      role={["designer"]}
                       label=""
                       width=""
                       onSelect={(user) =>
