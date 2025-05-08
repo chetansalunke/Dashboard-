@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import BASE_URL from "../../config";
-import ProjectForm from "./ProjectForm";
+import ReadOnlyProjectInfo from "../../components/projectForm/ReadOnlyProjectInfo";
 import AssignTask from "./AssignTask";
 import DrawingList from "./DrawingList";
 import ProjectTeam from "./ProjectTeam";
@@ -65,7 +65,12 @@ export default function Management() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "Project Information":
-        return <ProjectForm selectedProject={selectedProject} users={users} />;
+        return (
+          <ReadOnlyProjectInfo
+            selectedProject={selectedProject}
+            users={users}
+          />
+        );
       case "Drawing List":
         return <DrawingList selectedProject={selectedProject} users={users} />;
       case "Assign Task":

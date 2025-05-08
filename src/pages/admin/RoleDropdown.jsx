@@ -1,8 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import BASE_URL from "../../config";
-import axios from 'axios';
+import axios from "axios";
 
-const RoleDropdown = ({ role = [], label = "Select User", width = "w-1/4", onSelect, value }) => {
+const RoleDropdown = ({
+  role = [],
+  label = "Select User",
+  width = "w-1/4",
+  onSelect,
+  value,
+}) => {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(value || "");
 
@@ -12,9 +18,7 @@ const RoleDropdown = ({ role = [], label = "Select User", width = "w-1/4", onSel
         const roles = Array.isArray(role) ? role : [role];
 
         const allResponses = await Promise.all(
-          roles.map((r) =>
-            axios.get(`${BASE_URL}/api/auth/role?role=${r}`)
-          )
+          roles.map((r) => axios.get(`${BASE_URL}/api/auth/role?role=${r}`))
         );
 
         const mergedUsers = allResponses.flatMap((res) => res.data.users);

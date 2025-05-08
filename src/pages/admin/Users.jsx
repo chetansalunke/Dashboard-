@@ -2,9 +2,16 @@ import React, { useState, useEffect } from "react";
 import UserTable from "./UserTable";
 import UserForm from "./UserForm";
 import BASE_URL from "../../config";
+import {
+  Users as UsersIcon,
+  UserPlus,
+  RefreshCw,
+  ChevronLeft,
+} from "lucide-react";
 
 export default function Users() {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -16,6 +23,7 @@ export default function Users() {
   const [users, setUsers] = useState([]);
 
   const fetchUsers = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch(`${BASE_URL}/api/auth/all`);
 
@@ -24,6 +32,8 @@ export default function Users() {
       setUsers(Array.isArray(data) ? data : data.users || []);
     } catch (error) {
       console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,24 +90,37 @@ export default function Users() {
   };
 
   return (
-    <div className="bg-gray-100">
-      <main className="h-full overflow-y-auto">
-        <div className="container px-6 my-6 grid">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold tracking-wide text-left text-gray-500 uppercase">
-              Welcome, Manage & Track Your Users
-            </h1>
+    <div className="bg-gray-50 min-h-screen">
+      <main className="container px-4 py-6 mx-auto">
+        {/* Header Section */}
+        <div className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center mb-4 md:mb-0">
+              <UsersIcon size={24} className="text-purple-600 mr-2" />
+              <h1 className="text-2xl font-bold text-gray-800">
+                {isFormOpen ? "Add New User" : "User Management"}
+              </h1>
+            </div>
 
-            <div className="flex justify-end gap-2">
+            <div className="flex space-x-3">
+              {!isLoading && !isFormOpen && (
+                <button
+                  onClick={fetchUsers}
+                  className="px-3 py-2 text-sm font-medium text-purple-600 bg-purple-100 rounded-lg hover:bg-purple-200 transition duration-150 flex items-center"
+                >
+                  <RefreshCw size={16} className="mr-1" />
+                  Refresh
+                </button>
+              )}
+
               {isFormOpen ? (
-                <>
-                  <button
-                    onClick={() => setIsFormOpen(false)}
-                    className="px-3 py-2 text-sm font-medium text-white bg-purple-500 rounded-lg hover:bg-purple-600"
-                  >
-                    Back
-                  </button>
-                </>
+                <button
+                  onClick={() => setIsFormOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition duration-150 flex items-center shadow-sm"
+                >
+                  <ChevronLeft size={16} className="mr-1" />
+                  Back to List
+                </button>
               ) : (
                 <button
                   onClick={() => {
@@ -111,15 +134,29 @@ export default function Users() {
                       status: "internal_stakeholder",
                     });
                   }}
-                  className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition duration-150 flex items-center shadow-sm"
                 >
+                  <UserPlus size={16} className="mr-1" />
                   New User
                 </button>
               )}
             </div>
           </div>
-          <br />
-          {isFormOpen ? (
+
+          {!isFormOpen && (
+            <p className="text-gray-500 mt-2">
+              Manage your team members and their account permissions here.
+            </p>
+          )}
+        </div>
+
+        {/* Content Section */}
+        <div className="transition-all duration-300">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-700"></div>
+            </div>
+          ) : isFormOpen ? (
             <UserForm
               formData={formData}
               handleChange={handleChange}

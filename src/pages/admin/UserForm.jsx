@@ -1,108 +1,142 @@
 import React from "react";
+import { User, Mail, Lock, Phone, UserPlus, ChevronLeft } from "lucide-react";
 
 const UserForm = ({ formData, handleChange, handleSubmit }) => {
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="px-4 py-3 bg-white rounded-lg shadow-md">
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
+      <div className="px-6 py-5 bg-white rounded-xl shadow-lg border border-gray-100">
+        <h2 className="text-xl font-bold text-center mb-6 text-purple-700">
+          Add New User
+        </h2>
+
         {/* Username */}
-        <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Username</span>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
-          />
-        </label>
-        <br />
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Username
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <User size={16} className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              name="username"
+              placeholder="Enter username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              className="pl-10 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition duration-150"
+            />
+          </div>
+        </div>
 
         {/* Email */}
-        <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Email</span>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
-          />
-        </label>
-        <br />
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Email Address
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Mail size={16} className="text-gray-400" />
+            </div>
+            <input
+              type="email"
+              name="email"
+              placeholder="your.email@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="pl-10 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition duration-150"
+            />
+          </div>
+        </div>
 
         {/* Password */}
-        <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Password</span>
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
-          />
-        </label>
-        <br />
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Password
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Lock size={16} className="text-gray-400" />
+            </div>
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter secure password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="pl-10 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition duration-150"
+            />
+          </div>
+        </div>
 
         {/* Phone Number */}
-        <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Phone Number</span>
-          <input
-            type="text"
-            name="phone_number"
-            placeholder="Phone Number"
-            value={formData.phone_number}
-            onChange={handleChange}
-            required
-            className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
-          />
-        </label>
-        <br />
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 text-gray-700">
+            Phone Number
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Phone size={16} className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              name="phone_number"
+              placeholder="+1 (123) 456-7890"
+              value={formData.phone_number}
+              onChange={handleChange}
+              required
+              className="pl-10 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition duration-150"
+            />
+          </div>
+        </div>
 
-        {/* Role */}
-        <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Role</span>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
-          >
-            <option value="Select">Select</option>
-            <option value="designer">Designer</option>
-            <option value="expert">Expert</option>
-            <option value="client">Client</option>
-          </select>
-        </label>
-        <br />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {/* Role */}
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">
+              Role
+            </label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition duration-150 bg-white"
+            >
+              <option value="Select">Select Role</option>
+              <option value="designer">Designer</option>
+              <option value="expert">Expert</option>
+              <option value="client">Client</option>
+            </select>
+          </div>
 
-        {/* Status */}
-        <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Status</span>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
-          >
-            <option value="internal_stakeholder">Internal Stakeholder</option>
-            <option value="external_stakeholder">External Stakeholder</option>
-          </select>
-        </label>
-        <br />
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">
+              Status
+            </label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition duration-150 bg-white"
+            >
+              <option value="internal_stakeholder">Internal Stakeholder</option>
+              <option value="external_stakeholder">External Stakeholder</option>
+            </select>
+          </div>
+        </div>
 
         {/* Submit Button */}
         <div className="flex justify-center">
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+            className="px-6 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 shadow-md flex items-center gap-2"
           >
-            Submit
+            <UserPlus size={16} />
+            Create User
           </button>
         </div>
       </div>
