@@ -31,7 +31,7 @@ export default function UploadDrawingForm({ onClose, onSubmit , selectedProject}
     const token = localStorage.getItem("token"); // Adjust how you store/get the token
   
     const payload = new FormData();
-    payload.append("project_id",selectedProject?.projectId); // You can make this dynamic as needed
+    payload.append("project_id",selectedProject.id); // You can make this dynamic as needed
     payload.append("name", formData.name);
     payload.append("remark", formData.remark);
     payload.append("discipline", formData.discipline);
@@ -55,7 +55,6 @@ export default function UploadDrawingForm({ onClose, onSubmit , selectedProject}
       }
   
       const result = await response.json();
-      // console.log("Upload successful:", result);
       // onSubmit(result); // You can pass the result to parent if needed
       await onSubmit();  // trigger parent fetch
       onClose();        // close modal after parent state update

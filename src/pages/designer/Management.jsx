@@ -1,19 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { FaDownload } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
 import BASE_URL from "../../config";
-import ProjectList from "../../components/Management/ProjectList";
-import ProjectTabs from "../../components/Management/ProjectTabs";
+import AssignedTasksView from "../../components/designer/AssignedTasksView";
+import DrawingListView from "../../components/designer/DrawingListView";
+import TeamsView from "../../components/designer/TeamsView";
+import ProjectInfoView from "../../components/designer/ProjectInfoView";
+import { useNavigate } from "react-router-dom";
 
-export default function Managment() {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+export default function Management() {
   const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [projectList, setProjectList] = useState([]);
-  const [selectedProject, setSelectedProject] = useState(null); // NEW
-  const hasFetchedProjects = useRef(false);
-  const token = localStorage.getItem("accessToken");
+  const [selectedProjectInfo, setSelectedProjectInfo] = useState([]);
+  const navigate = useNavigate();
+
+  const selectedProject = JSON.parse(
+    localStorage.getItem("selectedProject") || "{}"
+  );
 
   const fetchProjects = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch(`${BASE_URL}/api/projects/all`);
       if (!response.ok) throw new Error("HTTP error!");
@@ -22,12 +27,43 @@ export default function Managment() {
     } catch (error) {
       console.error("Error fetching projects:", error);
       setProjectList([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const fetchSelectedProjectInfo = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      // const token =
+      //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ2NjcxNjI3LCJleHAiOjE3NDcyNzY0Mjd9.DmuXa27o5BPt2wAjxBbPUjIkIrCOY_QN_ueIQ2E3elw";
+      const response = await fetch(
+        `${BASE_URL}/api/projects/${selectedProject.id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! ${response.status}: ${errorText}`);
+      }
+      const data = await response.json();
+      // console.log("Fetched project data:", data);
+      setSelectedProjectInfo(data.project || {});
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      setSelectedProjectInfo([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/all`); //http://localhost:3000/api/auth/all
+      const res = await fetch(`${BASE_URL}/api/auth/all`);
       const data = await res.json();
       const filteredUsers = data.users?.filter((u) => u.role !== "admin") || [];
       setUsers(filteredUsers);
@@ -36,73 +72,89 @@ export default function Managment() {
     }
   };
 
-  console.log(users);
-
   useEffect(() => {
     fetchUsers();
     fetchProjects();
-  }, []); // ✅ Only run once on mount
+    fetchSelectedProjectInfo();
+  }, []);
 
-  const handleManageClick = (project) => {
-    setSelectedProject(project);
-    setIsFormOpen(true);
+  const [activeTab, setActiveTab] = useState("Project Information");
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "Project Information":
+        return (
+          <ProjectInfoView
+            selectedProject={selectedProjectInfo}
+            users={users}
+          />
+        );
+      case "Drawing List":
+        return (
+          <DrawingListView
+            selectedProject={selectedProjectInfo}
+            users={users}
+          />
+        );
+      case "Assign Task":
+        return (
+          <AssignedTasksView
+            selectedProject={selectedProjectInfo}
+            users={users}
+          />
+        );
+      case "Team":
+        return <TeamsView selectedProject={selectedProjectInfo} />;
+      default:
+        return null;
+    }
   };
 
-  const handleBack = () => {
-    setIsFormOpen(false);
-    setSelectedProject(null); // clear selected project when going back
-  };
-
-  const handleDelete = (index) => {
-    setProjectList(projectList.filter((_, i) => i !== index));
-  };
+  // Show additional tabs when a project is selected
+  const tabs = [
+    "Project Information",
+    ...(selectedProject?.id ? ["Drawing List", "Assign Task", "Team"] : []),
+  ];
 
   return (
     <div className="bg-gray-100">
       <main className="h-full overflow-y-auto">
-        <div className="container px-6 my-6 grid">
+        <div className="space-y-4 m-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold tracking-wide text-gray-500 uppercase ">
-              {!isFormOpen
-                ? "Projects"
-                : selectedProject
-                ? selectedProject.projectName
-                : "Create Project"}
+            <h1 className="text-2xl font-semibold text-gray-600">
+              {selectedProject?.projectName || "No Project Selected"}
             </h1>
-            <div className="flex justify-end gap-2">
-              {isFormOpen ? (
-                <button
-                  onClick={handleBack}
-                  className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
-                >
-                  Back
-                </button>
-              ) : (
-                <button
-                  onClick={() => setIsFormOpen(true)}
-                  className="px-3 py-1 text-sm font-medium leading-5 text-white bg-purple-600 rounded-md hover:bg-purple-700"
-                >
-                  Create Project
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => navigate(-1)} // Go back to previous page
+              className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 transition"
+            >
+              Back
+            </button>
           </div>
 
-          {isFormOpen ? (
-            <ProjectTabs
-              users={users}
-              setIsFormOpen={setIsFormOpen}
-              fetchProjects={fetchProjects}
-              selectedProject={selectedProject}
-            />
-          ) : (
-            <ProjectList
-              projects={projectList}
-              onDelete={handleDelete}
-              fetchProjects={fetchProjects}
-              onManage={handleManageClick}
-            />
-          )}
+          <div className="bg-white rounded-lg shadow-lg mt-6 overflow-hidden">
+            {/* Tab Navigation */}
+            <div className="border-b border-gray-200">
+              <nav className="flex">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-5 py-4 text-sm font-medium transition-colors ${
+                      activeTab === tab
+                        ? "border-b-2 border-purple-600 text-purple-600"
+                        : "text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6">{renderTabContent()}</div>
+          </div>
         </div>
       </main>
     </div>

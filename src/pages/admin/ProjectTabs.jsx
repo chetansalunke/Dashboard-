@@ -12,6 +12,8 @@ export default function ProjectTabs({
 }) {
   const [activeTab, setActiveTab] = useState("Project Information");
 
+  console.log("admin project: ",selectedProject);
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "Project Information":

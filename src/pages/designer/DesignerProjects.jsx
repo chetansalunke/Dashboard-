@@ -78,13 +78,16 @@ export default function DesignerProjects() {
 
     setProjects(sortedProjects);
   }, [sortOption]);
-
-  const handleCardClick = (projectId, projectName) => {
-    localStorage.setItem("selectedProject", JSON.stringify({ projectId, projectName }));
+  
+  const handleCardClick = (project) => {
+    localStorage.setItem("selectedProject", JSON.stringify(project));
     navigate("/designer-dashboard/projects/design");
   };
-  
 
+  const selectedProject = JSON.parse(
+    localStorage.getItem("selectedProject") || "{}"
+  );
+  
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Header */}
@@ -150,7 +153,7 @@ export default function DesignerProjects() {
           {projects.map((project) => (
             <div
               key={project.id}
-              onClick={() => handleCardClick(project.id, project.projectName)}
+              onClick={() => handleCardClick(project)}
               className="bg-white max-w-xs w-full mx-auto p-3 border hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col items-center space-y-3"
             >
               <div className="bg-gray-100 w-full p-3 border rounded-2xl">

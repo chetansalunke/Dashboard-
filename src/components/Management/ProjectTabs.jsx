@@ -6,7 +6,7 @@ import AssignTask from "./AssignTask";
 import DrawingList from "./DrawingList";
 import ProjectTeam from "./ProjectTeam";
 
-export default function Management() {
+export default function ProjectTabs() {
   const [users, setUsers] = useState([]);
   const [projectList, setProjectList] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);

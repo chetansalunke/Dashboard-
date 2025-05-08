@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 export default function AssignTask({ selectedProject, users }) {
-  const [activeTab, setActiveTab] = useState("Pending");
+  const [activeTab, setActiveTab] = useState("all");
   const [dropdownKey, setDropdownKey] = useState(0);
   const [tasks, setTasks] = useState([]);
   const fileInputRef = useRef(null);

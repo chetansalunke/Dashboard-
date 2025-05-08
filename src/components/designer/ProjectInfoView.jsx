@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import BASE_URL from "../../config";
 
-export default function ReadOnlyProjectInfo({
+export default function ProjectInfoView({
   setIsFormOpen,
   selectedProject,
   users,
@@ -31,8 +31,8 @@ export default function ReadOnlyProjectInfo({
     phone_number: "",
     username: "",
   });
-  console.log("selected project ");
-  console.log(selectedProject);
+  // console.log("selected project ");
+  // console.log(selectedProject);
 
   useEffect(() => {
     if (selectedProject) {
@@ -214,7 +214,7 @@ export default function ReadOnlyProjectInfo({
   // Check if we have documents to display
   const hasDocuments =
     projectData.documents && projectData.documents.length > 0;
-  console.log("Documents available:", hasDocuments, projectData.documents);
+  // console.log("Documents available:", hasDocuments, projectData.documents);
 
   return (
     <div className="space-y-4">
@@ -541,17 +541,6 @@ export default function ReadOnlyProjectInfo({
               </p>
             </div>
           )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end pt-4 border-t">
-          <button
-            type="button"
-            onClick={() => setIsFormOpen(false)}
-            className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            Close View
-          </button>
         </div>
       </div>
     </div>
