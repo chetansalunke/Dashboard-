@@ -1,1 +1,1 @@
-export default ip = "52.66.253.170/";
+export default ip = "localhost";
