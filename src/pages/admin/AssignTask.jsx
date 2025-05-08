@@ -561,7 +561,7 @@ export default function AssignTask({ selectedProject, users }) {
                   <td className="px-4 py-2">
                     <RoleDropdown
                       key={dropdownKey}
-                      role={["designer", "expert"]}
+                      role={["designer"]}
                       label=""
                       width=""
                       onSelect={(user) =>
@@ -761,27 +761,51 @@ export default function AssignTask({ selectedProject, users }) {
                         {Math.round(
                           viewingAttachment.attachmentInfo.fileSize / 1024
                         )}{" "}
+                        KB
                       </p>
                     )}
                   </div>
                 </div>
 
                 <div className="mt-4 space-y-3">
-                  <a
-                    href={`${BASE_URL}${viewingAttachment.attachmentPath}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => {
+                      // Ensure the URL is properly formatted
+                      const url = viewingAttachment.attachmentPath.startsWith(
+                        "http"
+                      )
+                        ? viewingAttachment.attachmentPath
+                        : `${BASE_URL}${
+                            viewingAttachment.attachmentPath.startsWith("/")
+                              ? ""
+                              : "/"
+                          }${viewingAttachment.attachmentPath}`;
+
+                      // Open in new tab with proper security attributes
+                      const newWindow = window.open(url, "_blank");
+                      if (newWindow) newWindow.opener = null;
+                    }}
                     className="block w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-center transition-colors"
                   >
                     <div className="flex items-center justify-center">
                       <FileText size={16} className="mr-2" />
                       View Document
                     </div>
-                  </a>
+                  </button>
 
                   <a
-                    href={`${BASE_URL}${viewingAttachment.attachmentPath}`}
+                    href={
+                      viewingAttachment.attachmentPath.startsWith("http")
+                        ? viewingAttachment.attachmentPath
+                        : `${BASE_URL}${
+                            viewingAttachment.attachmentPath.startsWith("/")
+                              ? ""
+                              : "/"
+                          }${viewingAttachment.attachmentPath}`
+                    }
                     download
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="block w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg text-center transition-colors"
                   >
                     <div className="flex items-center justify-center">

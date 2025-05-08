@@ -181,7 +181,7 @@ export default function ProjectTeam({ selectedProject }) {
               <td className="px-4 py-3 text-sm">
                 <RoleDropdown
                   key={dropdownKey}
-                  role={["designer", "expert", "consultant"]}
+                  role={["designer"]}
                   label=""
                   width=""
                   onSelect={handleUserSelect}
