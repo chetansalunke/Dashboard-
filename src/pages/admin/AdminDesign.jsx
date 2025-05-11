@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import BASE_URL from "../../config";
 import UploadDrawingForm from "./UploadDrawingForm";
 import { FiMoreHorizontal } from "react-icons/fi";
+import { FileUp } from "lucide-react"; 
+
 
 export default function AdminDesign({ selectedProject, onBack }) {
   const [showUploadForm, setShowUploadForm] = useState(false);
@@ -15,6 +17,8 @@ export default function AdminDesign({ selectedProject, onBack }) {
   const dropdownRef = useRef(null);
   const sortDropdownRef = useRef(null);
   const filterDropdownRef = useRef(null);
+  
+  // console.log(selectedProject);
 
   // useEffect(() => {
   //   const handleClickOutside = (event) => {
@@ -104,9 +108,16 @@ export default function AdminDesign({ selectedProject, onBack }) {
       <main className="h-full overflow-y-auto">
         {showUploadForm ? (
           <div className="space-y-4 m-4">
-            <h1 className="text-xl font-semibold text-left text-gray-500 uppercase">
-              Upload Drawing
-            </h1>
+            {/* <h1>hello</h1>
+            <h2 className="text-xl font-bold text-center mb-6 text-purple-700">
+              Upload New Drawing
+            </h2> */}
+            <div className="flex items-center gap-2 mb-6">
+  <FileUp size={24} className="text-purple-700" />
+  <h2 className="text-xl font-bold text-purple-700">
+    Upload New Drawing
+  </h2>
+</div>
             <UploadDrawingForm
               onClose={() => setShowUploadForm(false)}
               onSubmit={handleUploadSubmit}
@@ -191,8 +202,10 @@ export default function AdminDesign({ selectedProject, onBack }) {
                     Filter By ▼
                   </button>
                   {showFilterDropdown && (
-                    <div className="absolute left-0 mt-1 w-44 bg-white border shadow-lg rounded text-sm z-20"
-                    ref={filterDropdownRef}>
+                    <div
+                      className="absolute left-0 mt-1 w-44 bg-white border shadow-lg rounded text-sm z-20"
+                      ref={filterDropdownRef}
+                    >
                       {["Version", "Sent By", "Status", "Discipline"].map(
                         (filter) => (
                           <button
@@ -218,8 +231,10 @@ export default function AdminDesign({ selectedProject, onBack }) {
                     Sort by ▼
                   </button>
                   {showDropdown && (
-                    <div className="absolute right-0 mt-1 w-44 bg-white border shadow-lg rounded text-sm z-20"
-                    ref={sortDropdownRef}>
+                    <div
+                      className="absolute right-0 mt-1 w-44 bg-white border shadow-lg rounded text-sm z-20"
+                      ref={sortDropdownRef}
+                    >
                       <button
                         onClick={() => {
                           setSortOption("date");
