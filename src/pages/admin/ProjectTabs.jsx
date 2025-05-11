@@ -12,7 +12,7 @@ export default function ProjectTabs({
 }) {
   const [activeTab, setActiveTab] = useState("Project Information");
 
-  console.log("admin project: ",selectedProject);
+  console.log("admin project: ", selectedProject);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -26,10 +26,10 @@ export default function ProjectTabs({
         );
       case "Drawing List":
         return <DrawingList selectedProject={selectedProject} users={users} />;
-      case "Assign Task":
-        return <AssignTask selectedProject={selectedProject} users={users} />;
       case "Team":
         return <ProjectTeam selectedProject={selectedProject} />;
+      case "Assign Task":
+        return <AssignTask selectedProject={selectedProject} users={users} />;
       default:
         return null;
     }
@@ -38,7 +38,7 @@ export default function ProjectTabs({
   // Show additional tabs when a project is selected
   const tabs = [
     "Project Information",
-    ...(selectedProject?.id ? ["Drawing List", "Assign Task", "Team"] : []),
+    ...(selectedProject?.id ? ["Drawing List", "Team", "Assign Task"] : []),
   ];
 
   return (

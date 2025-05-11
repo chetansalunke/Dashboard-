@@ -161,7 +161,10 @@ export default function ProjectForm({ setIsFormOpen, selectedProject, users }) {
     form.append("userId", formData.userId);
     form.append("projectId", formData.projectid);
     form.append("clientId", formData.clientId);
-    form.append("consultantId", formData.consultantId);
+    // form.append("consultantId", formData.consultantId ?? "null"); // Use "null" string or actual null
+    if (formData.consultantId) {
+      form.append("consultantId", formData.consultantId);
+    }
 
     formData.documents.forEach((file) => {
       form.append("documents", file);
@@ -449,7 +452,7 @@ export default function ProjectForm({ setIsFormOpen, selectedProject, users }) {
 
         <div className="mt-8 pt-6 border-t border-gray-200">
           <h2 className="text-xl font-bold text-purple-700 mb-4 flex items-center">
-            <FiUser className="mr-2" /> Consultant Information
+            <FiUser className="mr-2" /> Consultant Information (Optional)
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
