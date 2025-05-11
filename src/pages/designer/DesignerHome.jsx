@@ -116,7 +116,14 @@ export default function DesignerHome() {
             )
           : filteredTasks;
 
-        setTasks(searchFilteredTasks);
+        // Sort tasks by due date (closest first)
+        const sortedTasks = [...searchFilteredTasks].sort(
+          (a, b) => new Date(a.due_date) - new Date(b.due_date)
+        );
+
+        setTasks(sortedTasks);
+
+        // setTasks(searchFilteredTasks);
 
         // // Set upcoming deliverables - tasks that are not completed and due in the next 7 days
         // const now = new Date();

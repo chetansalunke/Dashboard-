@@ -16,9 +16,10 @@ import {
   Clock,
   Filter,
 } from "lucide-react";
+import TeamsDesignerDropdown from "../../components/Admin/TeamsDesignerDropdown";
 
 export default function AssignTask({ selectedProject, users }) {
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("All");
   const [dropdownKey, setDropdownKey] = useState(0);
   const [tasks, setTasks] = useState([]);
   const fileInputRef = useRef(null);
@@ -26,6 +27,7 @@ export default function AssignTask({ selectedProject, users }) {
   const [openChecklistInput, setOpenChecklistInput] = useState(false);
   const [viewingAttachment, setViewingAttachment] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasDesignerTeams, setHasDesignerTeams] = useState(true);
 
   const token = localStorage.getItem("accessToken");
   console.log("Task List ");
@@ -150,8 +152,19 @@ export default function AssignTask({ selectedProject, users }) {
         return true;
       });
 
-      console.log("Formatted tasks:", filteredTasks);
-      setTasks(filteredTasks);
+      // Add this sort functionality here
+      const sortedTasks = [...filteredTasks].sort((a, b) => {
+        // Handle cases where due dates might be empty
+        if (!a.dueDate) return 1; // Items without due dates go last
+        if (!b.dueDate) return -1; // Items without due dates go last
+        return new Date(a.dueDate) - new Date(b.dueDate); // Sort by due date ascending
+      });
+
+      // console.log("Formatted tasks:", filteredTasks);
+      // setTasks(filteredTasks);
+
+      console.log("Formatted tasks:", sortedTasks);
+      setTasks(sortedTasks); // Use sortedTasks instead of filteredTasks
     } catch (error) {
       console.error("Error fetching tasks:", error);
     } finally {
@@ -513,119 +526,184 @@ export default function AssignTask({ selectedProject, users }) {
                 )}
 
                 {/* New Task Input Row */}
-                <tr className="bg-gray-50 text-sm border-t-2 border-gray-200">
-                  <td className="px-4 py-2">
-                    <input
-                      type="text"
-                      placeholder="Task name"
-                      value={newTask.taskName}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, taskName: e.target.value })
-                      }
-                      className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </td>
-                  <td className="px-4 py-2">
-                    <select
-                      value={newTask.priority}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, priority: e.target.value })
-                      }
-                      className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none bg-white"
-                    >
-                      <option>High</option>
-                      <option>Medium</option>
-                      <option>Low</option>
-                    </select>
-                  </td>
-                  <td className="px-4 py-2">
-                    <input
-                      type="date"
-                      value={newTask.startDate}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, startDate: e.target.value })
-                      }
-                      className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </td>
-                  <td className="px-4 py-2">
-                    <input
-                      type="date"
-                      value={newTask.dueDate}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, dueDate: e.target.value })
-                      }
-                      className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </td>
-                  <td className="px-4 py-2">
-                    <RoleDropdown
+                {hasDesignerTeams ? (
+                  <tr className="bg-gray-50 text-sm border-t-2 border-gray-200">
+                    <td className="px-4 py-2">
+                      <input
+                        type="text"
+                        placeholder="Task name"
+                        value={newTask.taskName}
+                        onChange={(e) =>
+                          setNewTask({ ...newTask, taskName: e.target.value })
+                        }
+                        className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <select
+                        value={newTask.priority}
+                        onChange={(e) =>
+                          setNewTask({ ...newTask, priority: e.target.value })
+                        }
+                        className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none bg-white"
+                      >
+                        <option>High</option>
+                        <option>Medium</option>
+                        <option>Low</option>
+                      </select>
+                    </td>
+                    <td className="px-4 py-2">
+                      <input
+                        type="date"
+                        value={newTask.startDate}
+                        onChange={(e) =>
+                          setNewTask({ ...newTask, startDate: e.target.value })
+                        }
+                        className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <input
+                        type="date"
+                        value={newTask.dueDate}
+                        onChange={(e) =>
+                          setNewTask({ ...newTask, dueDate: e.target.value })
+                        }
+                        className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      {/* <TeamsDesignerDropdown
                       key={dropdownKey}
-                      role={["designer"]}
+                      selectedProject={selectedProject}
                       label=""
                       width=""
                       onSelect={(user) =>
                         setNewTask({ ...newTask, assignedTo: user })
                       }
-                    />
-                  </td>
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => setOpenChecklistInput(true)}
-                      className="px-3 py-1 text-white bg-blue-600 rounded-md hover:bg-blue-700 flex items-center"
-                    >
-                      <CheckSquare size={14} className="mr-1" />
-                      <span>Checklist</span>
-                    </button>
-                    {newTask.checklist && newTask.checklist.length > 0 && (
-                      <div className="mt-1 text-xs text-gray-600">
-                        {newTask.checklist.length} items selected
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-2">
-                    <div className="flex items-center">
-                      <label className="cursor-pointer px-3 py-1 text-white bg-blue-600 rounded-md hover:bg-blue-700 flex items-center">
-                        <Paperclip size={14} className="mr-1" />
-                        <span>Upload</span>
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          multiple
-                          onChange={(e) =>
-                            setNewTask({
-                              ...newTask,
-                              file: e.target.files[0],
-                              attachments: e.target.files.length,
-                            })
-                          }
-                          className="hidden"
-                        />
-                      </label>
-                      {newTask.file && (
-                        <span className="ml-2 text-xs text-gray-600 truncate max-w-xs">
-                          {newTask.file.name}
-                        </span>
+                      onEmpty={() => setHasDesignerTeams(false)} // 👈 handle empty case
+                    /> */}
+
+                      <TeamsDesignerDropdown
+                        key={dropdownKey}
+                        selectedProject={selectedProject}
+                        label=""
+                        width=""
+                        onSelect={(user) =>
+                          setNewTask({ ...newTask, assignedTo: user })
+                        }
+                        onEmpty={() => setHasDesignerTeams(false)}
+                        onNotEmpty={() => setHasDesignerTeams(true)} // Optional but helpful
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => setOpenChecklistInput(true)}
+                        className="px-3 py-1 text-white bg-blue-600 rounded-md hover:bg-blue-700 flex items-center"
+                      >
+                        <CheckSquare size={14} className="mr-1" />
+                        <span>Checklist</span>
+                      </button>
+                      {newTask.checklist && newTask.checklist.length > 0 && (
+                        <div className="mt-1 text-xs text-gray-600">
+                          {newTask.checklist.length} items selected
+                        </div>
                       )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-2">
-                    <span className="text-gray-400 text-xs italic">
-                      Auto-assigned
-                    </span>
-                  </td>
-                </tr>
+                    </td>
+
+                    <td className="px-4 py-2">
+                      <div className="flex items-center">
+                        <label className="cursor-pointer px-3 py-1 text-white bg-blue-600 rounded-md hover:bg-blue-700 flex items-center">
+                          <Paperclip size={14} className="mr-1" />
+                          <span>Upload</span>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            multiple
+                            onChange={(e) =>
+                              setNewTask({
+                                ...newTask,
+                                file: e.target.files[0],
+                                attachments: e.target.files.length,
+                              })
+                            }
+                            className="hidden"
+                          />
+                        </label>
+                        {newTask.file && (
+                          <span className="ml-2 text-xs text-gray-600 truncate max-w-xs">
+                            {newTask.file.name}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2">
+                      <span className="text-gray-400 text-xs italic">
+                        Auto-assigned
+                      </span>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr className="bg-red-50 text-sm border-t-2 border-gray-200">
+                    <td colSpan="8" className="text-center text-red-600 py-4">
+                      ⚠️ No eligible designer teams found. Please ensure at least one team exists with a member assigned the "Designer" role to enable task assignment.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
 
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          {/* <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
             <button
               onClick={handleAddTask}
               disabled={isLoading}
               className={`px-4 py-2 text-sm font-medium leading-5 text-white ${
                 isLoading
                   ? "bg-purple-400"
+                  : "bg-purple-600 hover:bg-purple-700"
+              } rounded-lg shadow-md transition-colors flex items-center`}
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                <>
+                  <Check size={16} className="mr-2" />
+                  Add Task
+                </>
+              )}
+            </button>
+          </div> */}
+
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <button
+              onClick={handleAddTask}
+              disabled={isLoading || !hasDesignerTeams}
+              className={`px-4 py-2 text-sm font-medium leading-5 text-white ${
+                isLoading || !hasDesignerTeams
+                  ? "bg-purple-300 cursor-not-allowed"
                   : "bg-purple-600 hover:bg-purple-700"
               } rounded-lg shadow-md transition-colors flex items-center`}
             >

@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 export default function AssignedTasksView({ selectedProject, users }) {
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("All");
   const [dropdownKey, setDropdownKey] = useState(0);
   const [tasks, setTasks] = useState([]);
   const fileInputRef = useRef(null);
@@ -63,7 +63,7 @@ export default function AssignedTasksView({ selectedProject, users }) {
 
     setIsLoading(true);
     console.log("Fetch task");
-    console.log(token);
+    // console.log(token);
     try {
       const response = await axios.get(
         `${BASE_URL}/api/projects/${selectedProject.id}/assignTask`,
@@ -75,7 +75,7 @@ export default function AssignedTasksView({ selectedProject, users }) {
       );
 
       const taskArray = response.data.tasks;
-      // console.log("Raw tasks from API:", taskArray);
+      console.log("Raw tasks from API:", taskArray);
 
       const formattedTasks = await Promise.all(
         taskArray.map(async (item) => {
@@ -137,8 +137,19 @@ export default function AssignedTasksView({ selectedProject, users }) {
         return true;
       });
 
-      console.log("Formatted tasks:", filteredTasks);
-      setTasks(filteredTasks);
+      // Add this sort functionality here
+      const sortedTasks = [...filteredTasks].sort((a, b) => {
+        // Handle cases where due dates might be empty
+        if (!a.dueDate) return 1; // Items without due dates go last
+        if (!b.dueDate) return -1; // Items without due dates go last
+        return new Date(a.dueDate) - new Date(b.dueDate); // Sort by due date ascending
+      });
+
+      // console.log("Formatted tasks:", filteredTasks);
+      // setTasks(filteredTasks);
+
+      console.log("Formatted tasks:", sortedTasks);
+      setTasks(sortedTasks); // Use sortedTasks instead of filteredTasks
     } catch (error) {
       console.error("Error fetching tasks:", error);
     } finally {
