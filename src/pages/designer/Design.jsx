@@ -64,23 +64,24 @@ export default function Design() {
     fetchSelectedProjectInfo();
   }, []);
 
+  const fetchDrawings = async () => {
+    if (!selectedProject?.id) return;
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/projects/design_drawing/${selectedProject.id}`
+      );
+      const data = await response.json();
+      setDrawings(
+        Array.isArray(data.designDrawings) ? data.designDrawings : []
+      );
+    } catch (error) {
+      console.error("Error fetching drawings:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchDrawings = async () => {
-      if (!selectedProject?.id) return;
-      try {
-        const response = await fetch(
-          `${BASE_URL}/api/projects/design_drawing/${selectedProject.id}`
-        );
-        const data = await response.json();
-        setDrawings(
-          Array.isArray(data.designDrawings) ? data.designDrawings : []
-        );
-      } catch (error) {
-        console.error("Error fetching drawings:", error);
-      }
-    };
     fetchDrawings();
-  }, [selectedProject]);
+  }, []);
 
   const filteredDrawings = drawings.filter((drawing) => {
     const matchesSearch = drawing.name
