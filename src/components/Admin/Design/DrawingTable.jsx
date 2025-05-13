@@ -10,6 +10,12 @@ import {
   Clock,
   FileText,
   MessageSquare,
+  Send,
+  UserCheck,
+  ExternalLink,
+  ThumbsUp,
+  AlertTriangle,
+  User,
 } from "lucide-react";
 import BASE_URL from "../../../config";
 
@@ -23,12 +29,36 @@ const DrawingTable = ({
   const [showPreview, setShowPreview] = useState(null);
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showExpertReviewModal, setShowExpertReviewModal] = useState(false);
+  const [showClientSubmitModal, setShowClientSubmitModal] = useState(false);
   const [selectedDrawing, setSelectedDrawing] = useState(null);
   const [revisionComment, setRevisionComment] = useState("");
+  const [expertComment, setExpertComment] = useState("");
   const [revisionFile, setRevisionFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [versionHistory, setVersionHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [clientUsers, setClientUsers] = useState([]);
+  const [selectedClient, setSelectedClient] = useState("");
+  const [clientComment, setClientComment] = useState("");
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
+  const [userRole, setUserRole] = useState("");
+
+  useEffect(() => {
+    // Determine user role on component mount
+    const user = getCurrentUser();
+    setUserRole(user?.role || "");
+  }, []);
+
+  // Current user from local storage
+  const getCurrentUser = () => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || {};
+    } catch (error) {
+      console.error("Error parsing user from localStorage:", error);
+      return {};
+    }
+  };
 
   // Format date to display in a readable format
   const formatDate = (dateString) => {
@@ -40,6 +70,23 @@ const DrawingTable = ({
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Fetch client users
+  const fetchClientUsers = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/auth/all`);
+      const data = await res.json();
+      console.log("USERRRRRRRR");
+
+      // Filter only users with role "client"
+      const clientUsers = data.users?.filter((u) => u.role === "client") || [];
+
+      setClientUsers(clientUsers); // correctly set filtered list
+      console.log(clientUsers);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
   };
 
   // Fetch version history
@@ -76,24 +123,6 @@ const DrawingTable = ({
     setShowActionDropdown(null);
   };
 
-  // Handle approve drawing
-  const handleApprove = async (drawingId) => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      await fetch(`${BASE_URL}/api/projects/drawing/${drawingId}/approve`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      fetchDrawings(); // Refresh the drawings list
-      setShowActionDropdown(null);
-    } catch (error) {
-      console.error("Error approving drawing:", error);
-    }
-  };
-
   // Handle download drawing
   const handleDownload = (path) => {
     window.open(`${BASE_URL}/${path}`, "_blank");
@@ -104,6 +133,25 @@ const DrawingTable = ({
     setShowPreview(drawing);
   };
 
+  // Handle expert review modal
+  const handleExpertReviewModal = (drawing) => {
+    setSelectedDrawing(drawing);
+    setShowExpertReviewModal(true);
+    setExpertComment("");
+    fetchVersionHistory(drawing.drawing_id); // Get the history when opening review modal
+    setShowActionDropdown(null);
+  };
+
+  // Handle client submission modal
+  const handleClientSubmitModal = (drawing) => {
+    setSelectedDrawing(drawing);
+    setShowClientSubmitModal(true);
+    setSelectedClient("");
+    setClientComment("");
+    fetchClientUsers(); // Fetch available client users
+    setShowActionDropdown(null);
+  };
+
   // Handle revision modal
   const handleRevisionModal = (drawing) => {
     setSelectedDrawing(drawing);
@@ -112,6 +160,98 @@ const DrawingTable = ({
     setRevisionFile(null);
     fetchVersionHistory(drawing.drawing_id); // Get the history when opening revision modal
     setShowActionDropdown(null);
+  };
+
+  // Submit expert review
+  const handleSubmitExpertReview = async (isApproved) => {
+    if (!expertComment.trim()) {
+      alert("Please provide a comment");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem("accessToken");
+      const user = getCurrentUser();
+
+      const status = isApproved
+        ? "Approved by Expert"
+        : "Revision Required by Expert";
+
+      const payload = {
+        status: status,
+        comment: expertComment,
+        reviewer_id: user.id,
+      };
+
+      await fetch(
+        `${BASE_URL}/api/projects/drawings/${selectedDrawing.drawing_id}/reviewExpert`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      setShowExpertReviewModal(false);
+      setExpertComment("");
+      fetchDrawings(); // Refresh the drawings list
+
+      // If approved, show client submit modal
+      if (isApproved) {
+        handleClientSubmitModal(selectedDrawing);
+      }
+    } catch (error) {
+      console.error("Error submitting expert review:", error);
+      alert("Failed to submit review. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Submit to client
+  const handleSubmitToClient = async () => {
+    if (!selectedClient) {
+      alert("Please select a client");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem("accessToken");
+      const user = getCurrentUser();
+
+      const payload = {
+        submitted_by: user.id,
+        submitted_to: parseInt(selectedClient),
+        comment: clientComment || "Submitting approved drawing",
+      };
+
+      await fetch(
+        `${BASE_URL}/api/projects/drawings/${selectedDrawing.drawing_id}/submitClient`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      setShowClientSubmitModal(false);
+      setSelectedClient("");
+      setClientComment("");
+      fetchDrawings(); // Refresh the drawings list
+    } catch (error) {
+      console.error("Error submitting to client:", error);
+      alert("Failed to submit to client. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Submit revision
@@ -128,7 +268,7 @@ const DrawingTable = ({
       formData.append("design_documents", revisionFile);
       formData.append("comment", revisionComment);
       // localstorage return string not object
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = getCurrentUser();
       formData.append("uploaded_by", user?.id);
 
       await fetch(
@@ -160,10 +300,13 @@ const DrawingTable = ({
       case "Sent to Expert":
         return "bg-blue-100 text-blue-800";
       case "Approved":
+      case "Approved by Expert":
         return "bg-green-100 text-green-800";
       case "Needs Revision":
       case "Revision Required by Expert":
         return "bg-orange-100 text-orange-800";
+      case "Sent to Client":
+        return "bg-purple-100 text-purple-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -174,6 +317,12 @@ const DrawingTable = ({
     return (
       status === "Needs Revision" || status === "Revision Required by Expert"
     );
+  };
+
+  // Check if user is admin or expert
+  const isAdminOrExpert = () => {
+    const role = userRole.toLowerCase();
+    return role === "admin" || role === "expert";
   };
 
   // Find current version's comment from version history
@@ -269,10 +418,32 @@ const DrawingTable = ({
                         <Download size={18} />
                       </button>
 
-                      {needsRevision(drawing.status) && (
+                      {/* Show review button for admin/expert when drawing is 'Sent to Expert' */}
+                      {isAdminOrExpert() &&
+                        drawing.status === "Sent to Expert" && (
+                          <button
+                            onClick={() => handleExpertReviewModal(drawing)}
+                            className="px-2 py-1 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 flex items-center shadow-sm transition-colors"
+                          >
+                            <ExternalLink size={14} className="mr-1" /> Review
+                          </button>
+                        )}
+
+                      {/* Show 'Send to Client' button for admin/expert when drawing is 'Approved by Expert' */}
+                      {isAdminOrExpert() &&
+                        drawing.status === "Approved by Expert" && (
+                          <button
+                            onClick={() => handleClientSubmitModal(drawing)}
+                            className="px-2 py-1 text-xs font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 flex items-center shadow-sm transition-colors"
+                          >
+                            <Send size={14} className="mr-1" /> Send to Client
+                          </button>
+                        )}
+
+                      {needsRevision(drawing.status) && !isAdminOrExpert() && (
                         <button
                           onClick={() => handleRevisionModal(drawing)}
-                          className="px-2 py-1 text-xs font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center"
+                          className="px-2 py-1 text-xs font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 flex items-center shadow-sm transition-colors"
                         >
                           <CheckCircle size={14} className="mr-1" /> Resolve
                         </button>
@@ -326,26 +497,30 @@ const DrawingTable = ({
                             >
                               <Clock size={16} className="mr-2" /> View History
                             </button>
-                            {drawing.status === "Sent to Expert" && (
-                              <button
-                                onClick={() =>
-                                  handleApprove(drawing.drawing_id)
-                                }
-                                className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-gray-100 flex items-center"
-                              >
-                                <CheckCircle size={16} className="mr-2" />{" "}
-                                Approve Drawing
-                              </button>
-                            )}
-                            {needsRevision(drawing.status) && (
-                              <button
-                                onClick={() => handleRevisionModal(drawing)}
-                                className="block w-full text-left px-4 py-2 text-sm text-orange-700 hover:bg-gray-100 flex items-center"
-                              >
-                                <Upload size={16} className="mr-2" /> Submit
-                                Revision
-                              </button>
-                            )}
+                            {isAdminOrExpert() &&
+                              drawing.status === "Sent to Expert" && (
+                                <button
+                                  onClick={() =>
+                                    handleExpertReviewModal(drawing)
+                                  }
+                                  className="block w-full text-left px-4 py-2 text-sm text-blue-700 hover:bg-gray-100 flex items-center"
+                                >
+                                  <ExternalLink size={16} className="mr-2" />{" "}
+                                  Review Drawing
+                                </button>
+                              )}
+                            {isAdminOrExpert() &&
+                              drawing.status === "Approved by Expert" && (
+                                <button
+                                  onClick={() =>
+                                    handleClientSubmitModal(drawing)
+                                  }
+                                  className="block w-full text-left px-4 py-2 text-sm text-purple-700 hover:bg-gray-100 flex items-center"
+                                >
+                                  <Send size={16} className="mr-2" /> Submit to
+                                  Client
+                                </button>
+                              )}
                           </div>
                         )}
                       </div>
@@ -360,39 +535,416 @@ const DrawingTable = ({
 
       {/* Drawing Preview Modal */}
       {showPreview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-4/5 h-4/5 flex flex-col">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg font-semibold">
+            <div className="flex justify-between items-center p-4 border-b bg-gray-50">
+              <h3 className="text-lg font-semibold text-gray-800">
                 {showPreview.drawing_name}
               </h3>
               <button
                 onClick={() => setShowPreview(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-200 transition-colors"
               >
                 <X size={24} />
               </button>
             </div>
-            <div className="flex-grow p-4 overflow-auto">
+            <div className="flex-grow p-4 overflow-auto bg-gray-100">
               <iframe
                 src={`${BASE_URL}/${showPreview.latest_document_path}`}
-                className="w-full h-full"
+                className="w-full h-full rounded shadow-lg"
                 title={showPreview.drawing_name}
               />
             </div>
-            <div className="p-4 border-t flex justify-end space-x-2">
+            <div className="p-4 border-t bg-gray-50 flex justify-end space-x-2">
               <button
                 onClick={() => handleDownload(showPreview.latest_document_path)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center shadow-sm transition-colors"
               >
                 <Download size={16} className="mr-2" /> Download
               </button>
               <button
                 onClick={() => setShowPreview(null)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expert Review Modal */}
+      {showExpertReviewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-4/5 flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center p-4 border-b bg-indigo-50">
+              <h3 className="text-lg font-semibold text-indigo-900 flex items-center">
+                <ExternalLink size={20} className="mr-2 text-indigo-600" />
+                Expert Review: {selectedDrawing.drawing_name}
+              </h3>
+              <button
+                onClick={() => setShowExpertReviewModal(false)}
+                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-200 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="h-full flex flex-col">
+                <div className="bg-indigo-50 p-5 rounded-lg mb-5 shadow-sm">
+                  <h4 className="font-medium text-indigo-900 mb-3 flex items-center text-lg">
+                    <FileText size={18} className="mr-2 text-indigo-600" />
+                    Drawing Information
+                  </h4>
+                  <div className="space-y-3 bg-white p-4 rounded-md shadow-sm">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <span className="text-sm font-semibold text-gray-600">
+                          Name:
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-sm font-medium text-gray-800">
+                          {selectedDrawing.drawing_name}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <span className="text-sm font-semibold text-gray-600">
+                          Discipline:
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-sm font-medium text-gray-800">
+                          {selectedDrawing.discipline}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <span className="text-sm font-semibold text-gray-600">
+                          Version:
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-sm font-medium text-gray-800">
+                          v{selectedDrawing.latest_version_number}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <span className="text-sm font-semibold text-gray-600">
+                          Submitted By:
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="flex items-center">
+                          <User size={14} className="text-gray-500 mr-1" />
+                          <span className="text-sm font-medium text-gray-800">
+                            {selectedDrawing.sent_by_name}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <span className="text-sm font-semibold text-gray-600">
+                          Last Updated:
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="flex items-center">
+                          <Clock size={14} className="text-gray-500 mr-1" />
+                          <span className="text-sm font-medium text-gray-800">
+                            {formatDate(selectedDrawing.last_updated)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Designer's Comment */}
+                <div className="bg-blue-50 p-5 rounded-lg mb-5 shadow-sm">
+                  <h4 className="font-medium text-blue-900 mb-3 flex items-center">
+                    <MessageSquare size={18} className="mr-2 text-blue-600" />
+                    Designer's Latest Comment
+                  </h4>
+                  {isLoadingHistory ? (
+                    <div className="flex justify-center items-center h-24 bg-white rounded-md">
+                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+                    </div>
+                  ) : (
+                    <div className="bg-white p-4 rounded-md shadow-sm">
+                      <p className="text-gray-700 whitespace-pre-line">
+                        {getCurrentVersionComment() ||
+                          "No comment provided by the designer."}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Expert Review Form */}
+                <div className="bg-gray-50 p-5 rounded-lg shadow-sm">
+                  <h4 className="font-medium text-gray-800 mb-3 flex items-center">
+                    <ExternalLink size={18} className="mr-2 text-indigo-600" />
+                    Your Expert Review
+                  </h4>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      Review Comment: <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      className="shadow-sm appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                      rows="4"
+                      placeholder="Add your detailed review comments here..."
+                      value={expertComment}
+                      onChange={(e) => setExpertComment(e.target.value)}
+                      required
+                    ></textarea>
+                  </div>
+
+                  <div className="flex justify-between space-x-3">
+                    <button
+                      onClick={() => handleSubmitExpertReview(false)}
+                      className={`py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition-colors ${
+                        isSubmitting || !expertComment.trim()
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={isSubmitting || !expertComment.trim()}
+                    >
+                      <span className="flex items-center">
+                        <AlertTriangle size={16} className="mr-2" /> Request
+                        Revision
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => handleSubmitExpertReview(true)}
+                      className={`py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors ${
+                        isSubmitting || !expertComment.trim()
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={isSubmitting || !expertComment.trim()}
+                    >
+                      <span className="flex items-center">
+                        <ThumbsUp size={16} className="mr-2" /> Approve Drawing
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Drawing Preview Panel */}
+              <div className="bg-gray-50 p-5 rounded-lg shadow-sm h-full flex flex-col">
+                <h4 className="font-medium text-gray-800 mb-3 flex items-center">
+                  <Eye size={18} className="mr-2 text-gray-600" />
+                  Drawing Preview
+                </h4>
+                <div className="flex-grow bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
+                  <iframe
+                    src={`${BASE_URL}/${selectedDrawing.latest_document_path}`}
+                    className="w-full h-full"
+                    title={selectedDrawing.drawing_name}
+                  />
+                </div>
+                <div className="mt-3">
+                  <button
+                    onClick={() =>
+                      handleDownload(selectedDrawing.latest_document_path)
+                    }
+                    className="px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center shadow-sm text-sm transition-colors"
+                  >
+                    <Download size={14} className="mr-1.5" /> Download Drawing
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Client Submit Modal */}
+      {showClientSubmitModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-xl">
+            <div className="flex justify-between items-center p-4 border-b bg-purple-50">
+              <h3 className="text-lg font-semibold text-purple-900 flex items-center">
+                <Send size={20} className="mr-2 text-purple-600" />
+                Submit Drawing to Client
+              </h3>
+              <button
+                onClick={() => setShowClientSubmitModal(false)}
+                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-200 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Select Client: <span className="text-red-500">*</span>
+                </label>
+                {isLoadingClients ? (
+                  <div className="flex justify-center items-center h-10">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-purple-500 border-t-transparent"></div>
+                  </div>
+                ) : (
+                  <select
+                    className="shadow-sm appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    value={selectedClient}
+                    onChange={(e) => setSelectedClient(e.target.value)}
+                    required
+                  >
+                    <option value="">Select a client...</option>
+                    {clientUsers.map((client) => (
+                      <option key={client.id} value={client.id}>
+                        {client.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Message to Client:
+                </label>
+                <textarea
+                  className="shadow-sm appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  rows="3"
+                  placeholder="Add a message for the client (optional)"
+                  value={clientComment}
+                  onChange={(e) => setClientComment(e.target.value)}
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowClientSubmitModal(false)}
+                  className="py-2 px-4 rounded-md border border-gray-300 shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitToClient}
+                  className={`py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors flex items-center ${
+                    isSubmitting || !selectedClient
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
+                  disabled={isSubmitting || !selectedClient}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                      Submitting...
+                    </span>
+                  ) : (
+                    <span className="flex items-center">
+                      <Send size={16} className="mr-2" /> Submit to Client
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Revision Modal */}
+      {showRevisionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-xl">
+            <div className="p-6">
+              {/* Show current feedback that requires revision */}
+              <div className="mb-5 bg-orange-50 p-4 rounded-lg">
+                <h4 className="font-medium text-orange-800 mb-2 flex items-center">
+                  <AlertTriangle size={16} className="mr-2" />
+                  Revision Request
+                </h4>
+                {isLoadingHistory ? (
+                  <div className="flex justify-center items-center h-16">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-orange-500 border-t-transparent"></div>
+                  </div>
+                ) : (
+                  <div className="bg-white p-3 rounded-md border border-orange-200">
+                    <p className="text-gray-700 text-sm whitespace-pre-line">
+                      {versionHistory.length > 0
+                        ? versionHistory[0].feedback ||
+                          "No specific feedback provided."
+                        : "No feedback details available."}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Upload Revised Drawing:{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                  <div className="space-y-1 text-center">
+                    <FileDown
+                      size={30}
+                      className={`mx-auto ${
+                        revisionFile ? "text-green-500" : "text-gray-400"
+                      }`}
+                    />
+                    <div className="flex text-sm text-gray-600">
+                      <label
+                        htmlFor="file-upload"
+                        className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none"
+                      >
+                        <span>
+                          {revisionFile
+                            ? revisionFile.name
+                            : "Click to upload file"}
+                        </span>
+                        <input
+                          id="file-upload"
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) =>
+                            setRevisionFile(e.target.files[0] || null)
+                          }
+                        />
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      PDF, DWG, or DXF up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Revision Comment:
+                </label>
+                <textarea
+                  className="shadow-sm appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  rows="3"
+                  placeholder="Describe the changes made in this revision..."
+                  value={revisionComment}
+                  onChange={(e) => setRevisionComment(e.target.value)}
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowRevisionModal(false)}
+                  className="py-2 px-4 rounded-md border border-gray-300 shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -530,216 +1082,6 @@ const DrawingTable = ({
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
               >
                 Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Revision Modal */}
-      {showRevisionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-2/3 flex flex-col max-h-screen">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg font-semibold">
-                Submit Revision for {selectedDrawing.drawing_name}
-              </h3>
-              <button
-                onClick={() => setShowRevisionModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto">
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-1">
-                    Drawing Name:
-                  </label>
-                  <p className="text-gray-600">
-                    {selectedDrawing.drawing_name}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-1">
-                    Discipline:
-                  </label>
-                  <p className="text-gray-600">{selectedDrawing.discipline}</p>
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-1">
-                    Current Version:
-                  </label>
-                  <p className="text-gray-600">
-                    v{selectedDrawing.latest_version_number} -{" "}
-                    {selectedDrawing.latest_document_path.split("/").pop()}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-1">
-                    Status:
-                  </label>
-                  <p className="text-orange-600 font-semibold">
-                    {selectedDrawing.status}
-                  </p>
-                </div>
-              </div>
-
-              {/* Current Version Feedback */}
-              {isLoadingHistory ? (
-                <div className="flex justify-center items-center h-10 mb-4">
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
-                </div>
-              ) : (
-                <div className="mb-4 bg-orange-50 p-4 rounded-md border border-orange-200">
-                  <h4 className="font-medium text-orange-800 mb-2 flex items-center">
-                    <MessageSquare size={16} className="mr-2" /> Feedback from
-                    Expert
-                  </h4>
-                  {versionHistory.length > 0 ? (
-                    <p className="text-orange-700 text-sm">
-                      {getCurrentVersionComment() ||
-                        "No specific feedback provided."}
-                    </p>
-                  ) : (
-                    <p className="text-orange-700 text-sm italic">
-                      Loading feedback...
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Version History Summary */}
-              {versionHistory.length > 0 && !isLoadingHistory && (
-                <div className="mb-6 bg-gray-50 p-4 rounded-md border border-gray-200">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-gray-700">
-                      Previous Versions
-                    </h4>
-                    <button
-                      onClick={() => handleHistoryModal(selectedDrawing)}
-                      className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
-                    >
-                      <Clock size={14} className="mr-1" /> View Full History
-                    </button>
-                  </div>
-                  <div className="space-y-2 max-h-32 overflow-y-auto">
-                    {versionHistory.map((version, index) => (
-                      <div
-                        key={index}
-                        className="flex justify-between items-center text-sm p-2 hover:bg-gray-100 rounded"
-                      >
-                        <div className="flex-1">
-                          <span
-                            className={`${
-                              version.is_latest
-                                ? "font-semibold"
-                                : "font-normal"
-                            }`}
-                          >
-                            Version {version.version_number}{" "}
-                            {version.is_latest ? "(Current)" : ""}
-                          </span>
-                          <span className="text-gray-500 text-xs ml-2">
-                            {formatDate(version.uploaded_at)}
-                          </span>
-                        </div>
-                        <div className="flex space-x-1">
-                          <button
-                            onClick={() =>
-                              handleDownload(version.document_path)
-                            }
-                            className="text-blue-600 hover:text-blue-800"
-                            title="Download Version"
-                          >
-                            <Download size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Revision Comment: <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  rows="4"
-                  placeholder="Enter your comments about this revision"
-                  value={revisionComment}
-                  onChange={(e) => setRevisionComment(e.target.value)}
-                  required
-                ></textarea>
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Upload Revised Drawing:{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-400 transition-colors">
-                  <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="flex text-sm text-gray-600">
-                      <label
-                        htmlFor="file-upload"
-                        className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                      >
-                        <span>Upload a file</span>
-                        <input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          accept=".pdf,.dwg,.dxf"
-                          className="sr-only"
-                          onChange={(e) => setRevisionFile(e.target.files[0])}
-                        />
-                      </label>
-                      <p className="pl-1">or drag and drop</p>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      PDF, DWG, DXF up to 50MB
-                    </p>
-                  </div>
-                </div>
-                {revisionFile && (
-                  <div className="mt-2 text-sm text-green-600 flex items-center">
-                    <CheckCircle size={16} className="mr-1" />
-                    Selected file: {revisionFile.name}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="px-4 py-3 bg-gray-50 text-right sm:px-6 flex justify-end space-x-3 rounded-b-lg">
-              <button
-                onClick={() => setShowRevisionModal(false)}
-                className="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmitRevision}
-                className={`py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                  isSubmitting ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
-                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center`}
-                disabled={
-                  isSubmitting || !revisionFile || !revisionComment.trim()
-                }
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle size={16} className="mr-2" /> Submit Revision
-                  </>
-                )}
               </button>
             </div>
           </div>
