@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import BASE_URL from "../../config";
@@ -77,11 +76,21 @@ const TaskAssignTable = ({ userId }) => {
           </div>
 
           <div className="space-y-3 text-gray-700">
-            <p><strong>Task Name:</strong> {selectedTask.task_name}</p>
-            <p><strong>Project Name:</strong> {selectedTask.project_id}</p>
-            <p><strong>Start Date:</strong> {selectedTask.start_date}</p>
-            <p><strong>End Date:</strong> {selectedTask.due_date}</p>
-            <p><strong>Priority:</strong> {selectedTask.priority}</p>
+            <p>
+              <strong>Task Name:</strong> {selectedTask.task_name}
+            </p>
+            <p>
+              <strong>Project Name:</strong> {selectedTask.project_id}
+            </p>
+            <p>
+              <strong>Start Date:</strong> {selectedTask.start_date}
+            </p>
+            <p>
+              <strong>End Date:</strong> {selectedTask.due_date}
+            </p>
+            <p>
+              <strong>Priority:</strong> {selectedTask.priority}
+            </p>
           </div>
         </div>
       )}

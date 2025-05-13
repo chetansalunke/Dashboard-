@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import BASE_URL from "../../config";
 import { useLocation, useNavigate } from "react-router-dom";
-import UploadDrawingForm from "../admin/UploadDrawingForm";
 import DisciplineTabs from "../../components/designer/Design/DisciplineTabs";
 import FilterSortControls from "../../components/designer/Design/FilterSortControls";
 import DrawingTable from "../../components/designer/Design/DrawingTable";
@@ -125,51 +124,35 @@ export default function Design() {
   return (
     <div className="bg-gray-100">
       <main className="h-full overflow-y-auto">
-        {showUploadForm ? (
-          <div className="space-y-4 m-4">
-            <h1 className="text-xl font-semibold tracking-wide text-left text-gray-500 uppercase">
-              Upload Drawing
-            </h1>
-            <UploadDrawingForm
-              onClose={() => setShowUploadForm(false)}
-              onSubmit={handleUploadSubmit}
-              selectedProject={selectedProjectInfo}
+        <div className="container px-6 my-6 grid">
+          <TopBarControls
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            setShowUploadForm={setShowUploadForm}
+            navigate={navigate}
+            selectedProject={selectedProject}
+          />
+          <hr className="border border-gray-400" />
+          <div className="flex justify-between items-center gap-3 mb-4 bg-white w-full mt-4">
+            <DisciplineTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            <FilterSortControls
+              showDropdown={showDropdown}
+              setShowDropdown={setShowDropdown}
+              sortDropdownRef={sortDropdownRef}
+              sortOption={sortOption}
+              setSortOption={setSortOption}
+              showFilterDropdown={showFilterDropdown}
+              setShowFilterDropdown={setShowFilterDropdown}
+              filterDropdownRef={filterDropdownRef}
             />
           </div>
-        ) : (
-          <div className="container px-6 my-6 grid">
-            <TopBarControls
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              setShowUploadForm={setShowUploadForm}
-              navigate={navigate}
-              selectedProject={selectedProject}
-            />
-            <hr className="border border-gray-400" />
-            <div className="flex justify-between items-center gap-3 mb-4 bg-white w-full mt-4">
-              <DisciplineTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-              <FilterSortControls
-                showDropdown={showDropdown}
-                setShowDropdown={setShowDropdown}
-                sortDropdownRef={sortDropdownRef}
-                sortOption={sortOption}
-                setSortOption={setSortOption}
-                showFilterDropdown={showFilterDropdown}
-                setShowFilterDropdown={setShowFilterDropdown}
-                filterDropdownRef={filterDropdownRef}
-              />
-            </div>
-            <DrawingTable
-              drawings={sortedDrawings}
-              showActionDropdown={showActionDropdown}
-              setShowActionDropdown={setShowActionDropdown}
-              dropdownRef={dropdownRef}
-            />
-          </div>
-        )}
+          <DrawingTable
+            drawings={sortedDrawings}
+            showActionDropdown={showActionDropdown}
+            setShowActionDropdown={setShowActionDropdown}
+            dropdownRef={dropdownRef}
+          />
+        </div>
       </main>
     </div>
   );

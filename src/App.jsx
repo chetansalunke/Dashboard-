@@ -22,6 +22,7 @@ import ClientHome from "./pages/client/ClientHome";
 import Approvals from "./pages/client/Approvals";
 import Received from "./pages/client/Received";
 import Send from "./pages/client/Send";
+import UploadDrawingPage from "./pages/designer/UploadDrawingPage";
 // import AdminDesignerProjects from "./pages/admin/AdminDesignerProjects";
 import AdminDesignWrapper from "./pages/admin/AdminDesignWrapper";
 const getStoredUser = () => {
@@ -144,6 +145,15 @@ const App = () => {
               element={
                 <PrivateRoute
                   element={<Design />}
+                  allowedRoles={["designer"]}
+                />
+              }
+            />
+            <Route
+              path="/designer-dashboard/projects/design/upload"
+              element={
+                <PrivateRoute
+                  element={<UploadDrawingPage />}
                   allowedRoles={["designer"]}
                 />
               }
