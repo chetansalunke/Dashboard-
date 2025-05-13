@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import BASE_URL from "../../config";
 import UploadDrawingForm from "./UploadDrawingForm";
 import { FiMoreHorizontal } from "react-icons/fi";
-import { FileUp } from "lucide-react"; 
-
+import { FileUp } from "lucide-react";
 
 export default function AdminDesign({ selectedProject, onBack }) {
   const [showUploadForm, setShowUploadForm] = useState(false);
@@ -17,7 +16,7 @@ export default function AdminDesign({ selectedProject, onBack }) {
   const dropdownRef = useRef(null);
   const sortDropdownRef = useRef(null);
   const filterDropdownRef = useRef(null);
-  
+
   // console.log(selectedProject);
 
   // useEffect(() => {
@@ -113,11 +112,11 @@ export default function AdminDesign({ selectedProject, onBack }) {
               Upload New Drawing
             </h2> */}
             <div className="flex items-center gap-2 mb-6">
-  <FileUp size={24} className="text-purple-700" />
-  <h2 className="text-xl font-bold text-purple-700">
-    Upload New Drawing
-  </h2>
-</div>
+              <FileUp size={24} className="text-purple-700" />
+              <h2 className="text-xl font-bold text-purple-700">
+                Upload New Drawing
+              </h2>
+            </div>
             <UploadDrawingForm
               onClose={() => setShowUploadForm(false)}
               onSubmit={handleUploadSubmit}

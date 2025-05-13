@@ -23,6 +23,7 @@ import Approvals from "./pages/client/Approvals";
 import Received from "./pages/client/Received";
 import Send from "./pages/client/Send";
 import UploadDrawingPage from "./pages/designer/UploadDrawingPage";
+import DesignDrawingPage from "./pages/admin/DesignDrawingPage";
 // import AdminDesignerProjects from "./pages/admin/AdminDesignerProjects";
 import AdminDesignWrapper from "./pages/admin/AdminDesignWrapper";
 const getStoredUser = () => {
@@ -104,6 +105,15 @@ const App = () => {
               }
             />
             <Route
+              path="/admin-design"
+              element={
+                <PrivateRoute
+                  element={<DesignDrawingPage />}
+                  allowedRoles={["admin"]}
+                />
+              }
+            />
+            <Route
               path="/admin-dashboard/communication/rfi"
               element={
                 <PrivateRoute element={<RFI />} allowedRoles={["admin"]} />
@@ -112,6 +122,15 @@ const App = () => {
 
             <Route
               path="/admin-dashboard/communication/submission"
+              element={
+                <PrivateRoute
+                  element={<Submission />}
+                  allowedRoles={["admin"]}
+                />
+              }
+            />
+            <Route
+              path="/admin-design/approvals"
               element={
                 <PrivateRoute
                   element={<Submission />}

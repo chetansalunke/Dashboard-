@@ -8,7 +8,6 @@ import TopBarControls from "../../components/designer/Design/TopBarControls";
 
 export default function Design() {
   const [isLoading, setIsLoading] = useState(true);
-
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [drawings, setDrawings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,7 +16,7 @@ export default function Design() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showActionDropdown, setShowActionDropdown] = useState(null);
-  const [selectedProjectInfo, setSelectedProjectInfo] = useState([]);
+  const [selectedProjectInfo, setSelectedProjectInfo] = useState({});
 
   const dropdownRef = useRef(null);
   const sortDropdownRef = useRef(null);
@@ -32,9 +31,7 @@ export default function Design() {
   const fetchSelectedProjectInfo = async () => {
     setIsLoading(true);
     try {
-      // const token = localStorage.getItem("accessToken");
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ2NjcxNjI3LCJleHAiOjE3NDcyNzY0Mjd9.DmuXa27o5BPt2wAjxBbPUjIkIrCOY_QN_ueIQ2E3elw";
+      const token = localStorage.getItem("accessToken");
       const response = await fetch(
         `${BASE_URL}/api/projects/${selectedProject.id}`,
         {
@@ -44,16 +41,70 @@ export default function Design() {
           },
         }
       );
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP error! ${response.status}: ${errorText}`);
       }
+
       const data = await response.json();
-      // console.log("Fetched project data:", data);
       setSelectedProjectInfo(data.project || {});
     } catch (error) {
       console.error("Error fetching project:", error);
-      setSelectedProjectInfo([]);
+      setSelectedProjectInfo({});
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchDrawings = async () => {
+    setIsLoading(true);
+    try {
+      if (!selectedProject?.id) {
+        setDrawings([]);
+        return;
+      }
+
+      const token = localStorage.getItem("accessToken");
+      // Use the correct endpoint for fetching drawings
+      const response = await fetch(
+        `${BASE_URL}/api/projects/${selectedProject.id}/drawings`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+
+      // Process the drawings data to match the component's expected format
+      const processedDrawings = Array.isArray(data.drawings)
+        ? data.drawings.map((drawing) => ({
+            drawing_id: drawing.drawing_id,
+            drawing_name: drawing.drawing_name,
+            discipline: drawing.discipline,
+            status: drawing.status,
+            last_updated: drawing.last_updated,
+            latest_version_id: drawing.latest_version_id,
+            latest_document_path: drawing.latest_document_path,
+            latest_version_number: drawing.latest_version_number,
+            previous_version_number: drawing.previous_version_number,
+            previous_document_path: drawing.previous_document_path,
+            sent_by_name: drawing.sent_by_name,
+          }))
+        : [];
+
+      setDrawings(processedDrawings);
+    } catch (error) {
+      console.error("Error fetching drawings:", error);
+      setDrawings([]);
     } finally {
       setIsLoading(false);
     }
@@ -61,29 +112,11 @@ export default function Design() {
 
   useEffect(() => {
     fetchSelectedProjectInfo();
-  }, []);
-
-  const fetchDrawings = async () => {
-    if (!selectedProject?.id) return;
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/projects/design_drawing/${selectedProject.id}`
-      );
-      const data = await response.json();
-      setDrawings(
-        Array.isArray(data.designDrawings) ? data.designDrawings : []
-      );
-    } catch (error) {
-      console.error("Error fetching drawings:", error);
-    }
-  };
-
-  useEffect(() => {
     fetchDrawings();
-  }, []);
+  }, [selectedProject.id]);
 
   const filteredDrawings = drawings.filter((drawing) => {
-    const matchesSearch = drawing.name
+    const matchesSearch = drawing.drawing_name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesDiscipline =
@@ -93,8 +126,9 @@ export default function Design() {
 
   const sortedDrawings = [...filteredDrawings].sort((a, b) => {
     if (sortOption === "date")
-      return new Date(b.created_date) - new Date(a.created_date);
-    if (sortOption === "a-z") return a.name.localeCompare(b.name);
+      return new Date(b.last_updated) - new Date(a.last_updated);
+    if (sortOption === "a-z")
+      return a.drawing_name.localeCompare(b.drawing_name);
     return 0;
   });
 
@@ -117,41 +151,52 @@ export default function Design() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleUploadSubmit = (data) => {
-    // Handle upload logic here
-  };
-
   return (
-    <div className="bg-gray-100">
+    <div className="bg-gray-100 min-h-screen">
       <main className="h-full overflow-y-auto">
-        <div className="container px-6 my-6 grid">
-          <TopBarControls
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            setShowUploadForm={setShowUploadForm}
-            navigate={navigate}
-            selectedProject={selectedProject}
-          />
-          <hr className="border border-gray-400" />
-          <div className="flex justify-between items-center gap-3 mb-4 bg-white w-full mt-4">
-            <DisciplineTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-            <FilterSortControls
-              showDropdown={showDropdown}
-              setShowDropdown={setShowDropdown}
-              sortDropdownRef={sortDropdownRef}
-              sortOption={sortOption}
-              setSortOption={setSortOption}
-              showFilterDropdown={showFilterDropdown}
-              setShowFilterDropdown={setShowFilterDropdown}
-              filterDropdownRef={filterDropdownRef}
-            />
-          </div>
-          <DrawingTable
-            drawings={sortedDrawings}
-            showActionDropdown={showActionDropdown}
-            setShowActionDropdown={setShowActionDropdown}
-            dropdownRef={dropdownRef}
-          />
+        <div className="container px-6 py-6 mx-auto">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <>
+              <TopBarControls
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                setShowUploadForm={setShowUploadForm}
+                navigate={navigate}
+                selectedProject={selectedProject}
+              />
+
+              <hr className="border border-gray-300 my-4" />
+
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 bg-white p-4 rounded-lg shadow-sm w-full">
+                <DisciplineTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
+                <FilterSortControls
+                  showDropdown={showDropdown}
+                  setShowDropdown={setShowDropdown}
+                  sortDropdownRef={sortDropdownRef}
+                  sortOption={sortOption}
+                  setSortOption={setSortOption}
+                  showFilterDropdown={showFilterDropdown}
+                  setShowFilterDropdown={setShowFilterDropdown}
+                  filterDropdownRef={filterDropdownRef}
+                />
+              </div>
+
+              <DrawingTable
+                drawings={sortedDrawings}
+                showActionDropdown={showActionDropdown}
+                setShowActionDropdown={setShowActionDropdown}
+                dropdownRef={dropdownRef}
+                fetchDrawings={fetchDrawings}
+              />
+            </>
+          )}
         </div>
       </main>
     </div>
