@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import BASE_URL from "../../../config";
+import RoleDropdown from "../../admin/RoleDropdown";
+import { X } from "lucide-react";
 
 export default function RFIResolveForm({
   rfi,
@@ -11,6 +13,9 @@ export default function RFIResolveForm({
   const [solutionText, setSolutionText] = useState("");
   const [solutionFiles, setSolutionFiles] = useState([]);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [showClientForm, setShowClientForm] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [clientRemark, setClientRemark] = useState("");
 
   const handleResolveSubmit = async () => {
     const formData = new FormData();
@@ -35,7 +40,6 @@ export default function RFIResolveForm({
         throw new Error("Failed to resolve RFI");
       }
 
-      // Reset form
       setSolutionText("");
       setSolutionFiles([]);
       setErrorMsg(null);
@@ -46,15 +50,56 @@ export default function RFIResolveForm({
     }
   };
 
+  const handleSendToClientClick = () => {
+    setShowClientForm(true);
+  };
+
+  const handleClientSubmit = async () => {
+    if (!selectedClient || !clientRemark.trim()) {
+      setErrorMsg("Please select a client and enter a remark.");
+      return;
+    }
+
+    const body = {
+      rfi_id: rfi.id,
+      client_id: selectedClient.id,
+      client_remark: clientRemark,
+    };
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/sendToClient`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send to client.");
+      }
+
+      setClientRemark("");
+      setSelectedClient(null);
+      setShowClientForm(false);
+      setErrorMsg(null);
+      onSuccess();
+    } catch (error) {
+      console.error("Error sending to client:", error);
+      setErrorMsg("Something went wrong while sending to the client.");
+    }
+  };
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg space-y-4">
+    <div className="bg-white p-6 rounded-lg shadow-lg space-y-4 relative">
       <div className="text-right hover:cursor-pointer" onClick={onCancel}>
         <span className="inline-block bg-gray-300 rounded px-2 py-1 text-sm text-gray-600">
           X
         </span>
       </div>
 
-      {/* Title Section */}
+      {/* RFI Info */}
       <div
         className={`p-1 shadow-sm rounded ${
           rfi.resolution_details || rfi.resolved_at
@@ -65,50 +110,48 @@ export default function RFIResolveForm({
         <h1 className="text-xl font-semibold tracking-wide text-black">RFI</h1>
       </div>
 
-      {/* Details Grid */}
       <div className="w-full p-1 grid grid-cols-1 md:grid-cols-2 gap-6">
         <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Title</span>
+          <span className="text-gray-700 font-semibold">Title</span>
           <input
             type="text"
             value={rfi.title || "NA"}
-            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple text-gray-700 focus:shadow-outline-gray form-input"
             readOnly
+            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
           />
         </label>
 
         <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Details</span>
+          <span className="text-gray-700 font-semibold">Details</span>
           <input
             type="text"
             value={rfi.details || "NA"}
-            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple text-gray-700 focus:shadow-outline-gray form-input"
             readOnly
+            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
           />
         </label>
 
         <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Priority</span>
+          <span className="text-gray-700 font-semibold">Priority</span>
           <input
             type="text"
             value={rfi.priority || "NA"}
-            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple text-gray-700 focus:shadow-outline-gray form-input"
             readOnly
+            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
           />
         </label>
 
         <label className="block text-sm">
-          <span className="text-gray-700 text-sm font-semibold">Sent To</span>
+          <span className="text-gray-700 font-semibold">Sent To</span>
           <input
             type="text"
             value={users[rfi.send_to] ?? "NA"}
-            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple text-gray-700 focus:shadow-outline-gray form-input"
             readOnly
+            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
           />
         </label>
       </div>
 
-      {/* Sent Info */}
       <div className="text-right mt-2 mb-5">
         <span className="inline-block bg-gray-200 rounded px-2 py-1 text-sm text-gray-600">
           Sent on {new Date(rfi.created_at).toLocaleDateString("en-GB")} at{" "}
@@ -120,7 +163,7 @@ export default function RFIResolveForm({
         </span>
       </div>
 
-      {/* Resolution Section */}
+      {/* Solution Section */}
       <div
         className={`p-1 shadow-sm rounded ${
           rfi.resolution_details || rfi.resolved_at
@@ -133,7 +176,6 @@ export default function RFIResolveForm({
         </h1>
       </div>
 
-      {/* Solution Box */}
       <div className="space-y-2">
         <label className="text-gray-700 text-sm font-semibold">Solution</label>
 
@@ -141,19 +183,17 @@ export default function RFIResolveForm({
           <>
             <textarea
               value={rfi.resolution_details || ""}
-              className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple text-gray-700 focus:shadow-outline-gray form-input"
-              rows={3}
               readOnly
-              placeholder="No resolution provided"
+              rows={3}
+              className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
             />
-
             <label className="text-gray-700 text-sm font-semibold mt-2">
               Documents
             </label>
             {rfi.resolution_documents ? (
               <ul className="list-disc ml-5">
-                {rfi.resolution_documents.split(",").map((doc, index) => (
-                  <li key={index}>
+                {rfi.resolution_documents.split(",").map((doc, i) => (
+                  <li key={i}>
                     <a
                       href={`${BASE_URL}/uploads/${doc.trim()}`}
                       target="_blank"
@@ -175,8 +215,8 @@ export default function RFIResolveForm({
             <textarea
               value={solutionText}
               onChange={(e) => setSolutionText(e.target.value)}
-              className="block w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
               rows={3}
+              className="block w-full mt-1 text-sm border-gray-300 form-input"
               placeholder="Enter solution..."
             />
 
@@ -187,13 +227,12 @@ export default function RFIResolveForm({
               type="file"
               multiple
               onChange={(e) => setSolutionFiles(Array.from(e.target.files))}
-              className="lock w-full mt-1 text-sm light:border-gray-600 light:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple light:text-gray-300 light:focus:shadow-outline-gray form-input"
+              className="block w-full mt-1 text-sm border-gray-300 form-input"
             />
           </>
         )}
       </div>
 
-      {/* Resolved Date */}
       {rfi.resolved_at && (
         <div className="text-right mt-2 mb-5">
           <span className="inline-block bg-gray-200 rounded px-2 py-1 text-sm text-gray-600">
@@ -208,24 +247,100 @@ export default function RFIResolveForm({
         </div>
       )}
 
-      {/* Submit Button */}
-      {!rfi.resolution_details && !rfi.resolved_at && (
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            onClick={handleResolveSubmit}
-            className="px-4 py-2 text-sm font-medium leading-5 text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+      {/* Client Forward Modal */}
+      {showClientForm && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
+          onClick={() => setShowClientForm(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl w-full max-w-xl"
+            onClick={(e) => e.stopPropagation()}
           >
-            Submit Solution
-          </button>
+            <div className="flex justify-between items-center p-4 border-b bg-purple-50">
+              <h3 className="text-lg font-semibold text-purple-900 flex items-center">
+                Sent RFI to Client
+              </h3>
+              <button
+                onClick={() => setShowClientForm(false)}
+                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-200 transition-colors"
+                // aria-label="Close modal"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Select Client: <span className="text-red-500">*</span>
+                </label>
+                <RoleDropdown
+                  users={users}
+                  onSelect={(user) => setSelectedClient(user)}
+                  role="client"
+                  label=""
+                  width="w-full"
+                  value={selectedClient?.id}
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Remark for Client:
+                </label>
+                <textarea
+                  rows={3}
+                  value={clientRemark}
+                  onChange={(e) => setClientRemark(e.target.value)}
+                  placeholder="Add a Remark for the client (optional)"
+                  className="shadow-sm appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                />
+              </div>
+
+              <div className="mt-4 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowClientForm(false)}
+                  className="py-2 px-4 rounded-md border border-gray-300 shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleClientSubmit}
+                  className="py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Error Message */}
-      {errorMsg && (
-        <div className="text-red-600 text-sm font-semibold text-right">
-          {errorMsg}
-        </div>
-      )}
+      {/* Buttons */}
+      <div className="flex justify-between mt-6">
+        {!rfi.resolution_details && !rfi.resolved_at && (
+          <>
+            <button
+              onClick={handleResolveSubmit}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+            >
+              Resolve
+            </button>
+
+            <button
+              onClick={handleSendToClientClick}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            >
+              Send to Client
+            </button>
+          </>
+        )}
+
+        {/* {errorMsg && (
+          <p className="text-red-600 mt-2 text-sm font-semibold">{errorMsg}</p>
+        )} */}
+      </div>
     </div>
   );
 }

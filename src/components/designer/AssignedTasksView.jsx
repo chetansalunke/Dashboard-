@@ -66,7 +66,7 @@ export default function AssignedTasksView({ selectedProject, users }) {
     // console.log(token);
     try {
       const response = await axios.get(
-        `${BASE_URL}/api/projects/${selectedProject.id}/assignTask`,
+        `${BASE_URL}/api/projects/${selectedProject.id}/assignTasks`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
