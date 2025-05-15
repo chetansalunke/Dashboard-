@@ -20,6 +20,7 @@ import {
 import BASE_URL from "../../../config";
 
 const DrawingTable = ({
+  users,
   drawings,
   showActionDropdown,
   setShowActionDropdown,
@@ -39,10 +40,12 @@ const DrawingTable = ({
   const [versionHistory, setVersionHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [clientUsers, setClientUsers] = useState([]);
-  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedClient, setSelectedClient] = useState(null);
   const [clientComment, setClientComment] = useState("");
   const [isLoadingClients, setIsLoadingClients] = useState(false);
   const [userRole, setUserRole] = useState("");
+
+  console.log(selectedDrawing);
 
   useEffect(() => {
     // Determine user role on component mount
@@ -612,6 +615,18 @@ const DrawingTable = ({
                     <div className="grid grid-cols-3 gap-2">
                       <div className="col-span-1">
                         <span className="text-sm font-semibold text-gray-600">
+                          Remark:
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-sm font-medium text-gray-800">
+                          {selectedDrawing.description}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <span className="text-sm font-semibold text-gray-600">
                           Discipline:
                         </span>
                       </div>
@@ -803,7 +818,7 @@ const DrawingTable = ({
                     <option value="">Select a client...</option>
                     {clientUsers.map((client) => (
                       <option key={client.id} value={client.id}>
-                        {client.name}
+                        {client.username}
                       </option>
                     ))}
                   </select>

@@ -17,6 +17,8 @@ export default function Design() {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showActionDropdown, setShowActionDropdown] = useState(null);
   const [selectedProjectInfo, setSelectedProjectInfo] = useState({});
+  const [users, setUsers] = useState({});
+    const [token, setToken] = useState(localStorage.getItem("accessToken"));
 
   const dropdownRef = useRef(null);
   const sortDropdownRef = useRef(null);
@@ -27,6 +29,32 @@ export default function Design() {
   const selectedProject = JSON.parse(
     localStorage.getItem("selectedProject") || "{}"
   );
+
+    const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const userData = await response.json();
+      // Save full user objects directly
+      // setUsers(userData.users);
+      const userMap = {};
+      userData.users.forEach((user) => {
+        userMap[user.id] = user.username;
+      });
+      setUsers(userMap);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setError("Failed to load users");
+    }
+  };
+
+    useEffect(() => {
+      if (token) {
+        fetchUsers();
+      }
+    }, [token]);
+
 
   const fetchSelectedProjectInfo = async () => {
     setIsLoading(true);
@@ -189,6 +217,7 @@ export default function Design() {
               </div>
 
               <DrawingTable
+                users={users}
                 drawings={sortedDrawings}
                 showActionDropdown={showActionDropdown}
                 setShowActionDropdown={setShowActionDropdown}
