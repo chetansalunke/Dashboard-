@@ -32,18 +32,18 @@ export default function TopBarControls({
             className="w-full pl-10 pr-2 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md focus:border-purple-500 focus:ring focus:ring-purple-200 focus:outline-none"
           />
         </div>
-        <button
+        {/* <button
           onClick={() => navigate("/designer-dashboard/projects/design/upload")}
           className="px-3 py-1 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
         >
           Upload Drawing
-        </button>
-        <button
+        </button> */}
+        {/* <button
           onClick={() => navigate(-1)}
           className="px-3 py-1 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
         >
           Back
-        </button>
+        </button> */}
       </div>
     </div>
   );

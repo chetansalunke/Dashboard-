@@ -18,7 +18,7 @@ export default function Design() {
   const [showActionDropdown, setShowActionDropdown] = useState(null);
   const [selectedProjectInfo, setSelectedProjectInfo] = useState({});
   const [users, setUsers] = useState({});
-    const [token, setToken] = useState(localStorage.getItem("accessToken"));
+  const [token, setToken] = useState(localStorage.getItem("accessToken"));
 
   const dropdownRef = useRef(null);
   const sortDropdownRef = useRef(null);
@@ -30,7 +30,7 @@ export default function Design() {
     localStorage.getItem("selectedProject") || "{}"
   );
 
-    const fetchUsers = async () => {
+  const fetchUsers = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/auth/all`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -49,12 +49,11 @@ export default function Design() {
     }
   };
 
-    useEffect(() => {
-      if (token) {
-        fetchUsers();
-      }
-    }, [token]);
-
+  useEffect(() => {
+    if (token) {
+      fetchUsers();
+    }
+  }, [token]);
 
   const fetchSelectedProjectInfo = async () => {
     setIsLoading(true);

@@ -99,22 +99,6 @@ export default function AdminDesignProjects() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header - Reduced height */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-3">
-          <div className="flex items-center justify-between h-12">
-            <div className="flex items-center gap-2">
-              <FaUserCircle className="text-2xl text-gray-400" />
-              <h5 className="text-base font-medium text-gray-700">
-                Welcome,{" "}
-                {JSON.parse(localStorage.getItem("user"))?.username ||
-                  "Designer"}
-              </h5>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content - Reduced padding */}
       <div className="max-w-7xl mx-auto px-3 py-4">
         <div className="mb-4">

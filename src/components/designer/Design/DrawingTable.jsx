@@ -184,11 +184,15 @@ const DrawingTable = ({
     const currentVersion = versionHistory.find(
       (version) => version.is_latest === 1
     );
-    return currentVersion?.comment || "";
+    console.log("From Get Current Version");
+    console.log(currentVersion?.comments[2]);
+    return selectedDrawing?.status === "Revision Required by Client"
+      ? currentVersion?.comments?.[2]?.comment || ""
+      : currentVersion?.comments?.[1]?.comment || "";
   };
 
   return (
-    <div className="w-full overflow-hidden shadow-md rounded-lg">
+    <div className="w-full h-full shadow-md rounded-lg">
       <div className="overflow-x-auto">
         <table className="w-full bg-white">
           <thead>
@@ -465,8 +469,10 @@ const DrawingTable = ({
               ) : (
                 <div className="mb-4 bg-orange-50 p-4 rounded-md border border-orange-200">
                   <h4 className="font-medium text-orange-800 mb-2 flex items-center">
-                    <MessageSquare size={16} className="mr-2" /> Feedback from
-                    Expert
+                    <MessageSquare size={16} className="mr-2" /> Feedback from{" "}
+                    {selectedDrawing?.status === "Revision Required by Client"
+                      ? "Client"
+                      : "Expert"}
                   </h4>
                   {versionHistory.length > 0 ? (
                     <p className="text-orange-700 text-sm">

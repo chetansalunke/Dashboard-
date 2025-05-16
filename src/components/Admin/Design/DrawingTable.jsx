@@ -46,9 +46,6 @@ const DrawingTable = ({
   const [isLoadingClients, setIsLoadingClients] = useState(false);
   const [userRole, setUserRole] = useState("");
 
-  console.log("Selected Version ID");
-  console.log(selectedDrawing);
-
   useEffect(() => {
     // Determine user role on component mount
     const user = getCurrentUser();
@@ -332,10 +329,14 @@ const DrawingTable = ({
   // Find current version's comment from version history
   const getCurrentVersionComment = () => {
     if (!versionHistory || versionHistory.length === 0) return null;
+    console.log("Get Current version Ffrom '");
+    console.log(versionHistory);
     const currentVersion = versionHistory.find(
       (version) => version.is_latest === 1
     );
-    return currentVersion?.comment || "";
+    console.log("comment");
+    console.log(currentVersion?.comments?.[0]?.comment);
+    return currentVersion?.comments?.[0]?.comment || selectedDrawing.remark;
   };
 
   return (
