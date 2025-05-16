@@ -45,8 +45,6 @@ const DrawingTable = ({
   const [isLoadingClients, setIsLoadingClients] = useState(false);
   const [userRole, setUserRole] = useState("");
 
-  console.log(selectedDrawing);
-
   useEffect(() => {
     // Determine user role on component mount
     const user = getCurrentUser();
@@ -80,7 +78,6 @@ const DrawingTable = ({
     try {
       const res = await fetch(`${BASE_URL}/api/auth/all`);
       const data = await res.json();
-      console.log("USERRRRRRRR");
 
       // Filter only users with role "client"
       const clientUsers = data.users?.filter((u) => u.role === "client") || [];
@@ -620,7 +617,7 @@ const DrawingTable = ({
                       </div>
                       <div className="col-span-2">
                         <span className="text-sm font-medium text-gray-800">
-                          {selectedDrawing.description}
+                          {selectedDrawing.remark}
                         </span>
                       </div>
                     </div>

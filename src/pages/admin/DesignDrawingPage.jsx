@@ -26,8 +26,6 @@ export default function DesignDrawingPage() {
   const location = useLocation();
 
   const selectedProject = location.state?.project;
-  console.log("PROJECTTTTTTTTT");
-  console.log(selectedProject);
 
   const fetchSelectedProjectInfo = async () => {
     setIsLoading(true);
@@ -90,6 +88,7 @@ export default function DesignDrawingPage() {
         ? data.drawings.map((drawing) => ({
             drawing_id: drawing.drawing_id,
             drawing_name: drawing.drawing_name,
+            remark: drawing.remark,
             discipline: drawing.discipline,
             status: drawing.status,
             last_updated: drawing.last_updated,
