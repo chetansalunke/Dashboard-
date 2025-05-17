@@ -541,7 +541,8 @@ const DrawingTable = ({
       {/* Drawing Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-4/5 h-4/5 flex flex-col">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col">
+            {/* Header */}
             <div className="flex justify-between items-center p-4 border-b bg-gray-50">
               <h3 className="text-lg font-semibold text-gray-800">
                 {showPreview.drawing_name}
@@ -553,13 +554,17 @@ const DrawingTable = ({
                 <X size={24} />
               </button>
             </div>
-            <div className="flex-grow p-4 overflow-auto bg-gray-100">
+
+            {/* PDF Preview */}
+            <div className="flex-grow overflow-hidden bg-gray-100">
               <iframe
                 src={`${BASE_URL}/${showPreview.latest_document_path}`}
-                className="w-full h-full rounded shadow-lg"
+                className="w-full h-full border-none"
                 title={showPreview.drawing_name}
               />
             </div>
+
+            {/* Footer */}
             <div className="p-4 border-t bg-gray-50 flex justify-end space-x-2">
               <button
                 onClick={() => handleDownload(showPreview.latest_document_path)}
@@ -580,28 +585,34 @@ const DrawingTable = ({
 
       {/* Expert Review Modal */}
       {showExpertReviewModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-4/5 flex flex-col max-h-[90vh]">
-            <div className="flex justify-between items-center p-4 border-b bg-indigo-50">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-11/12 xl:w-4/5 flex flex-col max-h-[92vh] border border-indigo-100">
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 border-b bg-gradient-to-r from-indigo-100 to-indigo-50">
               <h3 className="text-lg font-semibold text-indigo-900 flex items-center">
                 <ExternalLink size={20} className="mr-2 text-indigo-600" />
                 Expert Review: {selectedDrawing.drawing_name}
               </h3>
               <button
                 onClick={() => setShowExpertReviewModal(false)}
-                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-200 transition-colors"
+                className="text-gray-500 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                aria-label="Close"
               >
-                <X size={24} />
+                <X size={22} />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="h-full flex flex-col">
-                <div className="bg-indigo-50 p-5 rounded-lg mb-5 shadow-sm">
+
+            {/* Content */}
+            <div className="p-5 overflow-y-auto flex-grow grid grid-cols-1 md:grid-cols-5 gap-5">
+              {/* Left Column - Drawing Information & Review Form */}
+              <div className="md:col-span-2 h-full flex flex-col space-y-4">
+                {/* Drawing Information */}
+                <div className="bg-indigo-50 p-4 rounded-lg shadow-sm border border-indigo-100">
                   <h4 className="font-medium text-indigo-900 mb-3 flex items-center text-lg">
                     <FileText size={18} className="mr-2 text-indigo-600" />
                     Drawing Information
                   </h4>
-                  <div className="space-y-3 bg-white p-4 rounded-md shadow-sm">
+                  <div className="space-y-2.5 bg-white p-4 rounded-md shadow-sm">
                     <div className="grid grid-cols-3 gap-2">
                       <div className="col-span-1">
                         <span className="text-sm font-semibold text-gray-600">
@@ -658,7 +669,7 @@ const DrawingTable = ({
                       </div>
                       <div className="col-span-2">
                         <div className="flex items-center">
-                          <User size={14} className="text-gray-500 mr-1" />
+                          <User size={14} className="text-indigo-500 mr-1.5" />
                           <span className="text-sm font-medium text-gray-800">
                             {selectedDrawing.sent_by_name}
                           </span>
@@ -673,7 +684,7 @@ const DrawingTable = ({
                       </div>
                       <div className="col-span-2">
                         <div className="flex items-center">
-                          <Clock size={14} className="text-gray-500 mr-1" />
+                          <Clock size={14} className="text-indigo-500 mr-1.5" />
                           <span className="text-sm font-medium text-gray-800">
                             {formatDate(selectedDrawing.last_updated)}
                           </span>
@@ -684,7 +695,7 @@ const DrawingTable = ({
                 </div>
 
                 {/* Designer's Comment */}
-                <div className="bg-blue-50 p-5 rounded-lg mb-5 shadow-sm">
+                <div className="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100">
                   <h4 className="font-medium text-blue-900 mb-3 flex items-center">
                     <MessageSquare size={18} className="mr-2 text-blue-600" />
                     Designer's Latest Comment
@@ -704,7 +715,7 @@ const DrawingTable = ({
                 </div>
 
                 {/* Expert Review Form */}
-                <div className="bg-gray-50 p-5 rounded-lg shadow-sm">
+                <div className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
                   <h4 className="font-medium text-gray-800 mb-3 flex items-center">
                     <ExternalLink size={18} className="mr-2 text-indigo-600" />
                     Your Expert Review
@@ -726,14 +737,14 @@ const DrawingTable = ({
                   <div className="flex justify-between space-x-3">
                     <button
                       onClick={() => handleSubmitExpertReview(false)}
-                      className={`py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition-colors ${
+                      className={`py-2.5 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition-colors flex-1 ${
                         isSubmitting || !expertComment.trim()
                           ? "opacity-50 cursor-not-allowed"
                           : ""
                       }`}
                       disabled={isSubmitting || !expertComment.trim()}
                     >
-                      <span className="flex items-center">
+                      <span className="flex items-center justify-center">
                         <AlertTriangle size={16} className="mr-2" /> Request
                         Revision
                       </span>
@@ -741,14 +752,14 @@ const DrawingTable = ({
 
                     <button
                       onClick={() => handleSubmitExpertReview(true)}
-                      className={`py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors ${
+                      className={`py-2.5 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors flex-1 ${
                         isSubmitting || !expertComment.trim()
                           ? "opacity-50 cursor-not-allowed"
                           : ""
                       }`}
                       disabled={isSubmitting || !expertComment.trim()}
                     >
-                      <span className="flex items-center">
+                      <span className="flex items-center justify-center">
                         <ThumbsUp size={16} className="mr-2" /> Approve Drawing
                       </span>
                     </button>
@@ -756,28 +767,36 @@ const DrawingTable = ({
                 </div>
               </div>
 
-              {/* Drawing Preview Panel */}
-              <div className="bg-gray-50 p-5 rounded-lg shadow-sm h-full flex flex-col">
-                <h4 className="font-medium text-gray-800 mb-3 flex items-center">
-                  <Eye size={18} className="mr-2 text-gray-600" />
-                  Drawing Preview
-                </h4>
-                <div className="flex-grow bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-                  <iframe
-                    src={`${BASE_URL}/${selectedDrawing.latest_document_path}`}
-                    className="w-full h-full"
-                    title={selectedDrawing.drawing_name}
-                  />
-                </div>
-                <div className="mt-3">
+              {/* Right Column - Drawing Preview Panel (Larger portion) */}
+              <div className="md:col-span-3 bg-gray-50 rounded-lg shadow-md border border-gray-200 flex flex-col h-full">
+                <div className="bg-gradient-to-r from-gray-100 to-gray-50 p-3 border-b border-gray-200 flex justify-between items-center">
+                  <h4 className="font-medium text-gray-800 flex items-center">
+                    <Eye size={18} className="mr-2 text-gray-600" />
+                    Drawing Preview
+                  </h4>
                   <button
                     onClick={() =>
                       handleDownload(selectedDrawing.latest_document_path)
                     }
                     className="px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center shadow-sm text-sm transition-colors"
                   >
-                    <Download size={14} className="mr-1.5" /> Download Drawing
+                    <Download size={14} className="mr-1.5" /> Download
                   </button>
+                </div>
+
+                <div className="flex-grow bg-white overflow-hidden relative p-1">
+                  <iframe
+                    src={`${BASE_URL}/${selectedDrawing.latest_document_path}`}
+                    className="w-full h-full rounded border border-gray-100"
+                    title={selectedDrawing.drawing_name}
+                  />
+                </div>
+
+                <div className="bg-gray-50 p-2 border-t border-gray-200 flex justify-center">
+                  <div className="text-xs text-gray-500">
+                    Viewing: {selectedDrawing.drawing_name} (v
+                    {selectedDrawing.latest_version_number})
+                  </div>
                 </div>
               </div>
             </div>
