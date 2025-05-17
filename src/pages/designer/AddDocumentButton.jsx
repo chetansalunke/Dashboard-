@@ -14,7 +14,7 @@ const AddDocumentButton = ({ taskId }) => {
     if (!file) return;
 
     const formData = new FormData();
-    formData.append("document", file);
+    formData.append("documents", file);
 
     const token = localStorage.getItem("accessToken");
 
