@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash, FaPlus } from "react-icons/fa";
 import axios from "axios";
 import BASE_URL from "../../config";
@@ -7,6 +7,8 @@ import RoleDropdown from "./RoleDropdown";
 export default function DrawingList({ selectedProject, users }) {
   const [tasks, setTasks] = useState([]);
   const [dropdownKey, setDropdownKey] = useState(0);
+  
+  const roles = useMemo(() => ["designer"], []);
 
   const token = localStorage.getItem("accessToken");
 
@@ -231,7 +233,7 @@ export default function DrawingList({ selectedProject, users }) {
               <td className="px-4 py-2">
                 <RoleDropdown
                   key={dropdownKey}
-                  role={["designer"]}
+                  role={roles}
                   label=""
                   width=""
                   onSelect={(user) =>

@@ -3,6 +3,7 @@ import { FaUserCircle, FaCheckCircle, FaClock } from "react-icons/fa";
 import axios from "axios";
 import BASE_URL from "../../config";
 import ProjectDropdown from "./ProjectDropdown";
+import AddDocumentButton from "./AddDocumentButton";
 
 export default function DesignerHome() {
   const [projects, setProjects] = useState([]);
@@ -20,6 +21,8 @@ export default function DesignerHome() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const usernameID = user?.id;
+
+  const taskId = selectedTask?.id;
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -774,13 +777,16 @@ export default function DesignerHome() {
                           </div>
                         </div>
 
-                        <div className="flex justify-end mt-6">
+                        <div className="flex justify-end mt-6 gap-2">
                           <button
                             onClick={() => setOpenUploadModalTaskId(null)}
                             className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 mr-3"
                           >
                             Cancel
                           </button>
+                         
+                          <AddDocumentButton taskId={taskId} />
+
                           <button
                             onClick={handleSubmit}
                             className="px-4 py-2 text-sm font-medium text-white rounded-md bg-purple-600 hover:bg-purple-700 transition-colors"

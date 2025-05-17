@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import BASE_URL from "../../config";
 import RoleDropdown from "./RoleDropdown";
 import axios from "axios";
@@ -11,6 +11,8 @@ export default function ProjectTeam({ selectedProject }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  const roles = useMemo(() => ["designer"], []);
 
   const token = localStorage.getItem("accessToken");
 
@@ -181,7 +183,7 @@ export default function ProjectTeam({ selectedProject }) {
               <td className="px-4 py-3 text-sm">
                 <RoleDropdown
                   key={dropdownKey}
-                  role={["designer"]}
+                  role={roles}
                   label=""
                   width=""
                   onSelect={handleUserSelect}

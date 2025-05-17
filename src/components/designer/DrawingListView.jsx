@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaTrash, FaPlus } from "react-icons/fa";
 import axios from "axios";
 import BASE_URL from "../../config";
+import { List } from "lucide-react";
 
 export default function DrawingListView({ selectedProject, users }) {
   const [tasks, setTasks] = useState([]);
@@ -73,35 +74,48 @@ export default function DrawingListView({ selectedProject, users }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y">
-            {tasks.map((task, idx) => (
-              <tr key={idx} className="text-gray-700 hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm">{selectedProject.id}</td>
-                <td className="px-4 py-3 text-sm">{task.drawingNo}</td>
-                <td className="px-4 py-3 text-sm">{task.drawingName}</td>
-                <td className="px-4 py-3 text-sm">{task.startDate}</td>
-                <td className="px-4 py-3 text-sm">{task.endDate}</td>
-                <td className="px-4 py-3 text-sm">
-                  {task.assignedTo ? (
-                    <div className="flex items-center">
-                      <div className="h-6 w-6 bg-purple-100 rounded-full flex items-center justify-center mr-2">
-                        <span className="text-purple-800 font-medium">
-                          {task.assignedTo.username.charAt(0).toUpperCase()}
-                        </span>
+            {tasks.length > 0 ? (
+              tasks.map((task, idx) => (
+                <tr key={idx} className="text-gray-700 hover:bg-gray-50">
+                  <td className="px-4 py-3 text-sm">{selectedProject.id}</td>
+                  <td className="px-4 py-3 text-sm">{task.drawingNo}</td>
+                  <td className="px-4 py-3 text-sm">{task.drawingName}</td>
+                  <td className="px-4 py-3 text-sm">{task.startDate}</td>
+                  <td className="px-4 py-3 text-sm">{task.endDate}</td>
+                  <td className="px-4 py-3 text-sm">
+                    {task.assignedTo ? (
+                      <div className="flex items-center">
+                        <div className="h-6 w-6 bg-purple-100 rounded-full flex items-center justify-center mr-2">
+                          <span className="text-purple-800 font-medium">
+                            {task.assignedTo.username.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <span>{task.assignedTo.username}</span>
                       </div>
-                      <span>{task.assignedTo.username}</span>
+                    ) : (
+                      "_"
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <FaTrash
+                      onClick={() => handleDelete(idx)}
+                      className="text-red-600 cursor-pointer hover:text-red-800"
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr className="text-gray-700">
+                <td colSpan="8" className="px-4 py-3 text-sm">
+                  <div className="text-center py-8">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mb-3">
+                      <List size={24} className="text-gray-400" />
                     </div>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  <FaTrash
-                    onClick={() => handleDelete(idx)}
-                    className="text-red-600 cursor-pointer hover:text-red-800"
-                  />
+                    <p className="text-gray-500">No Drawing found.</p>
+                  </div>
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
