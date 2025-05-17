@@ -5,6 +5,7 @@ import DisciplineTabs from "../../components/designer/Design/DisciplineTabs";
 import FilterSortControls from "../../components/designer/Design/FilterSortControls";
 import DrawingTable from "../../components/designer/Design/DrawingTable";
 import TopBarControls from "../../components/designer/Design/TopBarControls";
+import { List } from "lucide-react";
 
 export default function Design() {
   const [isLoading, setIsLoading] = useState(true);
@@ -178,11 +179,80 @@ export default function Design() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // return (
+  //   <div className="bg-gray-100 min-h-screen">
+  //     <main className="h-full overflow-y-auto">
+  //       <div className="container px-6 py-6 mx-auto">
+  //         {isLoading ? (
+  //           <div className="flex justify-center items-center h-64">
+  //             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  //           </div>
+  //         ) : (
+  //           <>
+  //             <TopBarControls
+  //               searchTerm={searchTerm}
+  //               setSearchTerm={setSearchTerm}
+  //               setShowUploadForm={setShowUploadForm}
+  //               navigate={navigate}
+  //               selectedProject={selectedProject}
+  //             />
+
+  //             <hr className="border border-gray-300 my-4" />
+
+  //             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 bg-white p-4 rounded-lg shadow-sm w-full">
+  //               <DisciplineTabs
+  //                 activeTab={activeTab}
+  //                 setActiveTab={setActiveTab}
+  //               />
+  //               <FilterSortControls
+  //                 showDropdown={showDropdown}
+  //                 setShowDropdown={setShowDropdown}
+  //                 sortDropdownRef={sortDropdownRef}
+  //                 sortOption={sortOption}
+  //                 setSortOption={setSortOption}
+  //                 showFilterDropdown={showFilterDropdown}
+  //                 setShowFilterDropdown={setShowFilterDropdown}
+  //                 filterDropdownRef={filterDropdownRef}
+  //               />
+  //             </div>
+
+  //             <DrawingTable
+  //               users={users}
+  //               drawings={sortedDrawings}
+  //               showActionDropdown={showActionDropdown}
+  //               setShowActionDropdown={setShowActionDropdown}
+  //               dropdownRef={dropdownRef}
+  //               fetchDrawings={fetchDrawings}
+  //             />
+  //           </>
+  //         )}
+  //       </div>
+  //     </main>
+  //   </div>
+  // );
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <main className="h-full overflow-y-auto">
         <div className="container px-6 py-6 mx-auto">
-          {isLoading ? (
+          {!selectedProject?.id ? (
+            <div className="">
+              <div className="text-center py-8">
+                <div className="mx-auto w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mb-3">
+                  <List size={24} className="text-gray-400" />
+                </div>
+                <p className="text-gray-500 mb-4">
+                  Please select a project first.
+                </p>
+                <button
+                  onClick={() => navigate("/designer-dashboard/projects")}
+                  className="px-3 py-1 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                >
+                  Go to Projects
+                </button>
+              </div>
+            </div>
+          ) : isLoading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>

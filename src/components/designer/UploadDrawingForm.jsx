@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Upload, Check, FileImage, Loader2, X } from "lucide-react";
 import RoleDropdown from "../../../src/pages/admin/RoleDropdown";
 
@@ -66,6 +66,8 @@ export default function UploadDrawingForm({
     sent_by: "",
     sent_to: "",
   });
+
+  const roles = useMemo(() => ["expert", "admin"], []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -282,7 +284,7 @@ export default function UploadDrawingForm({
                   onChange={handleChange}
                   placeholder="Enter drawing name"
                   error={errors.name}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting} 
                 />
                 {formData.name && (
                   <span className="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -411,7 +413,7 @@ export default function UploadDrawingForm({
                 Send To
               </FormLabel>
               <RoleDropdown
-                role={["expert", "admin"]}
+                role={roles}
                 label=""
                 width="w-1/3"
                 onSelect={handleUserSelect}

@@ -61,4 +61,4 @@ const RoleDropdown = ({
   );
 };
 
-export default RoleDropdown;
+export default React.memo(RoleDropdown);
