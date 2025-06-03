@@ -16,7 +16,7 @@ import {
   RefreshCw,
   Tag,
 } from "lucide-react";
-
+import BASE_URL from "../../config";
 const Approvals = () => {
   const [drawings, setDrawings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,6 @@ const Approvals = () => {
   const [versionHistory, setVersionHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [activeTab, setActiveTab] = useState("pending"); // pending, approved, revision
-  const BASE_URL = "http://localhost:3000";
 
   useEffect(() => {
     fetchDrawings();
