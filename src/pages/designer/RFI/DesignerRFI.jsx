@@ -6,7 +6,7 @@ import CreateRFIForm from "./CreateRFIForm";
 import RfiControls from "./RfiControls";
 import RFIResolveForm from "./RFIResolveForm";
 
-export default function RFI() {
+export default function DesignerRFI() {
   const [rfis, setRfis] = useState([]);
   const [filteredRfis, setFilteredRfis] = useState([]);
   const [users, setUsers] = useState({});
@@ -35,7 +35,9 @@ export default function RFI() {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/projects/all`);
+      const response = await fetch(
+        `${BASE_URL}/api/projects/assigned-projects/${userID}`
+      );
       const data = await response.json();
       setProjectList(Array.isArray(data.projects) ? data.projects : []);
     } catch (error) {

@@ -74,7 +74,7 @@ const Sidebar = ({ role }) => {
             name: "Design",
             path: "/designer-dashboard/projects/design",
           },
-          
+
           {
             name: "Management",
             path: "/designer-dashboard/management",

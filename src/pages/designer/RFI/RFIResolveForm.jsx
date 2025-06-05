@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import BASE_URL from "../../../config";
-import RoleDropdown from "../../admin/RoleDropdown";
+import RoleDropdown from "../../designer/RFI/DesignerRoleDropdown";
 import { X } from "lucide-react";
 
 export default function RFIResolveForm({
@@ -328,12 +328,12 @@ export default function RFIResolveForm({
               Resolve
             </button>
 
-            <button
+            {/* <button
               onClick={handleSendToClientClick}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
             >
               Send to Client
-            </button>
+            </button> */}
           </>
         )}
 

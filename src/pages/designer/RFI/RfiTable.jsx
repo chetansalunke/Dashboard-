@@ -83,45 +83,6 @@
 //   );
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React from "react";
 import BASE_URL from "../../../../src/config";
 
@@ -146,7 +107,9 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
             <tbody className="bg-white divide-y">
               {rfis.map((rfi) => (
                 <tr key={rfi.id} className="hover:bg-gray-50 text-gray-700">
-                  <td className="px-4 py-3 text-sm">{rfi.title ?? "No Title"}</td>
+                  <td className="px-4 py-3 text-sm">
+                    {rfi.title ?? "No Title"}
+                  </td>
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
@@ -187,7 +150,7 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                     {rfi.status === "Pending" && rfi.send_to === userID ? (
                       <button
                         onClick={() => onResolve(rfi)}
-                        className="text-sm px-3 py-1 bg-green-500 text-white rounded"// hover:bg-green-600"
+                        className="text-sm px-3 py-1 bg-green-500 text-white rounded" // hover:bg-green-600"
                       >
                         Resolve
                       </button>
