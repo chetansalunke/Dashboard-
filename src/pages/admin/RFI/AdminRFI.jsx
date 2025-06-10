@@ -277,7 +277,7 @@ export default function AdminRFI() {
             </p>
           )}
           {selectedProjectId && loading && (
-            <p className="text-center text-gray-500 mt-4">Loading RFIs...</p>
+            <p className="text-center text-gray-500 mt-4" >Loading RFIs...</p>
           )}
         </div>
       </main>

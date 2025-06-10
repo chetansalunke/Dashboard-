@@ -73,46 +73,6 @@ export default function ClientRFI() {
       console.error("Error fetching RFIs:", error);
       setError("Failed to load RFIs. Please try again.");
       // Fallback to mock data if API fails
-      const mockRfis = [
-        {
-          id: 1,
-          title: "Structural Drawing Clarification",
-          details:
-            "Need clarification on beam dimensions in drawing sheet A-101. The specified dimensions seem inconsistent with structural calculations.",
-          status: "Sent to Client",
-          priority: "High",
-          send_to: 2,
-          created_at: "2024-06-08T10:30:00Z",
-          resolution_details: null,
-          resolved_at: null,
-        },
-        {
-          id: 2,
-          title: "Material Specification Update",
-          details:
-            "Client requests update to material specifications for exterior cladding. Need approval for alternative materials due to supply chain issues.",
-          status: "Resolved",
-          priority: "Medium",
-          send_to: 3,
-          created_at: "2024-06-07T14:15:00Z",
-          resolution_details:
-            "Approved alternative materials as per revised specification document. Updated drawings will be issued by end of week.",
-          resolved_at: "2024-06-09T09:45:00Z",
-        },
-        {
-          id: 3,
-          title: "HVAC System Coordination",
-          details:
-            "Coordination required between mechanical and electrical systems. Potential conflict in ceiling space allocation.",
-          status: "Sent to Client",
-          priority: "High",
-          send_to: 2,
-          created_at: "2024-06-06T16:20:00Z",
-          resolution_details: null,
-          resolved_at: null,
-        },
-      ];
-      setRfis(mockRfis);
     } finally {
       setLoading(false);
     }
@@ -544,7 +504,8 @@ export default function ClientRFI() {
                             <Eye className="h-4 w-4 mr-1" />
                             View
                           </button>
-                          {rfi.status === "Sent to Client" && (
+                          {(rfi.status === "Sent to Client" ||
+                            rfi.status === "Pending") && (
                             <button
                               onClick={() => setResolvingRfi(rfi)}
                               className="text-green-600 hover:text-green-900 flex items-center"

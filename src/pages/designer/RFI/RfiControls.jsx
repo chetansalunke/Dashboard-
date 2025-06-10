@@ -1,7 +1,23 @@
-// components/RFI/RfiControls.js
+import React, { useState } from "react";
+import {
+  Plus,
+  Search,
+  Filter,
+  Calendar,
+  User,
+  FileText,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  X,
+  Upload,
+  Download,
+  Eye,
+  Send,
+  Check,
+} from "lucide-react";
 
-import React from "react";
-
+// Enhanced RFI Controls Component
 export default function RfiControls({
   activeTab,
   setActiveTab,
@@ -9,55 +25,45 @@ export default function RfiControls({
   onCreateClick,
 }) {
   return (
-    <div className="flex flex-wrap justify-between items-center gap-4">
-      <div className="flex flex-wrap items-center gap-4">
-        {/* Tabs */}
-        <div className="flex border border-purple-300 rounded-md overflow-hidden shadow-md">
-          {["All", "Pending", "Resolved"].map((tab) => (
-            <button
-              key={tab}
-              className={`px-4 py-2 font-medium transition-colors duration-150 ${
-                activeTab === tab
-                  ? "bg-purple-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Search */}
-        <div className="relative w-[280px]">
-          <div className="absolute inset-y-0 left-3 flex items-center">
-            <svg
-              className="w-4 h-4 text-gray-500"
-              aria-hidden="true"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                clipRule="evenodd"
-              />
-            </svg>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        {/* Left side - Tabs and Search */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
+          {/* Tabs */}
+          <div className="inline-flex bg-gray-50 rounded-lg p-1 shadow-inner">
+            {["All", "Pending", "Resolved"].map((tab) => (
+              <button
+                key={tab}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  activeTab === tab
+                    ? "bg-white text-purple-600 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                }`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
-          <input
-            className="w-full pl-10 pr-2 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md focus:border-purple-500 focus:ring focus:ring-purple-200 focus:outline-none"
-            type="text"
-            placeholder="Search"
-            aria-label="Search"
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
+
+          {/* Search */}
+          <div className="relative flex-1 min-w-[280px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-purple-300 focus:ring-2 focus:ring-purple-100 transition-all duration-200 placeholder-gray-500"
+              type="text"
+              placeholder="Search RFIs..."
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
         </div>
 
-        {/* Create RFI */}
+        {/* Right side - Create Button */}
         <button
-          className="px-4 py-2 text-white text-sm font-medium bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg hover:from-purple-700 hover:to-purple-800 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
           onClick={onCreateClick}
         >
+          <Plus className="w-4 h-4" />
           Create RFI
         </button>
       </div>

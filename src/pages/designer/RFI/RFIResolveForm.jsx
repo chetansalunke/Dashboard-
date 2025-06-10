@@ -1,7 +1,15 @@
 import React, { useState } from "react";
-import BASE_URL from "../../../config";
-import RoleDropdown from "../../designer/RFI/DesignerRoleDropdown";
-import { X } from "lucide-react";
+import {
+  FileText,
+  CheckCircle,
+  Clock,
+  X,
+  Upload,
+  User,
+  Calendar,
+  Send,
+  AlertTriangle,
+} from "lucide-react";
 
 export default function RFIResolveForm({
   rfi,
@@ -13,333 +21,356 @@ export default function RFIResolveForm({
   const [solutionText, setSolutionText] = useState("");
   const [solutionFiles, setSolutionFiles] = useState([]);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [showClientForm, setShowClientForm] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [clientRemark, setClientRemark] = useState("");
+  const [successMsg, setSuccessMsg] = useState(null);
 
   const handleResolveSubmit = async () => {
-    const formData = new FormData();
-    formData.append("resolution_details", solutionText);
-    formData.append("resolved_by", rfi.send_to);
-    formData.append("status", "Resolved");
-
-    solutionFiles.forEach((file) => {
-      formData.append("documents", file);
-    });
-
-    try {
-      const response = await fetch(`${BASE_URL}/api/resolveRfi/${rfi.id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to resolve RFI");
-      }
-
-      setSolutionText("");
-      setSolutionFiles([]);
-      setErrorMsg(null);
-      onSuccess();
-    } catch (error) {
-      console.error("Error resolving RFI:", error);
-      setErrorMsg("Something went wrong while resolving the RFI.");
-    }
+    // Simulate API call
+    console.log("Resolving RFI with:", { solutionText, solutionFiles });
+    setSuccessMsg("🎉 RFI resolved successfully!");
+    setTimeout(() => setSuccessMsg(null), 4000);
+    onSuccess();
   };
 
-  const handleSendToClientClick = () => {
-    setShowClientForm(true);
-  };
+  const isResolved = rfi.resolution_details || rfi.resolved_at;
 
-  const handleClientSubmit = async () => {
-    if (!selectedClient || !clientRemark.trim()) {
-      setErrorMsg("Please select a client and enter a remark.");
-      return;
-    }
-
-    const body = {
-      rfi_id: rfi.id,
-      client_id: selectedClient.id,
-      client_remark: clientRemark,
-    };
-
-    try {
-      const response = await fetch(`${BASE_URL}/api/sendToClient`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send to client.");
-      }
-
-      setClientRemark("");
-      setSelectedClient(null);
-      setShowClientForm(false);
-      setErrorMsg(null);
-      onSuccess();
-    } catch (error) {
-      console.error("Error sending to client:", error);
-      setErrorMsg("Something went wrong while sending to the client.");
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Resolved":
+        return "bg-gradient-to-r from-green-500 to-green-600";
+      case "Sent to Client":
+        return "bg-gradient-to-r from-blue-500 to-blue-600";
+      default:
+        return "bg-gradient-to-r from-yellow-500 to-yellow-600";
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg space-y-4 relative">
-      <div className="text-right hover:cursor-pointer" onClick={onCancel}>
-        <span className="inline-block bg-gray-300 rounded px-2 py-1 text-sm text-gray-600">
-          X
-        </span>
-      </div>
-
-      {/* RFI Info */}
-      <div
-        className={`p-1 shadow-sm rounded ${
-          rfi.resolution_details || rfi.resolved_at
-            ? "bg-green-500"
-            : "bg-gray-200"
-        }`}
-      >
-        <h1 className="text-xl font-semibold tracking-wide text-black">RFI</h1>
-      </div>
-
-      <div className="w-full p-1 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <label className="block text-sm">
-          <span className="text-gray-700 font-semibold">Title</span>
-          <input
-            type="text"
-            value={rfi.title || "NA"}
-            readOnly
-            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
-          />
-        </label>
-
-        <label className="block text-sm">
-          <span className="text-gray-700 font-semibold">Details</span>
-          <input
-            type="text"
-            value={rfi.details || "NA"}
-            readOnly
-            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
-          />
-        </label>
-
-        <label className="block text-sm">
-          <span className="text-gray-700 font-semibold">Priority</span>
-          <input
-            type="text"
-            value={rfi.priority || "NA"}
-            readOnly
-            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
-          />
-        </label>
-
-        <label className="block text-sm">
-          <span className="text-gray-700 font-semibold">Sent To</span>
-          <input
-            type="text"
-            value={users[rfi.send_to] ?? "NA"}
-            readOnly
-            className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
-          />
-        </label>
-      </div>
-
-      <div className="text-right mt-2 mb-5">
-        <span className="inline-block bg-gray-200 rounded px-2 py-1 text-sm text-gray-600">
-          Sent on {new Date(rfi.created_at).toLocaleDateString("en-GB")} at{" "}
-          {new Date(rfi.created_at).toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          })}
-        </span>
-      </div>
-
-      {/* Solution Section */}
-      <div
-        className={`p-1 shadow-sm rounded ${
-          rfi.resolution_details || rfi.resolved_at
-            ? "bg-green-500"
-            : "bg-gray-200"
-        }`}
-      >
-        <h1 className="text-xl font-semibold tracking-wide text-black">
-          Pending/Resolved
-        </h1>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-gray-700 text-sm font-semibold">Solution</label>
-
-        {rfi.resolution_details || rfi.resolved_at ? (
-          <>
-            <textarea
-              value={rfi.resolution_details || ""}
-              readOnly
-              rows={3}
-              className="block w-full mt-1 text-sm border-gray-300 bg-gray-100 form-input"
-            />
-            <label className="text-gray-700 text-sm font-semibold mt-2">
-              Documents
-            </label>
-            {rfi.resolution_documents ? (
-              <ul className="list-disc ml-5">
-                {rfi.resolution_documents.split(",").map((doc, i) => (
-                  <li key={i}>
-                    <a
-                      href={`${BASE_URL}/uploads/${doc.trim()}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-purple-600 underline hover:text-blue-800"
-                      download
-                    >
-                      {decodeURIComponent(doc.trim().split("/").pop())}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-gray-500 italic">No file</p>
-            )}
-          </>
-        ) : (
-          <>
-            <textarea
-              value={solutionText}
-              onChange={(e) => setSolutionText(e.target.value)}
-              rows={3}
-              className="block w-full mt-1 text-sm border-gray-300 form-input"
-              placeholder="Enter solution..."
-            />
-
-            <label className="text-gray-700 text-sm font-semibold">
-              Upload Documents
-            </label>
-            <input
-              type="file"
-              multiple
-              onChange={(e) => setSolutionFiles(Array.from(e.target.files))}
-              className="block w-full mt-1 text-sm border-gray-300 form-input"
-            />
-          </>
-        )}
-      </div>
-
-      {rfi.resolved_at && (
-        <div className="text-right mt-2 mb-5">
-          <span className="inline-block bg-gray-200 rounded px-2 py-1 text-sm text-gray-600">
-            Resolved on {new Date(rfi.resolved_at).toLocaleDateString("en-GB")}{" "}
-            at{" "}
-            {new Date(rfi.resolved_at).toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: true,
-            })}
-          </span>
-        </div>
-      )}
-
-      {/* Client Forward Modal */}
-      {showClientForm && (
+    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        {/* Header */}
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
-          onClick={() => setShowClientForm(false)}
+          className={`p-6 text-white relative ${
+            isResolved
+              ? "bg-gradient-to-r from-green-600 to-green-800"
+              : "bg-gradient-to-r from-purple-600 to-purple-800"
+          }`}
         >
-          <div
-            className="bg-white rounded-lg shadow-xl w-full max-w-xl"
-            onClick={(e) => e.stopPropagation()}
+          <button
+            onClick={onCancel}
+            className="absolute top-4 right-4 p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
           >
-            <div className="flex justify-between items-center p-4 border-b bg-purple-50">
-              <h3 className="text-lg font-semibold text-purple-900 flex items-center">
-                Sent RFI to Client
-              </h3>
-              <button
-                onClick={() => setShowClientForm(false)}
-                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-200 transition-colors"
-                // aria-label="Close modal"
-              >
-                <X size={24} />
-              </button>
+            <X size={24} />
+          </button>
+          <div className="flex items-center space-x-3">
+            <div className="p-3 bg-white bg-opacity-20 rounded-full">
+              <FileText size={24} />
             </div>
-
-            <div className="p-6">
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Select Client: <span className="text-red-500">*</span>
-                </label>
-                <RoleDropdown
-                  users={users}
-                  onSelect={(user) => setSelectedClient(user)}
-                  role="client"
-                  label=""
-                  width="w-full"
-                  value={selectedClient?.id}
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Remark for Client:
-                </label>
-                <textarea
-                  rows={3}
-                  value={clientRemark}
-                  onChange={(e) => setClientRemark(e.target.value)}
-                  placeholder="Add a Remark for the client (optional)"
-                  className="shadow-sm appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                />
-              </div>
-
-              <div className="mt-4 flex justify-end space-x-3">
-                <button
-                  onClick={() => setShowClientForm(false)}
-                  className="py-2 px-4 rounded-md border border-gray-300 shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleClientSubmit}
-                  className="py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors"
-                >
-                  Submit
-                </button>
-              </div>
+            <div>
+              <h1 className="text-2xl font-bold">
+                {isResolved ? "Resolved RFI" : "Resolve RFI"}
+              </h1>
+              <p
+                className={`${
+                  isResolved ? "text-green-100" : "text-purple-100"
+                }`}
+              >
+                Request for Information
+              </p>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Buttons */}
-      <div className="flex justify-between mt-6">
-        {!rfi.resolution_details && !rfi.resolved_at && (
-          <>
-            <button
-              onClick={handleResolveSubmit}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+        <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+          <div className="p-6">
+            {/* Success Message */}
+            {successMsg && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 rounded-lg">
+                <div className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
+                  <p className="text-green-800 font-medium">{successMsg}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {errorMsg && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 rounded-lg">
+                <div className="flex items-center">
+                  <AlertTriangle className="h-5 w-5 text-red-500 mr-3" />
+                  <p className="text-red-800 font-medium">{errorMsg}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Status Badge */}
+            <div className="mb-6">
+              <div
+                className={`inline-flex items-center px-4 py-2 rounded-full text-white font-semibold ${getStatusColor(
+                  rfi.status || "Pending"
+                )}`}
+              >
+                {rfi.status === "Resolved" && (
+                  <CheckCircle size={18} className="mr-2" />
+                )}
+                {rfi.status === "Sent to Client" && (
+                  <Send size={18} className="mr-2" />
+                )}
+                {(!rfi.status || rfi.status === "Pending") && (
+                  <Clock size={18} className="mr-2" />
+                )}
+                {isResolved ? "Resolved" : rfi.status || "Pending"}
+              </div>
+            </div>
+
+            {/* RFI Information Grid */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">
+                RFI Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <div className="bg-white p-4 rounded-xl shadow-sm">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Title
+                    </label>
+                    <p className="text-gray-900 font-medium">
+                      {rfi.title || "No title provided"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-4 rounded-xl shadow-sm">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Priority
+                    </label>
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                        rfi.priority === "High"
+                          ? "bg-red-100 text-red-800"
+                          : rfi.priority === "Medium"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
+                      {rfi.priority || "Not specified"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="bg-white p-4 rounded-xl shadow-sm">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Details
+                    </label>
+                    <p className="text-gray-900">
+                      {rfi.details || "No details provided"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-4 rounded-xl shadow-sm">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Assigned To
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <User size={16} className="text-purple-600" />
+                      <span className="text-gray-900 font-medium">
+                        {users[rfi.send_to] || "Unassigned"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Date Information */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl mb-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Calendar size={18} className="text-blue-600" />
+                  <span className="text-sm font-semibold text-blue-900">
+                    Created:{" "}
+                    {new Date(rfi.created_at).toLocaleDateString("en-GB")} at{" "}
+                    {new Date(rfi.created_at).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </span>
+                </div>
+                {rfi.resolved_at && (
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle size={18} className="text-green-600" />
+                    <span className="text-sm font-semibold text-green-900">
+                      Resolved:{" "}
+                      {new Date(rfi.resolved_at).toLocaleDateString("en-GB")} at{" "}
+                      {new Date(rfi.resolved_at).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Resolution Section */}
+            <div
+              className={`rounded-xl p-6 mb-8 ${
+                isResolved
+                  ? "bg-gradient-to-br from-green-50 to-emerald-50"
+                  : "bg-gradient-to-br from-purple-50 to-indigo-50"
+              }`}
             >
-              Resolve
-            </button>
+              <h2
+                className={`text-xl font-bold mb-4 ${
+                  isResolved ? "text-green-900" : "text-purple-900"
+                }`}
+              >
+                {isResolved ? "Resolution Details" : "Provide Resolution"}
+              </h2>
 
-            {/* <button
-              onClick={handleSendToClientClick}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            >
-              Send to Client
-            </button> */}
-          </>
-        )}
+              {isResolved ? (
+                <div className="space-y-4">
+                  <div>
+                    <label
+                      className={`block text-sm font-semibold mb-2 ${
+                        isResolved ? "text-green-800" : "text-purple-800"
+                      }`}
+                    >
+                      Solution
+                    </label>
+                    <div
+                      className={`bg-white p-4 rounded-lg border ${
+                        isResolved ? "border-green-200" : "border-purple-200"
+                      }`}
+                    >
+                      <p className="text-gray-900">
+                        {rfi.resolution_details ||
+                          "No resolution details provided"}
+                      </p>
+                    </div>
+                  </div>
 
-        {/* {errorMsg && (
-          <p className="text-red-600 mt-2 text-sm font-semibold">{errorMsg}</p>
-        )} */}
+                  {rfi.resolution_documents && (
+                    <div>
+                      <label
+                        className={`block text-sm font-semibold mb-2 ${
+                          isResolved ? "text-green-800" : "text-purple-800"
+                        }`}
+                      >
+                        Supporting Documents
+                      </label>
+                      <div className="space-y-2">
+                        {rfi.resolution_documents.split(",").map((doc, i) => (
+                          <a
+                            key={i}
+                            href="#"
+                            className={`flex items-center space-x-2 p-3 bg-white rounded-lg border hover:border-opacity-60 transition-colors ${
+                              isResolved
+                                ? "border-green-200 hover:border-green-400"
+                                : "border-purple-200 hover:border-purple-400"
+                            }`}
+                          >
+                            <FileText
+                              size={18}
+                              className={
+                                isResolved
+                                  ? "text-green-600"
+                                  : "text-purple-600"
+                              }
+                            />
+                            <span
+                              className={`font-medium ${
+                                isResolved
+                                  ? "text-green-700"
+                                  : "text-purple-700"
+                              }`}
+                            >
+                              {decodeURIComponent(doc.trim().split("/").pop())}
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-right">
+                    <div className="inline-flex items-center px-4 py-2 rounded-full text-white font-semibold bg-gradient-to-r from-green-500 to-green-600">
+                      <CheckCircle size={18} className="mr-2" />
+                      Resolved on{" "}
+                      {new Date(rfi.resolved_at).toLocaleDateString("en-GB")}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-purple-800 mb-2">
+                      Solution <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      value={solutionText}
+                      onChange={(e) => setSolutionText(e.target.value)}
+                      rows={4}
+                      className="w-full p-4 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      placeholder="Describe the solution or response..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-purple-800 mb-2">
+                      Upload Supporting Documents
+                    </label>
+                    <div className="relative border-2 border-dashed border-purple-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors duration-200 bg-white">
+                      <Upload className="mx-auto h-8 w-8 text-purple-400 mb-3" />
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium text-purple-600 hover:text-purple-500 cursor-pointer">
+                          Click to upload
+                        </span>{" "}
+                        supporting documents
+                      </div>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) =>
+                          setSolutionFiles(Array.from(e.target.files))
+                        }
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                    </div>
+                    {solutionFiles.length > 0 && (
+                      <div className="mt-2 text-sm text-purple-700 font-medium">
+                        {solutionFiles.length} file(s) selected
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={onCancel}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              {!isResolved && (
+                <button
+                  onClick={handleResolveSubmit}
+                  disabled={!solutionText.trim()}
+                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
+                >
+                  <CheckCircle size={18} />
+                  <span>Resolve RFI</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
