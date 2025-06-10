@@ -528,13 +528,13 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                   }
                 </span>
               </div> */}
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <div className="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
                 <span className="text-gray-700">
                   Sent to Client:{" "}
                   {rfis.filter((rfi) => rfi.status === "Sent to Client").length}
                 </span>
-              </div>
+              </div> */}
             </div>
             <div className="text-gray-600">Total RFIs: {rfis.length}</div>
           </div>

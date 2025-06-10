@@ -183,7 +183,7 @@ export default function VersionHistoryModal({
                         </div>
 
                         {/* Comments Section */}
-                        <div className="mt-4 border-t pt-3">
+                        {/* <div className="mt-4 border-t pt-3">
                           <div className="flex items-center mb-3">
                             <MessageSquare
                               size={18}
@@ -223,7 +223,7 @@ export default function VersionHistoryModal({
                               </div>
                             ))}
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   ))}

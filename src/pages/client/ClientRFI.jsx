@@ -35,9 +35,6 @@ export default function ClientRFI() {
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState("desc");
 
-  // Mock client ID - replace with actual client ID
-  const clientId = 5;
-
   const [solutionText, setSolutionText] = useState("");
   const [solutionFiles, setSolutionFiles] = useState([]);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -45,22 +42,20 @@ export default function ClientRFI() {
   const [successMsg, setSuccessMsg] = useState(null);
 
   // Mock token for demo - replace with actual token
-  const token = localStorage.getItem("accessToken") || "demo-token";
+  const token = localStorage.getItem("accessToken");
+  const userId = JSON.parse(localStorage.getItem("user"))?.id;
 
   // Fetch RFIs for the client
   const fetchRfis = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${BASE_URL}/api/sent-to-client/${clientId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${BASE_URL}/api/sent-to-client/${userId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch RFIs");

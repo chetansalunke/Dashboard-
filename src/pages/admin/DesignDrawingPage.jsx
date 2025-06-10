@@ -194,6 +194,7 @@ export default function DesignDrawingPage() {
                 setShowActionDropdown={setShowActionDropdown}
                 dropdownRef={dropdownRef}
                 fetchDrawings={fetchDrawings}
+                selectedProject={selectedProject}
               />
             </>
           )}

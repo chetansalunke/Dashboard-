@@ -178,17 +178,46 @@ const DrawingTable = ({
     );
   };
 
-  // Find current version's comment from version history
   const getCurrentVersionComment = () => {
     if (!versionHistory || versionHistory.length === 0) return null;
+
     const currentVersion = versionHistory.find(
       (version) => version.is_latest === 1
     );
-    console.log("From Get Current Version");
-    console.log(currentVersion?.comments[2]);
-    return selectedDrawing?.status === "Revision Required by Client"
-      ? currentVersion?.comments?.[2]?.comment || ""
-      : currentVersion?.comments?.[1]?.comment || "";
+
+    if (
+      !currentVersion ||
+      !currentVersion.comments ||
+      currentVersion.comments.length === 0
+    ) {
+      return "No specific feedback provided.";
+    }
+
+    // Find the appropriate comment based on status
+    let targetComment = null;
+
+    if (selectedDrawing?.status === "Revision Required by Client") {
+      // Look for client comment (usually the last comment or find by role)
+      targetComment =
+        currentVersion.comments.find(
+          (comment) =>
+            comment.role === "client" || comment.commented_by_role === "client"
+        ) || currentVersion.comments[currentVersion.comments.length - 1];
+    } else if (selectedDrawing?.status === "Revision Required by Expert") {
+      // Look for expert comment
+      targetComment =
+        currentVersion.comments.find(
+          (comment) =>
+            comment.role === "expert" || comment.commented_by_role === "expert"
+        ) ||
+        currentVersion.comments.find(
+          (comment) =>
+            comment.role !== "client" && comment.commented_by_role !== "client"
+        ) ||
+        currentVersion.comments[0];
+    }
+
+    return targetComment?.comment || "No specific feedback provided.";
   };
 
   return (

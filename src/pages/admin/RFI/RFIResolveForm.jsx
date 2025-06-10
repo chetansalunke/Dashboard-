@@ -1,4 +1,6 @@
 // RFIResolveForm.js - Enhanced version
+
+import axios from "axios";
 import React, { useState } from "react";
 import BASE_URL from "../../../config";
 import RoleDropdown from "../../admin/RoleDropdown";
@@ -14,6 +16,7 @@ import {
 } from "lucide-react";
 
 export default function RFIResolveForm({
+  selectedProjectId,
   rfi,
   users,
   token,
@@ -29,7 +32,7 @@ export default function RFIResolveForm({
   const [clientRemark, setClientRemark] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
-
+  const [clientUsers, setClientUsers] = useState([]);
   const handleResolveSubmit = async () => {
     if (!solutionText.trim()) {
       setErrorMsg("Please provide a solution before resolving.");
@@ -73,10 +76,33 @@ export default function RFIResolveForm({
     }
   };
 
+  const fetchClientUsers = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/api/projects/client-info/${selectedProjectId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Wrap in array if you want it in array format
+      const clientArray = [res.data];
+
+      setClientUsers(clientArray);
+      console.log("Fetched Client Users:", clientArray);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  };
+
   const handleSendToClientClick = () => {
     setShowClientForm(true);
     setErrorMsg(null);
     setSuccessMsg(null);
+    fetchClientUsers();
   };
 
   const handleClientSubmit = async () => {
@@ -457,16 +483,19 @@ export default function RFIResolveForm({
                 <label className="block text-gray-700 text-sm font-bold mb-3">
                   Select Client <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <RoleDropdown
-                    users={users}
-                    onSelect={(user) => setSelectedClient(user)}
-                    role="client"
-                    label=""
-                    width="w-full"
-                    value={selectedClient?.id}
-                  />
-                </div>
+                <select
+                  className="shadow-sm appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  value={selectedClient}
+                  onChange={(e) => setSelectedClient(e.target.value)}
+                  required
+                >
+                  <option value="">Select a client...</option>
+                  {clientUsers.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.username}
+                    </option>
+                  ))}
+                </select>
                 {selectedClient && (
                   <div className="mt-2 p-3 bg-blue-50 rounded-lg">
                     <div className="flex items-center space-x-2">
