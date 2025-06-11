@@ -52,10 +52,6 @@ const Sidebar = ({ role }) => {
             name: "RFI",
             path: "/admin-dashboard/communication/rfi",
           },
-          {
-            name: "Submission",
-            path: "/admin-dashboard/communication/submission",
-          },
         ],
       },
     ],
@@ -88,10 +84,6 @@ const Sidebar = ({ role }) => {
           {
             name: "RFI",
             path: "/designer-dashboard/communication/rfi",
-          },
-          {
-            name: "Submission",
-            path: "/designer-dashboard/communication/submission",
           },
         ],
       },
@@ -131,21 +123,6 @@ const Sidebar = ({ role }) => {
         name: "RFI",
         icon: <IoChatbubbleOutline className="w-5 h-5" />,
         path: "/client-rif",
-      },
-      {
-        name: "Files",
-        icon: <IoDocumentTextOutline className="w-5 h-5" />,
-        subItems: [
-          {
-            name: "Received",
-            path: "/client-files-received",
-          },
-
-          {
-            name: "Send",
-            path: "/client-files-send",
-          },
-        ],
       },
     ],
   };

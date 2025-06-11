@@ -1,4 +1,4 @@
-// RFIResolveForm.js - Enhanced version
+// RFIResolveForm.js - Fixed version with proper client ID handling
 
 import axios from "axios";
 import React, { useState } from "react";
@@ -28,11 +28,12 @@ export default function RFIResolveForm({
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
   const [showClientForm, setShowClientForm] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedClientId, setSelectedClientId] = useState(""); // Changed to store ID as string
   const [clientRemark, setClientRemark] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
   const [clientUsers, setClientUsers] = useState([]);
+
   const handleResolveSubmit = async () => {
     if (!solutionText.trim()) {
       setErrorMsg("Please provide a solution before resolving.");
@@ -82,19 +83,27 @@ export default function RFIResolveForm({
         `${BASE_URL}/api/projects/client-info/${selectedProjectId}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${token}`, // Use token prop instead of localStorage
             "Content-Type": "application/json",
           },
         }
       );
 
-      // Wrap in array if you want it in array format
-      const clientArray = [res.data];
+      console.log("Raw API response:", res.data);
+
+      // Handle different response formats
+      let clientArray = [];
+      if (Array.isArray(res.data)) {
+        clientArray = res.data;
+      } else if (res.data && typeof res.data === "object") {
+        clientArray = [res.data];
+      }
 
       setClientUsers(clientArray);
-      console.log("Fetched Client Users:", clientArray);
+      console.log("Processed Client Users:", clientArray);
     } catch (err) {
-      console.error("Error fetching users:", err);
+      console.error("Error fetching client users:", err);
+      setErrorMsg("Failed to fetch client users. Please try again.");
     }
   };
 
@@ -102,11 +111,13 @@ export default function RFIResolveForm({
     setShowClientForm(true);
     setErrorMsg(null);
     setSuccessMsg(null);
+    setSelectedClientId(""); // Reset selection
+    setClientRemark("");
     fetchClientUsers();
   };
 
   const handleClientSubmit = async () => {
-    if (!selectedClient) {
+    if (!selectedClientId) {
       setErrorMsg("Please select a client.");
       return;
     }
@@ -114,12 +125,19 @@ export default function RFIResolveForm({
     setIsSubmitting(true);
     setErrorMsg(null);
 
+    // Find the selected client object to get the name for success message
+    const selectedClient = clientUsers.find(
+      (client) => client.id.toString() === selectedClientId
+    );
+
     const requestBody = {
       rfiId: rfi.id,
-      clientId: selectedClient.id,
+      clientId: parseInt(selectedClientId), // Convert to number if needed
       remark: clientRemark.trim() || "",
       status: "Sent to Client",
     };
+
+    console.log("Sending request body:", requestBody);
 
     try {
       const response = await fetch(`${BASE_URL}/api/sendToClient`, {
@@ -132,6 +150,7 @@ export default function RFIResolveForm({
       });
 
       const responseText = await response.text();
+      console.log("Response text:", responseText);
 
       if (!response.ok) {
         let errorMessage = "Failed to send to client.";
@@ -144,13 +163,20 @@ export default function RFIResolveForm({
         throw new Error(errorMessage);
       }
 
+      // Reset form
       setClientRemark("");
-      setSelectedClient(null);
+      setSelectedClientId("");
       setShowClientForm(false);
       setErrorMsg(null);
-      setSuccessMsg(
-        `✅ RFI successfully sent to ${selectedClient.name || "client"}!`
-      );
+
+      const clientName = selectedClient
+        ? selectedClient.name ||
+          selectedClient.username ||
+          selectedClient.email ||
+          "client"
+        : "client";
+
+      setSuccessMsg(`✅ RFI successfully sent to ${clientName}!`);
       setTimeout(() => setSuccessMsg(null), 4000);
       onSuccess();
     } catch (error) {
@@ -485,40 +511,37 @@ export default function RFIResolveForm({
                 </label>
                 <select
                   className="shadow-sm appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  value={selectedClient}
-                  onChange={(e) => setSelectedClient(e.target.value)}
+                  value={selectedClientId}
+                  onChange={(e) => setSelectedClientId(e.target.value)}
                   required
                 >
                   <option value="">Select a client...</option>
                   {clientUsers.map((client) => (
                     <option key={client.id} value={client.id}>
-                      {client.username}
+                      {client.username ||
+                        client.name ||
+                        client.email ||
+                        `Client ${client.id}`}
                     </option>
                   ))}
                 </select>
-                {selectedClient && (
-                  <div className="mt-2 p-3 bg-blue-50 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <User size={16} className="text-blue-600" />
-                      <span className="text-blue-800 font-medium">
-                        Selected:{" "}
-                        {selectedClient.name || `Client ${selectedClient.id}`}
-                      </span>
-                    </div>
-                  </div>
+                {clientUsers.length === 0 && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    No clients found for this project.
+                  </p>
                 )}
               </div>
 
               <div>
                 <label className="block text-gray-700 text-sm font-bold mb-3">
-                  Message to Client
+                  Remark (Optional)
                 </label>
                 <textarea
-                  rows={4}
                   value={clientRemark}
                   onChange={(e) => setClientRemark(e.target.value)}
-                  placeholder="Add a message or instructions for the client (optional)"
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  rows={3}
+                  className="shadow-sm appearance-none border rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  placeholder="Add any additional comments for the client..."
                 />
               </div>
 
@@ -532,7 +555,7 @@ export default function RFIResolveForm({
                 </button>
                 <button
                   onClick={handleClientSubmit}
-                  disabled={isSubmitting || !selectedClient}
+                  disabled={isSubmitting || !selectedClientId}
                   className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isSubmitting ? (

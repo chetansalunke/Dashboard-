@@ -43,19 +43,22 @@ export default function ClientRFI() {
 
   // Mock token for demo - replace with actual token
   const token = localStorage.getItem("accessToken");
-  const userId = JSON.parse(localStorage.getItem("user"))?.id;
+  const clientId = JSON.parse(localStorage.getItem("user"))?.id;
 
   // Fetch RFIs for the client
   const fetchRfis = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${BASE_URL}/api/sent-to-client/${userId}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/sent-to-client/${clientId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch RFIs");
