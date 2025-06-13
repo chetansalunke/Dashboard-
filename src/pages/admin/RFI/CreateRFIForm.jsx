@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import DesignerRoleDropdown from "../../designer/RFI/DesignerRoleDropdown";
+import AdminRoleDropdown from "./AdminRoleDropdown";
 
 export default function CreateRFIForm({
   formData,
@@ -238,8 +238,8 @@ export default function CreateRFIForm({
               </div>
 
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
-                <DesignerRoleDropdown
-                  role={["admin", "expert"]}
+                <AdminRoleDropdown
+                  role={["client"]}
                   label="Send To"
                   value={formData.send_to}
                   onSelect={(selectedUser) =>

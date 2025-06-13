@@ -14,7 +14,6 @@ import Design from "./pages/designer/Design";
 import Layout from "./components/Layout";
 import { AuthProvider } from "./context/AuthContext";
 import Submission from "./pages/designer/Submission";
-import RFI from "./pages/designer/RFI/RFI";
 import ClientRFI from "./pages/client/ClientRFI";
 import Management from "./pages/designer/Management";
 import DesignerProjects from "./pages/designer/DesignerProjects";
@@ -26,6 +25,8 @@ import UploadDrawingPage from "./pages/designer/UploadDrawingPage";
 import DesignDrawingPage from "./pages/admin/DesignDrawingPage";
 // import AdminDesignerProjects from "./pages/admin/AdminDesignerProjects";
 import AdminDesignWrapper from "./pages/admin/AdminDesignWrapper";
+import AdminRFI from "./pages/admin/RFI/AdminRFI";
+import DesignerRFI from "./pages/designer/RFI/DesignerRFI";
 const getStoredUser = () => {
   const user = localStorage.getItem("user");
   return user ? JSON.parse(user) : null;
@@ -116,7 +117,7 @@ const App = () => {
             <Route
               path="/admin-dashboard/communication/rfi"
               element={
-                <PrivateRoute element={<RFI />} allowedRoles={["admin"]} />
+                <PrivateRoute element={<AdminRFI />} allowedRoles={["admin"]} />
               }
             />
 
@@ -181,7 +182,10 @@ const App = () => {
             <Route
               path="/designer-dashboard/communication/rfi"
               element={
-                <PrivateRoute element={<RFI />} allowedRoles={["designer"]} />
+                <PrivateRoute
+                  element={<DesignerRFI />}
+                  allowedRoles={["designer"]}
+                />
               }
             />
 

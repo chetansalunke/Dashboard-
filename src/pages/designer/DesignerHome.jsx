@@ -17,6 +17,7 @@ export default function DesignerHome() {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("active"); // New state for tab management
   const token = localStorage.getItem("accessToken");
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -125,27 +126,6 @@ export default function DesignerHome() {
         );
 
         setTasks(sortedTasks);
-
-        // setTasks(searchFilteredTasks);
-
-        // // Set upcoming deliverables - tasks that are not completed and due in the next 7 days
-        // const now = new Date();
-        // const sevenDaysFromNow = new Date();
-        // sevenDaysFromNow.setDate(now.getDate() + 7);
-
-        // const upcoming = allTasks.filter((task) => {
-        //   const dueDate = new Date(task.due_date);
-        //   return (
-        //     task.status !== "Completed" &&
-        //     dueDate >= now &&
-        //     dueDate <= sevenDaysFromNow
-        //   );
-        // });
-
-        // // Sort by due date (closest first)
-        // upcoming.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-
-        // setUpcomingDeliverables(upcoming);
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }
@@ -286,6 +266,17 @@ export default function DesignerHome() {
     });
   };
 
+  // Filter tasks based on active tab
+  const getFilteredTasks = () => {
+    if (activeTab === "completed") {
+      return tasks.filter((task) => task.status === "Completed");
+    } else {
+      return tasks.filter((task) => task.status !== "Completed");
+    }
+  };
+
+  const filteredTasks = getFilteredTasks();
+
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       <div className="flex-1 overflow-hidden flex">
@@ -338,10 +329,47 @@ export default function DesignerHome() {
 
             {!selectedTask && (
               <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-                <h2 className="text-lg font-semibold tracking-wide text-gray-700 mb-4 flex items-center">
-                  <FaCheckCircle className="text-purple-500 mr-2" />
-                  Task Assigned
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold tracking-wide text-gray-700 flex items-center">
+                    <FaCheckCircle className="text-purple-500 mr-2" />
+                    Task Management
+                  </h2>
+
+                  {/* Tab Navigation */}
+                  <div className="flex border-b border-gray-200">
+                    <button
+                      onClick={() => setActiveTab("active")}
+                      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                        activeTab === "active"
+                          ? "border-purple-500 text-purple-600"
+                          : "border-transparent text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      Active Tasks (
+                      {
+                        tasks.filter((task) => task.status !== "Completed")
+                          .length
+                      }
+                      )
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("completed")}
+                      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                        activeTab === "completed"
+                          ? "border-purple-500 text-purple-600"
+                          : "border-transparent text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      Completed Tasks (
+                      {
+                        tasks.filter((task) => task.status === "Completed")
+                          .length
+                      }
+                      )
+                    </button>
+                  </div>
+                </div>
+
                 <div className="max-h-[300px] overflow-y-auto rounded-lg border border-gray-200">
                   <table className="w-full table-auto">
                     <thead className="bg-gray-50 sticky top-0 z-10">
@@ -355,8 +383,8 @@ export default function DesignerHome() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y">
-                      {tasks.length > 0 ? (
-                        tasks.map((task) => (
+                      {filteredTasks.length > 0 ? (
+                        filteredTasks.map((task) => (
                           <tr
                             key={task.id}
                             className={`hover:bg-gray-50 text-gray-700 ${
@@ -409,7 +437,9 @@ export default function DesignerHome() {
                       ) : (
                         <tr>
                           <td colSpan="6" className="text-center p-4">
-                            No tasks found.
+                            {activeTab === "completed"
+                              ? "No completed tasks found."
+                              : "No active tasks found."}
                           </td>
                         </tr>
                       )}
@@ -756,43 +786,49 @@ export default function DesignerHome() {
                                       onChange={() =>
                                         handleCheckboxChange(index)
                                       }
-                                      className="w-5 h-5 mt-0.5 rounded text-purple-600 focus:ring-purple-500"
                                       disabled={
-                                        selectedTask.status === "Completed"
+                                        selectedTask?.status === "Completed"
                                       }
+                                      className="mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 disabled:opacity-50"
                                     />
                                     <label
                                       htmlFor={`checklist-item-${index}`}
-                                      className={`text-sm ${
-                                        selectedTask.status === "Completed"
-                                          ? "text-gray-500"
-                                          : "text-gray-700"
-                                      } cursor-pointer`}
+                                      className={`text-sm text-gray-700 cursor-pointer ${
+                                        selectedTask?.status === "Completed"
+                                          ? "opacity-50"
+                                          : ""
+                                      }`}
                                     >
                                       {item}
                                     </label>
                                   </div>
                                 )
                               )}
+
+                            <div className="mt-6 pt-4 border-t border-gray-200">
+                              <AddDocumentButton taskId={taskId} />
+                            </div>
+
+                            <div className="flex justify-end gap-3 mt-6">
+                              <button
+                                onClick={() => setOpenUploadModalTaskId(null)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={handleSubmit}
+                                disabled={
+                                  !Object.values(checkedItems).every(
+                                    (value) => value === true
+                                  )
+                                }
+                                className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                              >
+                                Complete Task
+                              </button>
+                            </div>
                           </div>
-                        </div>
-
-                        <div className="flex justify-end mt-6 gap-2">
-                          <button
-                            onClick={() => setOpenUploadModalTaskId(null)}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 mr-3"
-                          >
-                            Cancel
-                          </button>
-                         
-                          <AddDocumentButton taskId={taskId} />
-
-                          <button
-                            onClick={handleSubmit}
-                            className="px-4 py-2 text-sm font-medium text-white rounded-md bg-purple-600 hover:bg-purple-700 transition-colors"
-                          >
-                            Mark Complete
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -801,6 +837,7 @@ export default function DesignerHome() {
               </div>
             )}
 
+            {/* Upcoming Deliverables Section */}
             {!selectedTask && (
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 <h2 className="text-lg font-semibold tracking-wide text-gray-700 mb-4 flex items-center">

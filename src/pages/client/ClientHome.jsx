@@ -1,61 +1,59 @@
 import React, { useState, useEffect } from "react";
-import { FaTimes, FaDownload, FaUserCircle } from "react-icons/fa";
-import BASE_URL from "../../config";
-import LatestSubmissions from "./LatestSubmissions";
+
 import ProjectOverview from "./ProjectOverview";
 import StatusCards from "./StatusCards";
-import UpcomingMilestones from "./UpcomingMilestones";
+import { Search, User, Bell } from "lucide-react";
 
+// Main Dashboard Component
 export default function ClientHome() {
-  const user = JSON.parse(localStorage.getItem("user")); 
+  const [user, setUser] = useState(null);
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    // Get user from localStorage - replace with your actual user management
+    const userData = JSON.parse(localStorage.getItem("user")) || {
+      username: "John Doe",
+      id: 1,
+      email: "john@example.com",
+    };
+    setUser(userData);
+  }, []);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-white border-opacity-25 mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading your workspace...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex-1 overflow-hidden flex">
-        <div className="flex-1 overflow-y-auto p-6">
-          <div>
-            {/* Header and Search */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-              <div className="flex flex-wrap items-center gap-4 mb-4">
-                <FaUserCircle className="text-3xl text-gray-500" />
-                <h5 className="text-xl font-semibold tracking-wide text-gray-500 uppercase">
-                  Welcome {user.username}
-                </h5>
-                {/* <h1>{user.id}</h1> */}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+      {/* Enhanced Header */}
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            {/* Welcome Section */}
+            <div className="flex items-center space-x-6">
+              <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+                <User className="h-10 w-10 text-white" />
               </div>
-              <div className="relative w-[280px]">
-                <div className="absolute inset-y-0 left-3 flex items-center">
-                  <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <input
-                  className="w-full pl-10 pr-2 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md focus:border-purple-500 focus:ring focus:ring-purple-200 focus:outline-none"
-                  type="text"
-                  placeholder="Search"
-                  aria-label="Search"
-                />
+              <div>
+                <h1 className="text-2xl font-bold text-white mb-2">
+                  Welcome back, {user.username}!
+                </h1>
               </div>
             </div>
-
-            {/* Overview and Status */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
-              <div className="lg:col-span-3">
-                <ProjectOverview user={user}/>
-              </div>
-              <div className="lg:col-span-1 mt-10">
-                <StatusCards />
-              </div>
-            </div>
-
-            {/* Other sections */}
-            <LatestSubmissions />
-            <UpcomingMilestones />
           </div>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ProjectOverview user={user} />
       </div>
     </div>
   );

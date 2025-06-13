@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Download,
   Eye,
@@ -27,6 +28,7 @@ const DrawingTable = ({
   setShowActionDropdown,
   dropdownRef,
   fetchDrawings,
+  selectedProject,
 }) => {
   const [showPreview, setShowPreview] = useState(null);
   const [showRevisionModal, setShowRevisionModal] = useState(false);
@@ -45,6 +47,9 @@ const DrawingTable = ({
   const [clientComment, setClientComment] = useState("");
   const [isLoadingClients, setIsLoadingClients] = useState(false);
   const [userRole, setUserRole] = useState("");
+
+  console.log("Selected project ");
+  console.log(selectedProject);
 
   useEffect(() => {
     // Determine user role on component mount
@@ -77,14 +82,21 @@ const DrawingTable = ({
   // Fetch client users
   const fetchClientUsers = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/all`);
-      const data = await res.json();
+      const res = await axios.get(
+        `${BASE_URL}/api/projects/client-info/${selectedProject.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      // Filter only users with role "client"
-      const clientUsers = data.users?.filter((u) => u.role === "client") || [];
+      // Wrap in array if you want it in array format
+      const clientArray = [res.data];
 
-      setClientUsers(clientUsers); // correctly set filtered list
-      console.log(clientUsers);
+      setClientUsers(clientArray);
+      console.log("Fetched Client Users:", clientArray);
     } catch (err) {
       console.error("Error fetching users:", err);
     }

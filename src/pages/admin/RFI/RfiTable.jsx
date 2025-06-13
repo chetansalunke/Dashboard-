@@ -1,23 +1,17 @@
-import BASE_URL from "../../../../src/config";
+import { Eye } from "lucide-react"; // RfiTable.js - Enhanced version
 import React, { useState } from "react";
+import BASE_URL from "../../../config";
+import RoleDropdown from "../../admin/RoleDropdown";
 import {
-  Plus,
-  Search,
-  Filter,
-  Calendar,
-  User,
-  FileText,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  AlertTriangle,
   X,
-  Upload,
-  Download,
-  Eye,
+  CheckCircle,
   Send,
-  Check,
-  ExternalLink,
+  FileText,
+  User,
+  Calendar,
+  Clock,
+  AlertTriangle,
+  Upload,
   CheckSquare,
 } from "lucide-react";
 
@@ -80,46 +74,6 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "Resolved":
-      case "Client Resolved":
-        return <CheckCircle size={14} className="mr-1" />;
-      case "Sent to Client":
-        return <Send size={14} className="mr-1" />;
-      case "Pending":
-      default:
-        return <Clock size={14} className="mr-1" />;
-    }
-  };
-
-  const getPendingMessage = (rfi) => {
-    const daysPending = calculateDaysPending(
-      rfi.created_at,
-      rfi.sent_to_client_at,
-      rfi.status
-    );
-    const isOverdue = daysPending > 7;
-
-    if (rfi.status === "Sent to Client") {
-      return {
-        message: rfi.sent_to_client_at
-          ? `${daysPending} days with client`
-          : `${daysPending} days pending`,
-        isOverdue: isOverdue,
-        daysPending: daysPending,
-      };
-    } else if (rfi.status === "Pending") {
-      return {
-        message: `${daysPending} days pending`,
-        isOverdue: isOverdue,
-        daysPending: daysPending,
-      };
-    }
-
-    return { message: null, isOverdue: false, daysPending: 0 };
-  };
-
   const getActionButton = (rfi) => {
     if (rfi.status === "Pending" && rfi.send_to === userID) {
       return (
@@ -165,65 +119,40 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
     }
   };
 
-  // Function to handle document opening
-  const handleDocumentOpen = (documentPath) => {
-    if (!documentPath) return;
+  const getPendingMessage = (rfi) => {
+    const daysPending = calculateDaysPending(
+      rfi.created_at,
+      rfi.sent_to_client_at,
+      rfi.status
+    );
+    const isOverdue = daysPending > 7;
 
-    // If it's a comma-separated list of files, split and handle each
-    const files = documentPath.split(",").map((file) => file.trim());
-
-    files.forEach((file) => {
-      // Construct the full URL for the document
-      const documentUrl = `${BASE_URL}/uploads/${file}`;
-
-      // Open in new tab/window
-      window.open(documentUrl, "_blank");
-    });
-  };
-
-  // Function to download document
-  const handleDocumentDownload = async (documentPath, fileName = null) => {
-    if (!documentPath) return;
-
-    try {
-      const documentUrl = `${BASE_URL}/uploads/${documentPath}`;
-
-      // Create a temporary anchor element to trigger download
-      const link = document.createElement("a");
-      link.href = documentUrl;
-      link.download = fileName || documentPath.split("/").pop(); // Use provided name or extract from path
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading document:", error);
-      // Fallback: open in new tab if download fails
-      window.open(`${BASE_URL}/uploads/${documentPath}`, "_blank");
+    if (rfi.status === "Sent to Client") {
+      return {
+        message: rfi.sent_to_client_at
+          ? `${daysPending} days with client`
+          : `${daysPending} days pending`,
+        isOverdue: isOverdue,
+        daysPending: daysPending,
+      };
+    } else if (rfi.status === "Pending") {
+      return {
+        message: `${daysPending} days pending`,
+        isOverdue: isOverdue,
+        daysPending: daysPending,
+      };
     }
+
+    return { message: null, isOverdue: false, daysPending: 0 };
   };
 
+  // Enhanced function to render all document types
   const renderDocuments = (rfi) => {
     const documentSections = [];
 
-    const normalizeDocPath = (doc) => {
-      const trimmed = doc.trim();
-      if (!trimmed) return null;
-
-      // Normalize all paths to use /rfi/
-      if (trimmed.startsWith("uploads/rfi/")) {
-        return `rfi/${trimmed.split("uploads/rfi/")[1]}`;
-      } else if (trimmed.startsWith("rfi/")) {
-        return trimmed;
-      }
-      return `rfi/${trimmed}`; // fallback
-    };
-
-    // Initial Documents
+    // Initial Documents (document_upload)
     if (rfi.document_upload) {
-      const docs = rfi.document_upload
-        .split(",")
-        .map(normalizeDocPath)
-        .filter(Boolean);
+      const docs = rfi.document_upload.split(",").filter((doc) => doc.trim());
       if (docs.length > 0) {
         documentSections.push({
           title: "Initial Documents",
@@ -236,12 +165,9 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
       }
     }
 
-    // Attachments
+    // Regular Documents (documents)
     if (rfi.documents) {
-      const docs = rfi.documents
-        .split(",")
-        .map(normalizeDocPath)
-        .filter(Boolean);
+      const docs = rfi.documents.split(",").filter((doc) => doc.trim());
       if (docs.length > 0) {
         documentSections.push({
           title: "Attachments",
@@ -254,12 +180,11 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
       }
     }
 
-    // Resolution Documents
+    // Resolution Documents (resolution_documents)
     if (rfi.resolution_documents) {
       const docs = rfi.resolution_documents
         .split(",")
-        .map(normalizeDocPath)
-        .filter(Boolean);
+        .filter((doc) => doc.trim());
       if (docs.length > 0) {
         documentSections.push({
           title: "Resolution Documents",
@@ -298,16 +223,20 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                 {section.documents.slice(0, 2).map((doc, docIndex) => (
                   <a
                     key={docIndex}
-                    href={`${BASE_URL}/${doc}`}
+                    href={
+                      doc.includes("rfi/")
+                        ? `${BASE_URL}/rfi/${doc.split("rfi/")[1]}`
+                        : `${BASE_URL}/uploads/${doc.trim()}`
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`flex items-center text-xs hover:underline transition-colors truncate ${section.color} hover:opacity-80`}
                     download
-                    title={decodeURIComponent(doc.split("/").pop())}
+                    title={decodeURIComponent(doc.trim().split("/").pop())}
                   >
                     <FileText size={10} className="mr-1 flex-shrink-0" />
                     <span className="truncate">
-                      {decodeURIComponent(doc.split("/").pop())}
+                      {decodeURIComponent(doc.trim().split("/").pop())}
                     </span>
                   </a>
                 ))}
@@ -340,28 +269,28 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                 Status
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                Priority
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 <div className="flex items-center">
-                  <User size={16} className="mr-2 text-purple-600" />
-                  Assignee
+                  <Calendar size={16} className="mr-2 text-purple-600" />
+                  Date Created
                 </div>
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 <div className="flex items-center">
-                  <Calendar size={16} className="mr-2 text-purple-600" />
-                  Created
+                  <User size={16} className="mr-2 text-purple-600" />
+                  Assigned To
                 </div>
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-64">
                 <div className="flex items-center">
                   <FileText size={16} className="mr-2 text-purple-600" />
-                  Documents
+                  All Documents
                 </div>
               </th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                Actions
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Created By
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Action
               </th>
             </tr>
           </thead>
@@ -386,18 +315,34 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <div className="text-sm font-semibold text-gray-900 mb-1">
-                          {rfi.title || "Untitled RFI"}
+                          {rfi.title || "No Title"}
                         </div>
                         <div className="text-xs text-gray-500 truncate max-w-xs mb-2">
                           {rfi.details || "No details provided"}
                         </div>
+                        {rfi.priority && (
+                          <div>
+                            <span className={getPriorityBadge(rfi.priority)}>
+                              {rfi.priority}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </td>
 
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className={getStatusBadge(rfi.status)}>
-                          {getStatusIcon(rfi.status)}
+                          {(rfi.status === "Resolved" ||
+                            rfi.status === "Client Resolved") && (
+                            <CheckCircle size={14} className="mr-1" />
+                          )}
+                          {rfi.status === "Sent to Client" && (
+                            <Send size={14} className="mr-1" />
+                          )}
+                          {(!rfi.status || rfi.status === "Pending") && (
+                            <Clock size={14} className="mr-1" />
+                          )}
                           {rfi.status || "Pending"}
                         </span>
 
@@ -430,25 +375,6 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                     </td>
 
                     <td className="px-6 py-4">
-                      <span className={getPriorityBadge(rfi.priority)}>
-                        {rfi.priority || "Normal"}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mr-3">
-                          <User size={16} className="text-white" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {users[rfi.send_to] || "Unassigned"}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
                         {formatDate(rfi.created_at)}
                       </div>
@@ -461,11 +387,39 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                       </div>
                     </td>
 
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        <div className="h-8 w-8 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mr-3">
+                          <User size={16} className="text-white" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {users[rfi.send_to] || "Unassigned"}
+                          </div>
+                          {/* <div className="text-xs text-gray-500">
+                            User ID: {rfi.send_to}
+                          </div> */}
+                        </div>
+                      </div>
+                    </td>
+
                     <td className="px-6 py-4">{renderDocuments(rfi)}</td>
 
-                    <td className="px-6 py-4 text-right">
-                      {getActionButton(rfi)}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        <div className="h-8 w-8 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full flex items-center justify-center mr-3">
+                          <User size={16} className="text-white" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {users[rfi.created_by] || "Unknown"}
+                          </div>
+                          <div className="text-xs text-gray-500">Creator</div>
+                        </div>
+                      </div>
                     </td>
+
+                    <td className="px-6 py-4">{getActionButton(rfi)}</td>
                   </tr>
                 );
               })}
@@ -518,7 +472,7 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                   {rfis.filter((rfi) => rfi.status === "Resolved").length}
                 </span>
               </div>
-              {/* <div className="flex items-center">
+              <div className="flex items-center">
                 <div className="w-3 h-3 bg-emerald-400 rounded-full mr-2"></div>
                 <span className="text-gray-700">
                   Client Resolved:{" "}
@@ -527,14 +481,14 @@ export default function RfiTable({ rfis, users, userID, onResolve }) {
                       .length
                   }
                 </span>
-              </div> */}
-              {/* <div className="flex items-center">
+              </div>
+              <div className="flex items-center">
                 <div className="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
                 <span className="text-gray-700">
                   Sent to Client:{" "}
                   {rfis.filter((rfi) => rfi.status === "Sent to Client").length}
                 </span>
-              </div> */}
+              </div>
             </div>
             <div className="text-gray-600">Total RFIs: {rfis.length}</div>
           </div>
