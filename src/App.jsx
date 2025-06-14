@@ -27,6 +27,7 @@ import DesignDrawingPage from "./pages/admin/DesignDrawingPage";
 import AdminDesignWrapper from "./pages/admin/AdminDesignWrapper";
 import AdminRFI from "./pages/admin/RFI/AdminRFI";
 import DesignerRFI from "./pages/designer/RFI/DesignerRFI";
+import ChangeOrder from "./pages/admin/ChangeOrder";
 const getStoredUser = () => {
   const user = localStorage.getItem("user");
   return user ? JSON.parse(user) : null;
@@ -139,6 +140,12 @@ const App = () => {
                 />
               }
             />
+            <Route
+              path="/admin-dashboard/change-order"
+              element={
+                <PrivateRoute element={<ChangeOrder />} allowedRoles={["admin"]} />
+              }
+            />
 
             {/* Designer Routes */}
             <Route
@@ -208,6 +215,12 @@ const App = () => {
                 />
               }
             />
+            <Route
+              path="/designer-dashboard/change-order"
+              element={
+                <PrivateRoute element={<ChangeOrder />} allowedRoles={["designer"]} />
+              }
+            />
             {/* Client Routes */}
             <Route
               path="/client-dashboard"
@@ -252,6 +265,13 @@ const App = () => {
                 <PrivateRoute element={<Send />} allowedRoles={["client"]} />
               }
             />
+            <Route
+              path="/client-change-order"
+              element={
+                <PrivateRoute element={<ChangeOrder />} allowedRoles={["client"]} />
+              }
+            />
+            
 
             <Route
               path="/expert-dashboard"
@@ -260,6 +280,12 @@ const App = () => {
                   element={<AdminDashboard />}
                   allowedRoles={["expert"]}
                 />
+              }
+            />
+            <Route
+              path="/expert-change-order"
+              element={
+                <PrivateRoute element={<ChangeOrder />} allowedRoles={["expert"]} />
               }
             />
           </Route>

@@ -54,6 +54,11 @@ const Sidebar = ({ role }) => {
           },
         ],
       },
+      {
+        name: "Change Order",
+        icon: <IoBrushOutline className="w-5 h-5" />,
+        path: "/admin-dashboard/change-order",
+      },
     ],
     designer: [
       {
@@ -87,6 +92,11 @@ const Sidebar = ({ role }) => {
           },
         ],
       },
+      {
+        name: "Change Order",
+        icon: <IoBrushOutline className="w-5 h-5" />,
+        path: "/designer-dashboard/change-order",
+      },
     ],
 
     developer: [
@@ -107,6 +117,11 @@ const Sidebar = ({ role }) => {
         icon: <IoPeopleOutline className="w-5 h-5" />,
         path: "/users", // Changed to absolute path
       },
+      {
+        name: "Change Order",
+        icon: <IoBrushOutline className="w-5 h-5" />,
+        path: "/expert-change-order",
+      },
     ],
     client: [
       {
@@ -123,6 +138,11 @@ const Sidebar = ({ role }) => {
         name: "RFI",
         icon: <IoChatbubbleOutline className="w-5 h-5" />,
         path: "/client-rif",
+      },
+      {
+        name: "Change Order",
+        icon: <IoBrushOutline className="w-5 h-5" />,
+        path: "/client-change-order",
       },
     ],
   };
